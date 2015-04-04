@@ -1,4 +1,4 @@
-// linux ubuntu hp 11
+// ubuntu linux hp 11
 #ifndef gles_h
 //#define GLESO_NOT_EMBEDDED
 #define GLESO_EMBEDDED
