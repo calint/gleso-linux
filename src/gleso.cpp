@@ -569,7 +569,7 @@ int gleso_init(){
     p("\nargs:\n");
     char**a=gleso_argv;// command line arguments
     int c=gleso_argc;
-    int nsprite=32;
+    int nsprite=1024;
     while(c--){
         const char*s=*a++;
         if(*s!='-')continue;// looking for example: -s 100
