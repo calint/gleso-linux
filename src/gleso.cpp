@@ -346,6 +346,7 @@ public:
 //	linked_list*prv;
 //};
 //class glob:public linked_list{
+//glo nullglo{};
 class glob{
 	const class glo*glo;// ref to gl renderable
 	class physics phys;// current physics state
@@ -356,7 +357,7 @@ class glob{
 	class render_info render_info_next;// next renderinfo, updated during render
 	p3 scal;
 public:
-	glob():glo(0){metrics::nglob++;}
+	glob():glo(nullptr){metrics::nglob++;}
 	virtual ~glob(){}
 	inline glob&glo_ref(const class glo*g){glo=g;return*this;}
 	inline class physics&physics(){return phys;}
