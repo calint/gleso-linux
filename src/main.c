@@ -1,31 +1,49 @@
-#include <errno.h>
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
-#include "gles.h"
-#include <GL/glu.h>
-#include <GL/glut.h>
-static void _display(void){
-	gleso_step();
-	glutSwapBuffers();
+#include<stdio.h>
+#include<stdlib.h>
+#include<errno.h>
+#include<math.h>
+#include<string.h>
+#include<GL/glew.h>
+#include"gles.h"
+#include<GLFW/glfw3.h>
+#include<GL/glu.h>
+#include<GL/glut.h>
+static void key_callback(GLFWwindow*window, int key,int scancode,int action,int mods){
+	printf("key_callback  window=%p   key=%d   scancode=%d    action=%d   mods=%d\n",(void*)window,key,scancode,action,mods);
 }
-static void _reshape(int w, int h){
-	glViewport(0,0,w,h);
-}
-static void _idle(){
-	glutPostRedisplay();
-}
-int main(int argc, char *argv[])
-{
-  glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_DOUBLE | GLUT_ALPHA | GLUT_DEPTH | GLUT_STENCIL);
-  glutInitWindowSize(800, 600);
-  glutInitWindowPosition(200, 100);
-  glutCreateWindow(argv[0]);
-  gleso_init();
-  glutDisplayFunc(_display);
-  glutReshapeFunc(_reshape);
-  glutIdleFunc(_idle);
-  glutMainLoop();
-  return 0;
+#define WINDOW_WIDTH 240
+#define WINDOW_HEIGHT 320
+int main(int argc,char**argv){
+	while(argc--)puts(*argv++);
+	puts(glfwGetVersionString());
+	if(!glfwInit())
+		return 1;
+//	glfwWindowHint(GLFW_SAMPLES,4);
+//	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,3);
+//	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,3);
+//	glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
+	GLFWwindow*window=glfwCreateWindow(WINDOW_WIDTH,WINDOW_HEIGHT,"gleso",NULL,NULL);
+	if(!window){
+		glfwTerminate();
+		return 2;
+	}
+	glfwSetKeyCallback(window,key_callback);
+	glfwMakeContextCurrent(window);
+
+//	glewExperimental=GL_TRUE; // needed for core profile
+	if (glewInit()!=GLEW_OK) {
+		return 3;
+	}
+
+	gleso_init();
+	gleso_on_viewport_change(WINDOW_WIDTH,WINDOW_HEIGHT);
+	while(!glfwWindowShouldClose(window)){
+		gleso_step();
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
+	glfwDestroyWindow(window);
+	glfwTerminate();
+	puts("done");
+	return 0;
 }
