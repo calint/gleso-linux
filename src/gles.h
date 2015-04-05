@@ -2,7 +2,7 @@
 #ifndef gles_h
 //#define GLESO_NOT_EMBEDDED
 #define GLESO_EMBEDDED
-#include<GLES3/gl3.h>
+#include<GLES2/gl2.h>
 //#include<GLES3/gl3ext.h>
 typedef GLfloat floato;
 #include<stdio.h>
