@@ -4,4 +4,4 @@
 #	osx
 #	ios	
 
-cd src&&g++ -o ../gleso -std=c++0x -O0 -g3 -Wall -Wextra -pedantic -Wfatal-errors -fmessage-length=0 -Wfatal-errors main.c gleso.cpp -lGL -lglut
+cd src&&g++ -o ../gleso -std=c++0x -O0 -g3 -Wall -Wextra -pedantic -Wfatal-errors -fmessage-length=0 -Wfatal-errors main.c gleso.cpp -lGL -lglfw -lGLEW

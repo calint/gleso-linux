@@ -1,4 +1,5 @@
-#include"gleso.h"
+#include "gleso.h"
+
 #include<stdlib.h>
 #include<string.h>
 ////////////////////////////////////////////////////////////////////////
@@ -567,21 +568,21 @@ int gleso_init(){
 	p("%16s %4u B\n","grid",(unsigned int)sizeof(grid));
 //	p("%16s %4lu B\n","physics",sizeof(physics));
     srand(1);// generate same random numbers in different instances
-    p("\nargs:\n");
-    char**a=gleso_argv;// command line arguments
-    int c=gleso_argc;
+//    p("\nargs:\n");
+//    char**a=gleso_argv;// command line arguments
+//    int c=gleso_argc;
     int nsprite=1024;
-    while(c--){
-        const char*s=*a++;
-        if(*s!='-')continue;// looking for example: -s 100
-        if(*(s+1)=='s'){// found -s
-            const char*arg=*a++;//
-//            p("nsprite=%s\n",arg);
-            nsprite=atoi(arg);
-//            p("nsprite=%d\n",nsprite);
-            break;
-        }
-    }
+//    while(c--){
+//        const char*s=*a++;
+//        if(*s!='-')continue;// looking for example: -s 100
+//        if(*(s+1)=='s'){// found -s
+//            const char*arg=*a++;//
+////            p("nsprite=%s\n",arg);
+//            nsprite=atoi(arg);
+////            p("nsprite=%d\n",nsprite);
+//            break;
+//        }
+//    }
 //    p("\n\n");
 
 	if(!gl::shdr)gl::shdr=new shader();
