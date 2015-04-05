@@ -5,11 +5,9 @@
 #include<string.h>
 #include<GL/glew.h>
 #include<GLFW/glfw3.h>
-#include<GL/glu.h>
-#include<GL/glut.h>
-#include "gleso.h"
-static void key_callback(GLFWwindow*window, int key,int scancode,int action,int mods){
-	printf("key_callback  window=%p   key=%d   scancode=%d    action=%d   mods=%d\n",(void*)window,key,scancode,action,mods);
+#include"gleso.h"
+static void key_callback(GLFWwindow*window,int key,int scancode,int action,int mods){
+	gleso_key(key,scancode,action,mods);
 }
 #define WINDOW_WIDTH 240
 #define WINDOW_HEIGHT 320
