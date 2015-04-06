@@ -183,19 +183,15 @@ void main(){
 #include<vector>
 using std::vector;
 
-const int texture_width=2,texture_height=2;
-GLubyte texels_rgb[]={
-	0xff,0x00,0x00,   0x00,0xff,0x00,    0x00, 0x00,
-	0x00,0x00,0xff,   0xff,0xff,0x00,    0x00, 0x00,
-};
 class texture{
 public:
 	void load(){
 		glGenTextures(1,&glid_texture);
 		glBindTexture(GL_TEXTURE_2D,glid_texture);
-		glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,texture_width,texture_height,0,GL_RGB,GL_UNSIGNED_BYTE,(GLvoid*)texels_rgb);
+		glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,(GLvoid*)data);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-		glGenerateMipmap(GL_TEXTURE_2D);
+//		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	void enable_for_gl_draw(){
 		glActiveTexture(GL_TEXTURE0);
@@ -204,10 +200,16 @@ public:
 	}
 	void refresh_from_data(){
 		glBindTexture(GL_TEXTURE_2D,glid_texture);
-		glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,texture_width,texture_height,0,GL_RGB,GL_UNSIGNED_BYTE,texels_rgb);
+		glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,(GLvoid*)data);
 	}
 private:
 	GLuint glid_texture{0};
+	GLsizei width=2;
+	GLsizei height=2;
+	GLubyte data[16]={
+		0xff,0x00,0x00,   0x00,0xff,0x00,    0x00, 0x00,
+		0x00,0x00,0xff,   0xff,0xff,0x00,    0x00, 0x00,
+	};
 };
 class glo{
 public:
