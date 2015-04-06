@@ -30,6 +30,7 @@ public:
 
 	virtual~shader(){
 		metrics::nshader--;
+		p("deleting shader %p\n",this);
 		if(glid_program){glDeleteProgram(glid_program);glid_program=0;}
 	}
 
@@ -185,6 +186,10 @@ using std::vector;
 
 class texture{
 public:
+	~texture(){
+		p("deleting texture %p\n",this);
+		glDeleteTextures(1,&glid_texture);
+	}
 	void load(){
 		glGenTextures(1,&glid_texture);
 		glBindTexture(GL_TEXTURE_2D,glid_texture);
@@ -221,8 +226,13 @@ public:
 	GLuint glid_vao{0};
 	GLuint glid_buffer_vertices{0};
 #endif
-	glo(){metrics::nglo++;}
-	virtual~glo(){metrics::nglo--;}
+	glo(){
+		metrics::nglo++;
+	}
+	virtual~glo(){
+		metrics::nglo--;
+		p("deleting glo %p\n",this);
+	}
 	inline glo&texture(texture*t){tex=t;return*this;}
 	int load(){// called when context is (re)created
 #ifdef GLESO_EMBEDDED
@@ -553,6 +563,9 @@ public://                                          (:)
 	void rem(glob*g){globs.remove(g);}//? multicore?||
 	void clr(){globs.clear();}
 	//    void refresh(){}// refreshes the grid, globs dont change grid often, globs often totally inside grid, maximum glob size less than grid    <-- procedurally generated text for vegetation
+	~grid(){
+		foreach(globs,[](glob*o){delete o;});
+	}
 };
 //------------------------------------------------------------------------------
 #include<sys/time.h>
@@ -658,11 +671,42 @@ int gleso_init(){
 	p("%16s %4lu B\n","physics",sizeof(physics));
 	srand(1);// generate same random numbers in different instances
 	p("\n");
+/*
+	if(gl::shdr){
+		delete gl::shdr;
+	}
+	gl::shdr=new shader();
+	if(!gl::shdr->load())
+		return 1;
 
-	if(!gl::shdr)gl::shdr=new shader();
-	if(!gl::shdr->load())return 1;
+	if(!gleso::textures.empty()){
+		foreach(gleso::textures,[](texture*o){delete o;});
+		gleso::textures.clear();
+	}
+	if(!gleso::glos.empty()){
+		foreach(gleso::glos,[](glo*o){delete o;});
+		gleso::textures.clear();
+	}
+	if(gleso::grd){
+		delete gleso::grd;
+	}
+	gleso_impl_add_resources();
+	foreach(gleso::textures,[](texture*o){
+		p(" texture %p   %s\n",(void*)o,typeid(*o).name());
+		o->load();
+	});
+	foreach(gleso::glos,[](glo*o){
+		p(" glo %p   %s\n",(void*)o,typeid(*o).name());
+		o->load();
+	});
+	gleso::grd=new grid();
+	gleso::grd->add(gleso_impl_create_root());//? leak? grd->add does not take
+*/
 
-	if(gleso::glos.empty()){//? if no glos declared re-init?
+	if(!gl::shdr){
+		gl::shdr=new shader();
+		if(!gl::shdr->load())
+			return 1;
 		gleso_impl_add_resources();
 		foreach(gleso::textures,[](texture*o){
 			p(" texture %p   %s\n",(void*)o,typeid(*o).name());
@@ -672,11 +716,10 @@ int gleso_init(){
 			p(" glo %p   %s\n",(void*)o,typeid(*o).name());
 			o->load();
 		});
-	}
-	if(!gleso::grd){
 		gleso::grd=new grid();
 		gleso::grd->add(/*gives*/gleso_impl_create_root());//? leak? grd->add does not take
 	}
+
 	fps::reset();
 	gettimeofday(&timeval_after_init,NULL);
 	metrics::time_since_start_in_seconds=0;
