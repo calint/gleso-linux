@@ -168,10 +168,11 @@ void main(){
 
 ////////////////////////////////////////////////
 #include<vector>
+using std::vector;
 class glo{
 public:
 #ifdef GLESO_EMBEDDED
-	std::vector<GLfloat>vertices;
+	vector<GLfloat>vertices;
 	glo(){metrics::nglo++;}
 #else
 	GLuint glid_vao=0;
@@ -181,13 +182,13 @@ public:
 	virtual~glo(){metrics::nglo--;}
 	int load(){// called when context is (re)created
 #ifdef GLESO_EMBEDDED
-		vertices=make_vertices();
+		vertices=make_vertices();//? no need
 #else
 		glGenVertexArrays(1,&glid_vao);
 		glBindVertexArray(glid_vao);
 		glGenBuffers(1,&glid_buffer_vertices);
 		glBindBuffer(GL_ARRAY_BUFFER,glid_buffer_vertices);
-		const std::vector<GLfloat>vec=make_vertices();
+		const vector<GLfloat>vec=make_vertices();
 		glBufferData(GL_ARRAY_BUFFER,GLsizeiptr(vec.size()*sizeof(GLfloat)),vec.data(),GL_STATIC_DRAW);
 		if(shader::checkGlError("load"))return 1;
 #endif
@@ -207,9 +208,9 @@ public:
 		gldraw();
 	}
 protected:
-	virtual std::vector<GLfloat>make_vertices()const{
+	virtual vector<GLfloat>make_vertices()const{
 		const GLfloat verts[]={0,.5f, -.5f,-.5f, .5f,-.5f};
-		std::vector<GLfloat>v;//{0,.5f, -.5f,-.5f, .5f,-.5f};
+		vector<GLfloat>v;//{0,.5f, -.5f,-.5f, .5f,-.5f};
 		v.assign(verts,verts+sizeof(verts)/sizeof(GLfloat));//?? on stack then invalidated
 		return v;
 	}
@@ -239,7 +240,7 @@ namespace gleso{
 	floato dt;
 	inline floato d(const floato unit_over_second){return unit_over_second*dt;}
 	unsigned int tick;//?? rollover issues when used in comparisons
-	std::vector<glo*>glos;
+	vector<glo*>glos;
 	grid*grd;
 	floato rnd(){return floato(rand())/RAND_MAX;}
 }
@@ -413,9 +414,9 @@ public:
 ------------------------------
 "defglo" */
 class glo_square_xy:public glo{
-	virtual std::vector<GLfloat>make_vertices()const{
+	virtual vector<GLfloat>make_vertices()const{
 		const static GLfloat verts[]={-1,1, -1,-1, 1,-1, 1,1};
-		std::vector<GLfloat>v;//{-1,1, -1,-1, 1,-1, 1,1};
+		vector<GLfloat>v;//{-1,1, -1,-1, 1,-1, 1,1};
 		v.assign(verts,verts+sizeof(verts)/sizeof(GLfloat));
 		return v;
 	}
@@ -428,8 +429,8 @@ class glo_circle_xy:public glo{
 public:
 	glo_circle_xy():nvertices(1+12+1){}
 protected:
-	virtual std::vector<GLfloat>make_vertices()const{
-		std::vector<GLfloat>v;
+	virtual vector<GLfloat>make_vertices()const{
+		vector<GLfloat>v;
 		v.push_back(0);//x
 		v.push_back(0);//y
 		floato rad=0;
@@ -461,7 +462,7 @@ protected:
 //const int nsprites=1024;
 //#endif
 //const int nsprites=32;//1024*4;
-static void gleso_impl_add_glos(std::vector<glo*>&glos){
+static void gleso_impl_add_glos(vector<glo*>&glos){
 	glos.push_back(/*gives*/new glo());//?? leak. push_pack does not /*take*/ ownership of glob
 	glos.push_back(/*gives*/new glo_square_xy());//?? leak. push_pack does not /*takes*/
 	glos.push_back(/*gives*/new glo_circle_xy());//?? leak. /*gives*/ not matched by /*takes*/
@@ -588,7 +589,7 @@ int gleso_init(){
 //            break;
 //        }
 //    }
-	p("\n\n");
+	p("\n");
 
 	if(!gl::shdr)gl::shdr=new shader();
 	if(!gl::shdr->load())return 1;
@@ -614,8 +615,8 @@ int gleso_init(){
 	metrics::time_since_start_in_seconds=0;
 	return 0;
 }
-void gleso_on_viewport_change(int width,int height){
-	p("/// gleso_on_viewport_change %d x %d\n",width,height);
+void gleso_viewport(int width,int height){
+	p("/// gleso_viewport  %d x %d\n",width,height);
 	if(gl::shdr)gl::shdr->viewport(width,height);
 }
 void gleso_step(){

@@ -13,7 +13,7 @@ static void key_callback(GLFWwindow*window,int key,int scancode,int action,int m
 }
 static float pointer_x=0,pointer_y=0;
 static int pointer_button_action=1;
-static void cursor_position_callback(GLFWwindow*window,double xpos,double ypos){
+static void cursorpos_position_callback(GLFWwindow*window,double xpos,double ypos){
 	if(window==0)return;//? unused param warning workaround
 	pointer_x=(float)xpos;
 	pointer_y=(float)ypos;
@@ -21,7 +21,7 @@ static void cursor_position_callback(GLFWwindow*window,double xpos,double ypos){
 		gleso_touch(pointer_x,pointer_y,2);
 	}
 }
-void mouse_button_callback(GLFWwindow*window,int button,int action,int mods){
+void mousebutton_callback(GLFWwindow*window,int button,int action,int mods){
 	if(window==0)return;//? unused param warning workaround
 	if(mods!=0)return;
 	if(button!=GLFW_MOUSE_BUTTON_LEFT)
@@ -39,7 +39,7 @@ void mouse_button_callback(GLFWwindow*window,int button,int action,int mods){
 }
 static void windowsize_callback(GLFWwindow*window,int width,int height){
 	if(window==0)return;//? unused param warning workaround
-	gleso_on_viewport_change(width,height);
+	gleso_viewport(width,height);
 }
 #define WINDOW_WIDTH 240
 #define WINDOW_HEIGHT 320
@@ -54,14 +54,14 @@ int main(int argc,char**argv){
 	GLFWwindow*window=glfwCreateWindow(WINDOW_WIDTH,WINDOW_HEIGHT,"gleso",NULL,NULL);
 	if(!window){glfwTerminate();return 2;}
 	glfwSetKeyCallback(window,key_callback);
-	glfwSetCursorPosCallback(window,cursor_position_callback);
-	glfwSetMouseButtonCallback(window,mouse_button_callback);
+	glfwSetCursorPosCallback(window,cursorpos_position_callback);
+	glfwSetMouseButtonCallback(window,mousebutton_callback);
 	glfwSetWindowSizeCallback(window,windowsize_callback);
 	glfwMakeContextCurrent(window);
 //	glewExperimental=GL_TRUE; // needed for core profile
 	if (glewInit()!=GLEW_OK)return 3;
 	gleso_init();
-	gleso_on_viewport_change(WINDOW_WIDTH,WINDOW_HEIGHT);
+	gleso_viewport(WINDOW_WIDTH,WINDOW_HEIGHT);
 	while(!glfwWindowShouldClose(window)){
 		gleso_step();
 		glfwSwapBuffers(window);

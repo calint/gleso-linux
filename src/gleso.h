@@ -8,7 +8,7 @@ extern "C" {
 //	int gleso_argc;
 //	char**gleso_argv;
 	int gleso_init();// called when opengl context needs reload
-	void gleso_on_viewport_change(const int width,const int height);// called when screen size changes
+	void gleso_viewport(const int width,const int height);// called when screen size changes
 	void gleso_step();// called when opengl ready for render
 	void gleso_key(int key,int scancode,int action,int mods);// called on key event
 	//action 0:press   2:drag   1:release
