@@ -184,35 +184,27 @@ void main(){
 using std::vector;
 
 const int texture_width=2,texture_height=2;
-unsigned char texels_rgb[]={
-	0xff,0xff,0xff, 0xff,0x00,0x00,
-	0xff,0x00,0x00, 0xff,0xff,0xff,
+GLubyte texels_rgb[]={
+	0xff,0x00,0x00,   0x00,0xff,0x00,    0x00, 0x00,
+	0x00,0x00,0xff,   0xff,0xff,0x00,    0x00, 0x00,
 };
 class texture{
 public:
 	void load(){
 		glGenTextures(1,&glid_texture);
 		glBindTexture(GL_TEXTURE_2D,glid_texture);
-		glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,texture_width,texture_height,0,GL_RGB,GL_UNSIGNED_BYTE,texels_rgb);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,texture_width,texture_height,0,GL_RGB,GL_UNSIGNED_BYTE,(GLvoid*)texels_rgb);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
-	void enable(){
+	void enable_for_gl_draw(){
 		glActiveTexture(GL_TEXTURE0);
-		glUniform1i(glid_texture,0);
 		glBindTexture(GL_TEXTURE_2D,glid_texture);
+		glUniform1i(glid_texture,0);
 	}
 	void refresh_from_data(){
 		glBindTexture(GL_TEXTURE_2D,glid_texture);
 		glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,texture_width,texture_height,0,GL_RGB,GL_UNSIGNED_BYTE,texels_rgb);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 private:
 	GLuint glid_texture{0};
@@ -258,7 +250,7 @@ public:
 		if(tex){
 			glVertexAttribPointer(gl::auv,2,GL_FLOAT,GL_FALSE,0,&texture_coords[0]);
 			glEnableVertexAttribArray(gl::auv);
-			tex->enable();
+			tex->enable_for_gl_draw();
 		}
 
 		gldraw();
@@ -534,14 +526,14 @@ public:
 		return v;
 	}
 	virtual vector<GLfloat>make_texture_coords()const{
-		const static GLfloat verts[]{-1,1, -1,-1, 1,-1, 1,1};
+		const static GLfloat verts[]{0,1, 0,0, 1,0, 1,1};
 		vector<GLfloat>v;
 		v.assign(verts,verts+sizeof(verts)/sizeof(GLfloat));
 		return v;
 	}
 	inline virtual void gldraw()const{
-		texels_rgb[0]++;
-		texels_rgb[1]++;
+//		texels_rgb[0]++;
+//		texels_rgb[1]++;
 		gleso::textures[0]->refresh_from_data();
 		glDrawArrays(GL_TRIANGLE_FAN,0,4);
 	}
