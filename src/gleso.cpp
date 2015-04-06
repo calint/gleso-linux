@@ -1,6 +1,4 @@
 #include "gleso.h"
-#include<stdlib.h>
-#include<string.h>
 ////////////////////////////////////////////////////////////////////////
 namespace metrics{
 	unsigned int fps;
@@ -18,6 +16,7 @@ namespace gl{
 	GLuint umvp;// mat4 model-world-view-projection matrix
 }
 ////////////////////////////////////////////////////////////////////////
+#include<string>
 class shader{
 	GLuint glid_program;
 	GLuint apos,umvp;
@@ -221,7 +220,8 @@ private:
 };
 
 #include<list>
-class grid;
+#include<cstdlib>
+class grid;// forward declaration
 namespace gleso{
 	floato dt;
 	inline floato d(const floato unit_over_second){return unit_over_second*dt;}
