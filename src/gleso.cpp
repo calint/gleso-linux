@@ -252,9 +252,11 @@ public:
 		da.add(dda,gleso::dt);
 		a.add(da,gleso::dt);
 	}
+	inline p3&position(){return p;}
 	inline p3&pos(){return p;}
-	inline p3&position(){return p;}inline p3&dpos(){return dp;}
-	inline p3&angle(){return a;}inline p3&dagl(){return da;}
+	inline p3&dpos(){return dp;}
+	inline p3&angle(){return a;}
+	inline p3&dagl(){return da;}
 	inline p3&scale(){return s;}
 private:
 	p3 p,dp,ddp;//position
@@ -322,7 +324,7 @@ static void mtxRotateZApply(floato* mtx, floato deg)
 	mtx[ 3] = mtx[ 7]*sinrad + mtx03*cosrad;
 	mtx[ 7] = mtx[ 7]*cosrad - mtx03*sinrad;
 }
-void mtxScaleApply(floato* mtx, floato xScale, floato yScale, floato zScale)
+static void mtxScaleApply(floato* mtx, floato xScale, floato yScale, floato zScale)
 {
 	// [ 0 4  8 12 ]   [ x 0 0 0 ]
 	// [ 1 5  9 13 ] x [ 0 y 0 0 ]
@@ -394,8 +396,10 @@ public:
 		render_info_next.scale(phys.scale());
 	}
 	virtual void on_update(){
-		if(phys.pos().x()>1)phys.dpos().x(-phys.dpos().x());
-		else if(phys.pos().x()<-1)phys.dpos().x(-phys.dpos().x());
+		if(phys.pos().x()>1)
+			phys.dpos().x(-phys.dpos().x());
+		else if(phys.pos().x()<-1)
+			phys.dpos().x(-phys.dpos().x());
 	}
 };
 /*-----------------------------
@@ -640,7 +644,7 @@ void gleso_key(int key,int scancode,int action,int mods){
 	printf("gleso_key  key=%d   scancode=%d    action=%d   mods=%d\n",key,scancode,action,mods);
 }
 void gleso_touch(floato x,floato y,int action){
-	printf("gleso_touch  x=%f   y=%f    action=%d\n",x,y,action);
+	printf("gleso_touch  x=%.1f   y=%.1f    action=%d\n",x,y,action);
 }
 
 

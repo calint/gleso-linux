@@ -37,6 +37,10 @@ void mouse_button_callback(GLFWwindow*window,int button,int action,int mods){
 		break;
 	}
 }
+static void windowsize_callback(GLFWwindow*window,int width,int height){
+	if(window==0)return;//? unused param warning workaround
+	gleso_on_viewport_change(width,height);
+}
 #define WINDOW_WIDTH 240
 #define WINDOW_HEIGHT 320
 int main(int argc,char**argv){
@@ -52,6 +56,7 @@ int main(int argc,char**argv){
 	glfwSetKeyCallback(window,key_callback);
 	glfwSetCursorPosCallback(window,cursor_position_callback);
 	glfwSetMouseButtonCallback(window,mouse_button_callback);
+	glfwSetWindowSizeCallback(window,windowsize_callback);
 	glfwMakeContextCurrent(window);
 //	glewExperimental=GL_TRUE; // needed for core profile
 	if (glewInit()!=GLEW_OK)return 3;
