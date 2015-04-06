@@ -1,0 +1,33 @@
+
+
+
+//   clipboard
+
+
+//static const char vertex_shader_source[]="attribute vec4 apos;void main(){gl_Position=apos;}";
+//static const char fragment_shader_source[]="precision mediump float;void main(){gl_FragColor=vec4(0.0,1.0,0.0,1.0);}";
+//static const char vertex_shader_source[]="#version 100\nuniform mat4 umvp;attribute vec4 apos;void main(){gl_Position=umvp*apos;}";
+////static const char fragment_shader_source[]="#version 100\nvoid main(){gl_FragColor=vec4(.6,.3,.2,1.);}";
+//static const char vertex_shader_source_ch[]="#version 100\nuniform mat4 umvp;attribute vec4 apos;void main(){gl_Position=umvp*apos;}";
+//static const char fragment_shader_source_ch[]="#version 100\nvoid main(){gl_FragColor=vec4(gl_FragCoord.x,gl_FragCoord.y,.2,1.);}";
+
+
+
+
+const char*shader_source_vertex=R"(
+#version 100
+uniform mat4 umvp;
+attribute vec4 apos;
+void main(){
+	gl_Position=umvp*apos;
+}
+)";
+const char*shader_source_fragment=R"(
+#version 100
+void main(){
+    gl_FragColor=vec4(gl_FragCoord.x,gl_FragCoord.y,.2,1.);
+}
+)";
+
+
+
