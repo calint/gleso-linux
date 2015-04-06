@@ -135,8 +135,21 @@ protected:
 	inline GLint get_attribute_location(const char*name){return glGetAttribLocation(glid_program,name);}
 	inline GLint get_uniform_location(const char*name){return glGetUniformLocation(glid_program,name);}
 
-#define shader_source_vertex "#version 100\nuniform mat4 umvp;attribute vec4 apos;void main(){gl_Position=umvp*apos;}"
-#define shader_source_fragment "#version 100\nvoid main(){gl_FragColor=vec4(gl_FragCoord.x,gl_FragCoord.y,.2,1.);}"
+const char*shader_source_vertex=R"(
+	#version 100
+	uniform mat4 umvp;
+	attribute vec4 apos;
+	void main(){
+		gl_Position=umvp*apos;
+	}
+)";
+
+const char*shader_source_fragment=R"(
+#version 100
+void main(){
+    gl_FragColor=vec4(gl_FragCoord.x,gl_FragCoord.y,.2,1.);
+}
+)";
 	inline virtual const char*vertex_shader_source()const{return shader_source_vertex;}
 	inline virtual const char*fragment_shader_source()const{return shader_source_fragment;}
 

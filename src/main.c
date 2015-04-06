@@ -5,7 +5,8 @@
 #include<string.h>
 #include<GL/glew.h>
 #include<GLFW/glfw3.h>
-#include"gleso.h"
+
+#include "gleso.h"
 static void key_callback(GLFWwindow*window,int key,int scancode,int action,int mods){
 	if(window==0)return;//? unused param warning workaround
 	gleso_key(key,scancode,action,mods);
