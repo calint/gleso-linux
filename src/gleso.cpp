@@ -174,9 +174,9 @@ public:
 	std::vector<GLfloat>vertices;
 	glo(){metrics::nglo++;}
 #else
-	GLuint glid_vao;
-	GLuint glid_buffer_vertices;
-	glo():glid_vao(0),glid_buffer_vertices(0){metrics::nglo++;}
+	GLuint glid_vao=0;
+	GLuint glid_buffer_vertices=0;
+	glo(){metrics::nglo++;}
 #endif
 	virtual~glo(){metrics::nglo--;}
 	int load(){// called when context is (re)created
@@ -209,7 +209,7 @@ public:
 protected:
 	virtual std::vector<GLfloat>make_vertices()const{
 		const GLfloat verts[]={0,.5f, -.5f,-.5f, .5f,-.5f};
-		std::vector<GLfloat>v;
+		std::vector<GLfloat>v;//{0,.5f, -.5f,-.5f, .5f,-.5f};
 		v.assign(verts,verts+sizeof(verts)/sizeof(GLfloat));//?? on stack then invalidated
 		return v;
 	}
@@ -346,13 +346,12 @@ void mtxScaleApply(floato* mtx, floato xScale, floato yScale, floato zScale)
 	mtx[11] *= xScale;
 }
 class m4{
-    floato c[16];
+	floato c[16]{0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
 public:
-    m4():c{0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0 }{}
-    inline m4&load_translate(const p3&p){mtxLoadTranslate(c,p.x(),p.y(),p.z());return*this;}
-    inline m4&append_rotation_about_z_axis(const floato degrees){mtxRotateZApply(c,degrees);return*this;}
-    inline m4&append_scaling(const p3&scale){mtxScaleApply(c,scale.x(),scale.y(),scale.z());return*this;}
-    inline const floato*array()const{return c;}
+	inline m4&load_translate(const p3&p){mtxLoadTranslate(c,p.x(),p.y(),p.z());return*this;}
+	inline m4&append_rotation_about_z_axis(const floato degrees){mtxRotateZApply(c,degrees);return*this;}
+	inline m4&append_scaling(const p3&scale){mtxScaleApply(c,scale.x(),scale.y(),scale.z());return*this;}
+	inline const floato*array()const{return c;}
 };
 //class linked_list{
 //	linked_list*nxt;
@@ -412,7 +411,7 @@ public:
 class glo_square_xy:public glo{
 	virtual std::vector<GLfloat>make_vertices()const{
 		const static GLfloat verts[]={-1,1, -1,-1, 1,-1, 1,1};
-		std::vector<GLfloat>v;
+		std::vector<GLfloat>v;//{-1,1, -1,-1, 1,-1, 1,1};
 		v.assign(verts,verts+sizeof(verts)/sizeof(GLfloat));
 		return v;
 	}
@@ -535,14 +534,14 @@ namespace fps{
 	}
 	void after_render(){
 		const float d=dt();
- 		if(d>3){
-			const int dframe=frameno-last_frameno;
-			last_frameno=frameno;
-			fps=dframe/d;
-			metrics::fps=(unsigned int)fps;
-			reset();
-			metrics::log();
-		}
+		if(d<3)
+			return;
+		const int dframe=frameno-last_frameno;
+		last_frameno=frameno;
+		fps=dframe/d;
+		metrics::fps=(unsigned int)fps;
+		reset();
+		metrics::log();
 	}
 }
 
@@ -615,10 +614,10 @@ void gleso_on_viewport_change(int width,int height){
 	p("/// gleso_on_viewport_change %d x %d\n",width,height);
 	if(gl::shdr)gl::shdr->viewport(width,height);
 }
-static struct timeval tv;
 void gleso_step(){
 	fps::before_render();
 	gleso::tick++;
+	struct timeval tv;
 	gettimeofday(&tv,NULL);
 	const time_t diff_s=tv.tv_sec-timeval_after_init.tv_sec;
 	const int diff_us=tv.tv_usec-timeval_after_init.tv_usec;
