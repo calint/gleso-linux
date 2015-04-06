@@ -18,10 +18,11 @@ namespace gl{
 ////////////////////////////////////////////////////////////////////////
 #include<string>
 class shader{
-	GLuint glid_program;
-	GLuint apos,umvp;
+	GLuint glid_program{0};
+	GLuint apos{0};
+	GLuint umvp{0};
 public:
-	shader():glid_program(0),apos(0),umvp(0){metrics::nshader++;}
+	shader(){metrics::nshader++;}
 
 	virtual~shader(){
 		metrics::nshader--;
@@ -136,14 +137,13 @@ protected:
 	inline GLint get_uniform_location(const char*name){return glGetUniformLocation(glid_program,name);}
 
 const char*shader_source_vertex=R"(
-	#version 100
-	uniform mat4 umvp;
-	attribute vec4 apos;
-	void main(){
-		gl_Position=umvp*apos;
-	}
+#version 100
+uniform mat4 umvp;
+attribute vec4 apos;
+void main(){
+	gl_Position=umvp*apos;
+}
 )";
-
 const char*shader_source_fragment=R"(
 #version 100
 void main(){
@@ -361,7 +361,7 @@ public:
 //class glob:public linked_list{
 //glo nullglo{};
 class glob{
-	const class glo*glo;// ref to gl renderable
+	const class glo*glo{nullptr};// ref to gl renderable
 	class physics phys;// current physics state
 	class physics phys_prv;// previous physics state
 	class physics phys_nxt;// next physics state, computed during update
@@ -370,7 +370,7 @@ class glob{
 	class render_info render_info_next;// next renderinfo, updated during render
 	p3 scal;
 public:
-	glob():glo(nullptr){metrics::nglob++;}
+	glob(){metrics::nglob++;}
 	virtual ~glob(){}
 	inline glob&glo_ref(const class glo*g){glo=g;return*this;}
 	inline class physics&physics(){return phys;}
