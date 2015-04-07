@@ -46,23 +46,25 @@ static void windowsize_callback(GLFWwindow*window,int width,int height){
 int main(int argc,char**argv){
 	while(argc--)puts(*argv++);
 	puts(glfwGetVersionString());
-	if(!glfwInit())return 1;
-//	glfwWindowHint(GLFW_SAMPLES,4);
-//	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,3);
-//	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,3);
-//	glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
-	GLFWwindow*window=glfwCreateWindow(WINDOW_WIDTH,WINDOW_HEIGHT,"gleso",NULL,NULL);
-	if(!window){glfwTerminate();return 2;}
-	glfwSetKeyCallback(window,key_callback);
-	glfwSetCursorPosCallback(window,cursorpos_position_callback);
-	glfwSetMouseButtonCallback(window,mousebutton_callback);
-	glfwSetWindowSizeCallback(window,windowsize_callback);
-	glfwMakeContextCurrent(window);
-//	glewExperimental=GL_TRUE; // needed for core profile
-	if (glewInit()!=GLEW_OK)return 3;
+	GLFWwindow*window=nullptr;
 	try{
+		if(!glfwInit())throw"cannot init glfw";
+	//	glfwWindowHint(GLFW_SAMPLES,4);
+	//	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,3);
+	//	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,3);
+	//	glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
+		window=glfwCreateWindow(WINDOW_WIDTH,WINDOW_HEIGHT,"gleso",NULL,NULL);
+		if(!window){throw"cannot create window";}
+		glfwSetKeyCallback(window,key_callback);
+		glfwSetCursorPosCallback(window,cursorpos_position_callback);
+		glfwSetMouseButtonCallback(window,mousebutton_callback);
+		glfwSetWindowSizeCallback(window,windowsize_callback);
+		glfwMakeContextCurrent(window);
+	//	glewExperimental=GL_TRUE; // needed for core profile
+		if(glewInit()!=GLEW_OK)throw"cannot init glew";
 		gleso_init();
 		gleso_viewport(WINDOW_WIDTH,WINDOW_HEIGHT);
+		p("* running\n");
 		while(!glfwWindowShouldClose(window)){
 			gleso_step();
 			glfwSwapBuffers(window);
@@ -71,8 +73,9 @@ int main(int argc,char**argv){
 	}catch(const char*s){
 		p("!!! exception: %s\n",s);
 	}
-	glfwDestroyWindow(window);
+	// ommits deinit
+	if(window)glfwDestroyWindow(window);
 	glfwTerminate();
-	puts("done");
+	puts("* done");
 	return 0;
 }

@@ -30,11 +30,11 @@ public:
 
 	virtual~shader(){
 		metrics::nshader--;
-//		p("deleting shader %p\n",this);
+		p("deleting shader %p\n",(void*)this);
 //		if(glid_program){glDeleteProgram(glid_program);glid_program=0;}
 	}
 
-	static void printGLString(const char *name,const GLenum s){
+	static void print_gl_enum(const char *name,const GLenum s){
 		const char*v=(const char*)glGetString(s);
 		p("GL %s = %s\n",name,v);
 	}
@@ -59,10 +59,9 @@ public:
 		}
 		return str;
 	}
-
-	static void checkGlError(const char*op){
+	static void check_gl_error(const char*op=""){
 		for(GLenum error=glGetError();error;error=glGetError()){
-			p("at %s() glError (0x%x):  %s\n",op,error,get_gl_error_string(error));
+			p("!!! %s   glerror %x   %s\n",op,error,get_gl_error_string(error));
 			throw"detected gl error";
 		}
 	}
@@ -76,7 +75,7 @@ public:
 	static GLuint loadShader(const GLenum shader_type,const char*source){
 		//throw "error";
  		const GLuint shader=glCreateShader(shader_type);
- 		p("%s shader glid=%d\n",get_shader_name_for_type(shader_type),shader);
+ 		p(" %s shader glid=%d\n",get_shader_name_for_type(shader_type),shader);
  		if(!shader)throw"cannot get shader id";
  		glShaderSource(shader,1,&source,NULL);
 		glCompileShader(shader);
@@ -97,7 +96,7 @@ public:
 
 	void load(){
 		createProgram(vertex_shader_source(),fragment_shader_source());
-		checkGlError("program");
+		check_gl_error("program");
 		bind();
 	}
 
@@ -116,10 +115,11 @@ private:
 		GLuint glid_pixel_shader=loadShader(GL_FRAGMENT_SHADER,fragment_shader_source);
 		glid_program=glCreateProgram();
 		if(!glid_program)throw"cannot create program";
+		p(" program glid=%d\n",glid_program);
 		glAttachShader(glid_program,glid_vertex_shader);
-		checkGlError("glAttachShader vertex");
+		check_gl_error("glAttachShader vertex");
 		glAttachShader(glid_program,glid_pixel_shader);
-		checkGlError("glAttachShader fragment");
+		check_gl_error("glAttachShader fragment");
 		glLinkProgram(glid_program);
 		GLint linkStatus=GL_FALSE;
 		glGetProgramiv(glid_program,GL_LINK_STATUS,&linkStatus);
@@ -192,11 +192,12 @@ public:
 //	}
 	void load(){
 		glGenTextures(1,&glid_texture);
-		p("texture  glid=%d\n",glid_texture);
+		p(" texture  glid=%d\n",glid_texture);
 		glBindTexture(GL_TEXTURE_2D,glid_texture);
 		glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,(GLvoid*)data);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+		shader::check_gl_error();
 //		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	void enable_for_gl_draw(){
@@ -246,7 +247,7 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER,glid_buffer_vertices);
 		const vector<GLfloat>vec=make_vertices();
 		glBufferData(GL_ARRAY_BUFFER,GLsizeiptr(vec.size()*sizeof(GLfloat)),vec.data(),GL_STATIC_DRAW);
-		if(shader::checkGlError("load"))return 1;
+		if(shader::check_gl_error("load"))return 1;
 #endif
 		return 0;
 	}
@@ -653,13 +654,13 @@ static/*gives*/glob*gleso_impl_create_root(){
 #include<typeinfo>
 static struct timeval timeval_after_init;
 int gleso_init(){
-	shader::checkGlError("init");
-	shader::printGLString("GL_VERSION",GL_VERSION);
-	shader::printGLString("GL_VENDOR",GL_VENDOR);
-	shader::printGLString("GL_RENDERER",GL_RENDERER);
+	shader::check_gl_error("init");
+	shader::print_gl_enum("GL_VERSION",GL_VERSION);
+	shader::print_gl_enum("GL_VENDOR",GL_VENDOR);
+	shader::print_gl_enum("GL_RENDERER",GL_RENDERER);
 	//	    printGLString("Extensions",GL_EXTENSIONS);
-	shader::printGLString("GL_SHADING_LANGUAGE_VERSION",GL_SHADING_LANGUAGE_VERSION);
-	shader::checkGlError("after opengl info");
+	shader::print_gl_enum("GL_SHADING_LANGUAGE_VERSION",GL_SHADING_LANGUAGE_VERSION);
+	shader::check_gl_error("after opengl info");
 
 	p("/// gleso init\n");
 	p("%16s %4u B\n","int",(unsigned int)sizeof(int));
@@ -671,7 +672,6 @@ int gleso_init(){
 	p("%16s %4u B\n","grid",(unsigned int)sizeof(grid));
 	p("%16s %4lu B\n","physics",sizeof(physics));
 	srand(1);// generate same random numbers in different instances
-	p("\n");
 	if(!gl::shdr){// init
 		p("* initiating\n");
 		gl::shdr=new shader();
@@ -679,6 +679,7 @@ int gleso_init(){
 		gleso::grd=new grid();
 		gleso::grd->add(/*gives*/gleso_impl_create_root());//? leak? grd->add does not take
 	}
+	p("* loading\n");
 	gl::shdr->load();
 	foreach(gleso::textures,[](texture*o){
 		p(" texture %p   %s\n",(void*)o,typeid(*o).name());
@@ -688,7 +689,6 @@ int gleso_init(){
 		p(" glo %p   %s\n",(void*)o,typeid(*o).name());
 		o->load();
 	});
-
 	fps::reset();
 	gettimeofday(&timeval_after_init,NULL);
 	metrics::time_since_start_in_seconds=0;
