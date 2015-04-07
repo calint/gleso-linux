@@ -313,16 +313,16 @@ protected:
 
 class p3{
 public:
-	inline p3():x_(0),y_(0),z_(0){}
-	inline p3(const floato x):x_(x),y_(0),z_(0){}
-	inline p3(const floato x,const floato y):x_(x),y_(y),z_(0){}
-	inline p3(const p3&p):x_(p.x_),y_(p.y_),z_(p.z_){}
-	inline p3&x(const floato f){x_=f;return*this;}inline floato x()const{return x_;}
-	inline p3&y(const floato f){y_=f;return*this;}inline floato y()const{return y_;}
-	inline p3&z(const floato f){z_=f;return*this;}inline floato z()const{return z_;}
-	inline p3&add(const p3&p,const floato dt){x_+=p.x_*dt;y_+=p.y_*dt;z_+=p.z_*dt;return*this;}//? simd
-private:
-	floato x_,y_,z_;
+	inline p3():x{0},y{0},z{0}{}
+	inline p3(const floato x):x{x},y{0},z{0}{}
+	inline p3(const floato x,const floato y):x{x},y{y},z{0}{}
+//	inline p3(const p3&p):x{p.x},y{p.y},z{p.z}{}
+//	inline p3&x(const floato f){x_=f;return*this;}inline floato x()const{return x_;}
+//	inline p3&y(const floato f){y_=f;return*this;}inline floato y()const{return y_;}
+//	inline p3&z(const floato f){z_=f;return*this;}inline floato z()const{return z_;}
+	inline p3&add(const p3&p,const floato dt){x+=p.x*dt;y+=p.y*dt;z+=p.z*dt;return*this;}//? simd
+//private:
+	floato x,y,z;
 };
 
 #include<list>
@@ -346,13 +346,13 @@ public:
 		da.add(dda,gleso::dt);
 		a.add(da,gleso::dt);
 	}
-	inline p3&position(){return p;}
-	inline p3&pos(){return p;}
-	inline p3&dpos(){return dp;}
-	inline p3&angle(){return a;}
-	inline p3&dagl(){return da;}
-	inline p3&scale(){return s;}
-private:
+//	inline p3&position(){return p;}
+//	inline p3&pos(){return p;}
+//	inline p3&dpos(){return dp;}
+//	inline p3&angle(){return a;}
+//	inline p3&dagl(){return da;}
+//	inline p3&scale(){return s;}
+//private:
 	p3 p,dp,ddp;//position
 	p3 a,da,dda;//angle
 	p3 s;//scale
@@ -498,9 +498,9 @@ void mtxMultiply(float* ret, const float* lhs, const float* rhs)
 class m4{
 	floato c[16]{0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
 public:
-	inline m4&load_translate(const p3&p){mtxLoadTranslate(c,p.x(),p.y(),p.z());return*this;}
+	inline m4&load_translate(const p3&p){mtxLoadTranslate(c,p.x,p.y,p.z);return*this;}
 	inline m4&append_rotation_about_z_axis(const floato degrees){mtxRotateZApply(c,degrees);return*this;}
-	inline m4&append_scaling(const p3&scale){mtxScaleApply(c,scale.x(),scale.y(),scale.z());return*this;}
+	inline m4&append_scaling(const p3&scale){mtxScaleApply(c,scale.x,scale.y,scale.z);return*this;}
 	inline m4&load_ortho_projection(floato left,floato right,floato bottom,floato top,floato nearZ,floato farZ){
 		mtxLoadOrthographic(c,left,right,bottom,top,nearZ,farZ);
 		return*this;
@@ -508,58 +508,67 @@ public:
 	inline const floato*array()const{return c;}
 };
 
-class camera{
-	m4 mtx_wp;
-public:
-	void init_for_render(const p3&position){
-		glClearColor(floato{.5},0,floato{.5},1);
-		glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
-		mtx_wp.load_translate(position);
-		glUniformMatrix4fv(GLint(gl::umtx_vp),1,false,mtx_wp.array());
-	}
-	inline const m4&matrix_world_view_projection()const{return mtx_wp;}
-};
 class glob{
 	const class glo*glo{nullptr};// ref to gl renderable
-	class physics phys;// current physics state
-	class physics phys_prv;// previous physics state
-	class physics phys_nxt;// next physics state, computed during update
 	m4 matrix_model_world;
 	class render_info render_info;// info for opengl rendering
 	class render_info render_info_next;// next renderinfo, updated during render
 	p3 scal;
+protected:
+	physics phy_prv;// previous physics state
+//	physics phy_nxt;// next physics state
 public:
+	physics phy;// current physics state
 	glob(){metrics::nglob++;}
 	virtual ~glob(){}
 	inline glob&glo_ref(const class glo*g){glo=g;return*this;}
-	inline class physics&physics(){return phys;}
+//	inline physics&phys(){return phy;}
 	inline const p3&scale()const{return scal;}
 	inline glob&scale(const p3&scale){scal=scale;return*this;}
 	void render(){
 		if(!glo)return;
 		render_info=render_info_next;
 		matrix_model_world.load_translate(render_info.position());
-		matrix_model_world.append_rotation_about_z_axis(render_info.angle().z());
+		matrix_model_world.append_rotation_about_z_axis(render_info.angle().z);
 		matrix_model_world.append_scaling(render_info.scale());
 		glUniformMatrix4fv(GLint(gl::umtx_mw),1,false,matrix_model_world.array());
 		glo->render();
 	}
 	void update(){
-		phys_prv=phys;
-		phys.scale()=scal;
-		phys.update();
+		phy_prv=phy;
+//		phy=phy_nxt;
+		phy.s=scal;
+		phy.update();
 		on_update();
-		render_info_next.position(phys.position());
-		render_info_next.angle(phys.angle());
-		render_info_next.scale(phys.scale());
+		render_info_next.position(phy.p);
+		render_info_next.angle(phy.a);
+		render_info_next.scale(phy.s);
+	}
+	virtual void on_update(){}
+};
+
+class camera:public glob{
+	m4 mtx_wp;
+public:
+	void pre_render(){
+		gl::shdr->use_program();
+		glClearColor(floato{.5},0,floato{.5},1);
+		glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
+		mtx_wp.load_translate(phy.p);
+		glUniformMatrix4fv(GLint(gl::umtx_vp),1,false,mtx_wp.array());
 	}
 	virtual void on_update(){
-		if(phys.pos().x()>1)
-			phys.dpos().x(-phys.dpos().x());
-		else if(phys.pos().x()<-1)
-			phys.dpos().x(-phys.dpos().x());
+//		physics p=phys();
+		p(" update camera  %f   %f\n",phy.p.x,phy.dp.x);
+		if(phy.p.x>1)
+			phy.dp.x={-1};
+		else if(phy.p.x<-1)
+			phy.dp.x={1};
+		p(" update camera  %f   %f  after\n",phy.p.x,phy.dp.x);
 	}
+	inline const m4&matrix_world_view_projection()const{return mtx_wp;}
 };
+
 /*-----------------------------
      __    _       __     __
     /  \   |      /  \   /  \
@@ -736,6 +745,7 @@ static/*gives*/glob*gleso_impl_create_root(){
 //  interface
 #include<typeinfo>
 static struct timeval timeval_after_init;
+static camera c;
 int gleso_init(){
 	p("* gleso\n");
 	shader::check_gl_error("init");
@@ -767,7 +777,10 @@ int gleso_init(){
 		gl::shdr=new shader();
 		gleso_impl_add_resources();
 		gleso::grd=new grid();
+		gleso::grd->add(&c);
 		gleso::grd->add(/*gives*/gleso_impl_create_root());//? leak? grd->add does not take
+		c.phy.p.x={.5};
+		c.phy.dp.x={1};
 	}
 	p("* load\n");
 	gl::shdr->load();
@@ -789,9 +802,6 @@ void gleso_viewport(int width,int height){
 	if(gl::shdr)gl::shdr->viewport(width,height);
 }
 
-static camera c;
-static p3 cp{.5};
-static p3 dcp{1};
 void gleso_step(){
 	fps::before_render();
 	gleso::tick++;
@@ -804,12 +814,7 @@ void gleso_step(){
 	gleso::grd->update();//? thread
 
 //	p("%f  %f\n",cp.x(),gleso::dt);
-	gl::shdr->use_program();
-	c.init_for_render(cp);
-	cp.add(dcp,gleso::dt);
-	if(cp.x()>1)dcp.x(-1);
-	else if(cp.x()<-1)dcp.x(1);
-
+	c.pre_render();
 	gleso::grd->render();//? thread
 	fps::after_render();
 }
