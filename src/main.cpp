@@ -41,8 +41,8 @@ static void windowsize_callback(GLFWwindow*window,int width,int height){
 	if(window==0)return;//? unused param warning workaround
 	gleso_viewport(width,height);
 }
-#define WINDOW_WIDTH 240
-#define WINDOW_HEIGHT 320
+#define WINDOW_WIDTH 640
+#define WINDOW_HEIGHT 480
 int main(int argc,char**argv){
 	while(argc--)puts(*argv++);
 	puts(glfwGetVersionString());

@@ -14,6 +14,7 @@ namespace gl{
 	shader*shdr;
 	GLint apos;// vec2 vertex coords x,y
 	GLint auv;// vec2 texture coords x,y
+	GLint argba;// vec4 colors
 	GLint umtx_mw;// mat4 model-world matrix
 	GLint umtx_vp;// mat4 view projection matrix
 	GLint utex;// texture sampler
@@ -24,6 +25,7 @@ class shader{
 	GLint glid_program{0};
 	GLint apos{0};
 	GLint auv{0};
+	GLint argba{0};
 	GLint umtx_mw{0};
 	GLint umtx_vp{0};
 	GLint utex{0};
@@ -150,18 +152,22 @@ uniform mat4 umtx_mw;// model-world matrix
 uniform mat4 umtx_vp;// view-projection matrix
 attribute vec4 apos;// vertices
 attribute vec2 auv;// texture coords
+attribute vec4 argba;// colors
 varying vec2 vuv;
+varying vec4 vrgba;
 void main(){
 	gl_Position=umtx_vp*umtx_mw*apos;
     vuv=auv;
+    vrgba=argba;
 }
 )";
 const char*shader_source_fragment=R"(
 #version 100
 uniform sampler2D utex;
 varying mediump vec2 vuv;
+varying mediump vec4 vrgba;
 void main(){
-	gl_FragColor=texture2D(utex,vuv);
+	gl_FragColor=texture2D(utex,vuv)+vrgba;
 }
 )";
 	inline virtual const char*vertex_shader_source()const{return shader_source_vertex;}
@@ -172,6 +178,7 @@ void main(){
 	virtual void bind(){
 		A(apos,"apos");
 		A(auv,"auv");
+		A(argba,"argba");
 		U(umtx_mw,"umtx_mw");
 		U(umtx_vp,"umtx_vp");
 		U(utex,"utex");
@@ -182,6 +189,7 @@ void main(){
 		gl::utex=utex;
 		gl::apos=apos;
 		gl::auv=auv;
+		gl::argba=argba;
 	}
 };
 
@@ -233,9 +241,11 @@ class glo{
 #ifdef GLESO_EMBEDDED
 	vector<GLfloat>vertices;
 	vector<GLfloat>texture_coords;
+	vector<GLfloat>colors;
 #else
 	GLuint glid_buffer_vertices{0};
 	GLuint glid_buffer_texture_coords{0};
+	GLuint glid_buffer_colors{0};
 #endif
 public:
 	glo(){
@@ -250,19 +260,32 @@ public:
 #ifdef GLESO_EMBEDDED
 		vertices=make_vertices();
 		texture_coords=make_texture_coords();
+		colors=make_colors();
 #else
+		const vector<GLfloat>v1=make_vertices();
 		glGenBuffers(1,&glid_buffer_vertices);
 		p("    vertices buffer glid=%d\n",glid_buffer_vertices);
 		glBindBuffer(GL_ARRAY_BUFFER,glid_buffer_vertices);
-		const vector<GLfloat>v1=make_vertices();
 		glBufferData(GL_ARRAY_BUFFER,GLsizeiptr(v1.size()*sizeof(GLfloat)),v1.data(),GL_STATIC_DRAW);
 		shader::check_gl_error("load vertices");
 
-		glGenBuffers(1,&glid_buffer_texture_coords);
-		p("    texture coords buffer glid=%d\n",glid_buffer_texture_coords);
-		glBindBuffer(GL_ARRAY_BUFFER,glid_buffer_texture_coords);
 		const vector<GLfloat>v2=make_texture_coords();
-		glBufferData(GL_ARRAY_BUFFER,GLsizeiptr(v1.size()*sizeof(GLfloat)),v2.data(),GL_STATIC_DRAW);
+		if(!v2.empty()){
+			glGenBuffers(1,&glid_buffer_texture_coords);
+			p("    texture coords buffer glid=%d\n",glid_buffer_texture_coords);
+			glBindBuffer(GL_ARRAY_BUFFER,glid_buffer_texture_coords);
+			glBufferData(GL_ARRAY_BUFFER,GLsizeiptr(v2.size()*sizeof(GLfloat)),v2.data(),GL_STATIC_DRAW);
+			shader::check_gl_error("load texture coords");
+		}
+
+		const vector<GLfloat>v3=make_colors();
+		if(!v3.empty()){
+			glGenBuffers(1,&glid_buffer_colors);
+			p("    colors buffer glid=%d\n",glid_buffer_colors);
+			glBindBuffer(GL_ARRAY_BUFFER,glid_buffer_colors);
+			glBufferData(GL_ARRAY_BUFFER,GLsizeiptr(v3.size()*sizeof(GLfloat)),v3.data(),GL_STATIC_DRAW);
+			shader::check_gl_error("load colors");
+		}
 		shader::check_gl_error("load texture coords");
 #endif
 		return 0;
@@ -281,29 +304,55 @@ public:
 			glVertexAttribPointer(gl::auv,2,GL_FLOAT,GL_FALSE,0,&texture_coords[0]);
 #else
 			glBindBuffer(GL_ARRAY_BUFFER,glid_buffer_texture_coords);
-			glVertexAttribPointer(gl::auv,2,GL_FLOAT,GL_FALSE,0,nullptr);
+			glVertexAttribPointer(gl::auv,2,GL_FLOAT,GL_FALSE,0,0);
 #endif
 			tex->enable_for_gl_draw();
+		}
+
+#ifdef GLESO_EMBEDDED
+		if(!colors.empty()){
+			glEnableVertexAttribArray(gl::argba);
+			glVertexAttribPointer(gl::argba,4,GL_FLOAT,GL_FALSE,0,&colors[0]);
+#else
+		if(glid_buffer_colors){
+			glEnableVertexAttribArray(gl::argba);
+			glBindBuffer(GL_ARRAY_BUFFER,glid_buffer_colors);
+			glVertexAttribPointer(gl::argba,4,GL_FLOAT,GL_FALSE,0,0);
+#endif
 		}
 
 		gldraw();
 
 		glDisableVertexAttribArray(gl::apos);
-		if(tex){
-			glDisableVertexAttribArray(gl::auv);
-		}
+		if(tex)glDisableVertexAttribArray(gl::auv);
+#ifdef GLESO_EMBEDDED
+		if(!colors.empty())glDisableVertexAttribArray(gl::argba);
+#else
+		if(gl::argba)glDisableVertexAttribArray(gl::argba);
+#endif
 	}
 protected:
 	virtual vector<GLfloat>make_vertices()const{
-		const GLfloat verts[]{0,1, -1,-1, 1,-1};
+		const GLfloat verts[]{0,1,  -1,-1,  1,-1};
 		vector<GLfloat>v;
 		v.assign(verts,verts+sizeof(verts)/sizeof(GLfloat));
 		return v;
 	}
 	virtual vector<GLfloat>make_texture_coords()const{
-		const GLfloat verts[]{0,1, -1,-1, 1,-1};
 		vector<GLfloat>v;
-		v.assign(verts,verts+sizeof(verts)/sizeof(GLfloat));
+//		const GLfloat verts[]{0,1,  -1,-1,  1,-1};
+//		v.assign(verts,verts+sizeof(verts)/sizeof(GLfloat));
+		return v;
+	}
+	virtual vector<GLfloat>make_colors()const{
+		vector<GLfloat>v;
+//		const GLfloat f[]{
+//			1,0,0,1,
+//			0,1,0,1,
+//			0,0,1,1,
+//			0,1,1,1,
+//		};
+//		v.assign(f,f+sizeof(f)/sizeof(GLfloat));
 		return v;
 	}
 	virtual void gldraw()const{
@@ -441,7 +490,7 @@ static void mtxScaleApply(floato* mtx, floato xScale, floato yScale, floato zSca
 	mtx[ 7] *= yScale;
 	mtx[11] *= xScale;
 }
-void mtxLoadOrthographic(float* mtx,
+static void mtxLoadOrthographic(float* mtx,
 							float left, float right,
 							float bottom, float top,
 							float nearZ, float farZ)
@@ -468,7 +517,7 @@ void mtxLoadOrthographic(float* mtx,
 	mtx[14] = -(farZ + nearZ) / (farZ - nearZ);
 	mtx[15] = 1.0f;
 }
-void mtxMultiply(float* ret, const float* lhs, const float* rhs)
+static void mtxMultiply(float* ret, const float* lhs, const float* rhs)
 {
 	// [ 0 4  8 12 ]   [ 0 4  8 12 ]
 	// [ 1 5  9 13 ] x [ 1 5  9 13 ]
@@ -584,9 +633,9 @@ class glo_square_xy:public glo{
 		return v;
 	}
 	virtual vector<GLfloat>make_texture_coords()const{
-		const static GLfloat verts[]={-1,1, -1,-1, 1,-1, 1,1};
 		vector<GLfloat>v;
-		v.assign(verts,verts+sizeof(verts)/sizeof(GLfloat));
+//		const static GLfloat verts[]={-1,1, -1,-1, 1,-1, 1,1};
+//		v.assign(verts,verts+sizeof(verts)/sizeof(GLfloat));
 		return v;
 	}
 	inline virtual void gldraw()const{
@@ -623,14 +672,14 @@ public:
 		texture(gleso::textures[0]);
 	}
 	virtual vector<GLfloat>make_vertices()const{
-		const static GLfloat verts[]{-1,1, -1,-1, 1,-1, 1,1};
 		vector<GLfloat>v;
+		const static GLfloat verts[]{-1,1, -1,-1, 1,-1, 1,1};
 		v.assign(verts,verts+sizeof(verts)/sizeof(GLfloat));
 		return v;
 	}
 	virtual vector<GLfloat>make_texture_coords()const{
-		const static GLfloat verts[]{0,1, 0,0, 1,0, 1,1};
 		vector<GLfloat>v;
+		const static GLfloat verts[]{0,1, 0,0, 1,0, 1,1};
 		v.assign(verts,verts+sizeof(verts)/sizeof(GLfloat));
 		return v;
 	}
@@ -639,6 +688,26 @@ public:
 //		texels_rgb[1]++;
 		gleso::textures[0]->refresh_from_data();
 		glDrawArrays(GL_TRIANGLE_FAN,0,4);
+	}
+	virtual vector<GLfloat>make_colors()const{
+		return vector<GLfloat>();
+	}
+};
+class glo_square_xyuvrgba:public glo_square_xyuv{
+public:
+	glo_square_xyuvrgba(){
+		texture(nullptr);
+	}
+	virtual vector<GLfloat>make_colors()const{
+		vector<GLfloat>v;
+		const GLfloat f[]{
+			0,0,0,1,
+			1,1,1,1,
+			0,0,0,1,
+			0,0,0,1,
+		};
+		v.assign(f,f+sizeof(f)/sizeof(GLfloat));
+		return v;
 	}
 };
 //------------------------------------------------------------------------------
@@ -703,11 +772,12 @@ static void gleso_impl_add_resources(){
 	gleso::glos.push_back(/*gives*/new glo_square_xy());//??
 	gleso::glos.push_back(/*gives*/new glo_circle_xy());//??
 	gleso::glos.push_back(/*gives*/new glo_square_xyuv());//??
+	gleso::glos.push_back(/*gives*/new glo_square_xyuvrgba());//??
 }
 static/*gives*/glob*gleso_impl_create_root(){
 	glob*g=new glob();
 	g->phy.s=p3{.9,.9};
-	g->gl=gleso::glos[3];
+	g->gl=gleso::glos[4];
 	return g;
 }
 /*
