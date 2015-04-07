@@ -199,12 +199,9 @@ public:
 		glGenTextures(1,&glid_texture);
 		p(" texture  glid=%d\n",glid_texture);
 		refresh_from_data();
-//		glBindTexture(GL_TEXTURE_2D,glid_texture);
-//		glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,(GLvoid*)data);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 		shader::check_gl_error();
-//		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	void enable_for_gl_draw(){
 		glActiveTexture(GL_TEXTURE0);
@@ -213,7 +210,6 @@ public:
 	}
 	void refresh_from_data(){
 		glBindTexture(GL_TEXTURE_2D,glid_texture);
-//		glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,(GLvoid*)data);
 		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,(GLvoid*)texels());
 	}
 	inline GLubyte*texels(){
@@ -223,14 +219,6 @@ private:
 	GLuint glid_texture{0};
 	GLsizei width=2;
 	GLsizei height=2;
-//	GLubyte data[16]={
-//		0xff,0x00,0x00,   0x00,0xff,0x00,    0x00, 0x00,
-//		0x00,0x00,0xff,   0xff,0xff,0x00,    0x00, 0x00,
-//	};
-//	GLuint data[16]={
-//		0xff0000ff,   0x00ff00ff,
-//		0x0000ffff,   0xffff00ff,
-//	};
 	GLubyte data[16]={
 		0xff,0x00,0x00,0xff,   0x00,0xff,0x00,0xff,
 		0x00,0x00,0xff,0xff,   0xff,0xff,0x00,0xff,
@@ -242,16 +230,14 @@ private:
 };
 class glo{
 	class texture*tex{nullptr};
-public:
 #ifdef GLESO_EMBEDDED
 	vector<GLfloat>vertices;
 	vector<GLfloat>texture_coords;
 #else
-	GLuint glid_vertex_array{0};
 	GLuint glid_buffer_vertices{0};
-	GLuint glid_texture_coords_array{0};
 	GLuint glid_buffer_texture_coords{0};
 #endif
+public:
 	glo(){
 		metrics::nglo++;
 	}
@@ -265,21 +251,18 @@ public:
 		vertices=make_vertices();
 		texture_coords=make_texture_coords();
 #else
-		glGenVertexArrays(1,&glid_vertex_array);
-		p(" vertex array glid=%d\n",glid_vertex_array);
-		glBindVertexArray(glid_vertex_array);
 		glGenBuffers(1,&glid_buffer_vertices);
+		p(" vertices buffer glid=%d\n",glid_buffer_vertices);
 		glBindBuffer(GL_ARRAY_BUFFER,glid_buffer_vertices);
-		const vector<GLfloat>vec=make_vertices();
-		glBufferData(GL_ARRAY_BUFFER,GLsizeiptr(vec.size()*sizeof(GLfloat)),vec.data(),GL_STATIC_DRAW);
+		const vector<GLfloat>v1=make_vertices();
+		glBufferData(GL_ARRAY_BUFFER,GLsizeiptr(v1.size()*sizeof(GLfloat)),v1.data(),GL_STATIC_DRAW);
 		shader::check_gl_error("load vertices");
 
-//		glGenVertexArrays(1,&glid_texture_coords_array);
-//		glBindVertexArray(glid_texture_coords_array);
 		glGenBuffers(1,&glid_buffer_texture_coords);
+		p(" texture coords buffer glid=%d\n",glid_buffer_texture_coords);
 		glBindBuffer(GL_ARRAY_BUFFER,glid_buffer_texture_coords);
-		const vector<GLfloat>v=make_texture_coords();
-		glBufferData(GL_ARRAY_BUFFER,GLsizeiptr(vec.size()*sizeof(GLfloat)),v.data(),GL_STATIC_DRAW);
+		const vector<GLfloat>v2=make_texture_coords();
+		glBufferData(GL_ARRAY_BUFFER,GLsizeiptr(v1.size()*sizeof(GLfloat)),v2.data(),GL_STATIC_DRAW);
 		shader::check_gl_error("load texture coords");
 #endif
 		return 0;
