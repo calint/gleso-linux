@@ -31,3 +31,65 @@ void main(){
 
 
 
+
+#version 100
+uniform mat4 umtx_mw;// model-world matrix
+uniform mat4 umtx_vp;// view-projection matrix
+attribute vec4 apos;// vertices
+attribute vec2 auv;// texture coords
+attribute vec4 argba;// colors
+varying vec2 vuv;
+varying vec4 vrgba;
+void main(){
+	gl_Position=umtx_vp*umtx_mw*apos;
+    vuv=auv;
+    vrgba=argba;
+}
+)";
+const char*shader_source_fragment=R"(
+#version 100
+uniform sampler2D utex;
+varying mediump vec2 vuv;
+varying mediump vec4 vrgba;
+void main(){
+    mediump vec4 tx=texture2D(utex,vuv)+vrgba;
+    mediump vec4 rgba=tx.x==0.?vrgba:vrgba;
+	gl_FragColor=rgba;
+}
+
+
+
+const char*shader_source_vertex=R"(
+#version 100
+uniform mat4 umtx_mw;// model-world matrix
+uniform mat4 umtx_vp;// view-projection matrix
+attribute vec4 apos;// vertices
+attribute vec2 auv;// texture coords
+attribute vec4 argba;// colors
+varying vec2 vuv;
+varying vec4 vrgba;
+void main(){
+	gl_Position=umtx_vp*umtx_mw*apos;
+    vuv=auv;
+    vrgba=argba;
+}
+)";
+const char*shader_source_fragment=R"(
+#version 100
+uniform sampler2D utex;
+varying mediump vec2 vuv;
+varying mediump vec4 vrgba;
+void main(){
+    mediump vec4 tx=texture2D(utex,vuv)+vrgba;
+	gl_FragColor=tx;
+}
+)";
+
+
+
+
+
+
+
+
+
