@@ -30,8 +30,8 @@ public:
 
 	virtual~shader(){
 		metrics::nshader--;
-		p("deleting shader %p\n",this);
-		if(glid_program){glDeleteProgram(glid_program);glid_program=0;}
+//		p("deleting shader %p\n",this);
+//		if(glid_program){glDeleteProgram(glid_program);glid_program=0;}
 	}
 
 	static void printGLString(const char *name,const GLenum s){
@@ -72,8 +72,9 @@ public:
 	static GLuint loadShader(const GLenum shader_type,const char*source){
 		//throw "error";
  		const GLuint shader=glCreateShader(shader_type);
+ 		p("shader %d  glid=%d\n",shader_type,shader);
  		if(!shader)return 0;
-		glShaderSource(shader,1,&source,NULL);
+ 		glShaderSource(shader,1,&source,NULL);
 		glCompileShader(shader);
 		GLint compiled=0;
 		glGetShaderiv(shader,GL_COMPILE_STATUS,&compiled);
@@ -166,6 +167,7 @@ void main(){
 	#define A(x,y)if((x=(GLuint)get_attribute_location(y))==(GLuint)-1){p("shader: cannot find attribute %s\n",y);return-1;};
 	#define U(x,y)if((x=(GLuint)get_uniform_location(y))==(GLuint)-1){p("shader: cannot find uniform %s\n",y);return-1;}
 	virtual int bind(){
+//		throw"exception while binding";
 		A(apos,"apos");
 		A(auv,"auv");
 		U(umvp,"umvp");
@@ -186,12 +188,13 @@ using std::vector;
 
 class texture{
 public:
-	~texture(){
-		p("deleting texture %p\n",this);
-		glDeleteTextures(1,&glid_texture);
-	}
+//	~texture(){
+//		p("deleting texture %p\n",this);
+//		glDeleteTextures(1,&glid_texture);
+//	}
 	void load(){
 		glGenTextures(1,&glid_texture);
+		p("texture  glid=%d\n",glid_texture);
 		glBindTexture(GL_TEXTURE_2D,glid_texture);
 		glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,(GLvoid*)data);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
@@ -671,6 +674,11 @@ int gleso_init(){
 	p("%16s %4lu B\n","physics",sizeof(physics));
 	srand(1);// generate same random numbers in different instances
 	p("\n");
+	try{
+		throw"exception while init";
+	}catch(const char*s){
+    	p("!!! exception caught: %s\n",s);
+  }
 /*
 	if(gl::shdr){
 		delete gl::shdr;
@@ -703,22 +711,22 @@ int gleso_init(){
 	gleso::grd->add(gleso_impl_create_root());//? leak? grd->add does not take
 */
 
-	if(!gl::shdr){
+	if(!gl::shdr){// init
 		gl::shdr=new shader();
-		if(!gl::shdr->load())
-			return 1;
 		gleso_impl_add_resources();
-		foreach(gleso::textures,[](texture*o){
-			p(" texture %p   %s\n",(void*)o,typeid(*o).name());
-			o->load();
-		});
-		foreach(gleso::glos,[](glo*o){
-			p(" glo %p   %s\n",(void*)o,typeid(*o).name());
-			o->load();
-		});
 		gleso::grd=new grid();
 		gleso::grd->add(/*gives*/gleso_impl_create_root());//? leak? grd->add does not take
 	}
+	if(!gl::shdr->load())
+		return 1;
+	foreach(gleso::textures,[](texture*o){
+		p(" texture %p   %s\n",(void*)o,typeid(*o).name());
+		o->load();
+	});
+	foreach(gleso::glos,[](glo*o){
+		p(" glo %p   %s\n",(void*)o,typeid(*o).name());
+		o->load();
+	});
 
 	fps::reset();
 	gettimeofday(&timeval_after_init,NULL);

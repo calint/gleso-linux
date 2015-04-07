@@ -2,6 +2,8 @@
 #ifndef GLESO_H
 #define GLESO_H
 #include "gles.h"
+typedef GLfloat floato;
+typedef GLint into;
 #ifdef __cplusplus
 extern "C" {
 #endif
