@@ -493,12 +493,17 @@ public:
 	}
 	inline const floato*array()const{return c;}
 };
-//class linked_list{
-//	linked_list*nxt;
-//	linked_list*prv;
-//};
-//class glob:public linked_list{
-//glo nullglo{};
+
+class camera{
+	m4 mtx_wp;
+public:
+	void init_for_render(const p3&position){
+		glClearColor(floato{.5},0,floato{.5},1);
+		glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
+		mtx_wp.load_translate(position);
+	}
+	inline const m4&matrix_world_view_projection()const{return mtx_wp;}
+};
 class glob{
 	const class glo*glo{nullptr};// ref to gl renderable
 	class physics phys;// current physics state
@@ -515,17 +520,14 @@ public:
 	inline class physics&physics(){return phys;}
 	inline const p3&scale()const{return scal;}
 	inline glob&scale(const p3&scale){scal=scale;return*this;}
-	void render(){
+	void render(const camera&c){
 		if(!glo)return;
 		render_info=render_info_next;
 		matrix_model_world.load_translate(render_info.position());
 		matrix_model_world.append_rotation_about_z_axis(render_info.angle().z());
 		matrix_model_world.append_scaling(render_info.scale());
 		glUniformMatrix4fv(GLint(gl::umtx_mw),1,false,matrix_model_world.array());
-
-		m4 mtx_wp;
-		mtx_wp.load_translate(p3{});
-		glUniformMatrix4fv(GLint(gl::umtx_vp),1,false,mtx_wp.array());
+		glUniformMatrix4fv(GLint(gl::umtx_vp),1,false,c.matrix_world_view_projection().array());
 		glo->render();
 	}
 	void update(){
@@ -628,7 +630,7 @@ public://                                          (:)
 	grid(){}//                                    __|__         <- "long neck"
 	void add(glob*g){globs.push_back(g);}        //(.)\\          //
 	void update(){foreach(globs,[](glob*g){g->update();});}//? multicore?
-	void render(){foreach(globs,[](glob*g){g->render();});}// single thread opengl rendering
+	void render(camera&c){foreach(globs,[c](glob*g){g->render(c);});}// single thread opengl rendering
 	void rem(glob*g){globs.remove(g);}//? multicore?||
 	void clr(){globs.clear();}
 	//    void refresh(){}// refreshes the grid, globs dont change grid often, globs often totally inside grid, maximum glob size less than grid    <-- procedurally generated text for vegetation
@@ -765,6 +767,10 @@ void gleso_viewport(int width,int height){
 	p("/// gleso_viewport  %d x %d\n",width,height);
 	if(gl::shdr)gl::shdr->viewport(width,height);
 }
+
+static camera c;
+static p3 cp{.5};
+static p3 dcp{1};
 void gleso_step(){
 	fps::before_render();
 	gleso::tick++;
@@ -774,11 +780,16 @@ void gleso_step(){
 	const int diff_us=tv.tv_usec-timeval_after_init.tv_usec;
 	metrics::time_since_start_in_seconds=(float)diff_s+diff_us/1000000.f;
 	gleso::dt=floato(1./60);
-	glClearColor(floato{.5},0,floato{.5},1);
-	glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
-	gl::shdr->use_program();
 	gleso::grd->update();//? thread
-	gleso::grd->render();//? thread
+
+//	p("%f  %f\n",cp.x(),gleso::dt);
+	gl::shdr->use_program();
+	c.init_for_render(cp);
+	cp.add(dcp,gleso::dt);
+	if(cp.x()>1)dcp.x(-1);
+	else if(cp.x()<-1)dcp.x(1);
+
+	gleso::grd->render(c);//? thread
 	fps::after_render();
 }
 //void gleso_on_context_destroyed(){
