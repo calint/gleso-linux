@@ -198,8 +198,9 @@ public:
 	void load(){
 		glGenTextures(1,&glid_texture);
 		p(" texture  glid=%d\n",glid_texture);
-		glBindTexture(GL_TEXTURE_2D,glid_texture);
-		glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,(GLvoid*)data);
+		refresh_from_data();
+//		glBindTexture(GL_TEXTURE_2D,glid_texture);
+//		glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,(GLvoid*)data);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 		shader::check_gl_error();
@@ -212,26 +213,44 @@ public:
 	}
 	void refresh_from_data(){
 		glBindTexture(GL_TEXTURE_2D,glid_texture);
-		glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,(GLvoid*)data);
+//		glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,(GLvoid*)data);
+		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,(GLvoid*)texels());
+	}
+	inline GLubyte*texels(){
+		return data;
 	}
 private:
 	GLuint glid_texture{0};
 	GLsizei width=2;
 	GLsizei height=2;
+//	GLubyte data[16]={
+//		0xff,0x00,0x00,   0x00,0xff,0x00,    0x00, 0x00,
+//		0x00,0x00,0xff,   0xff,0xff,0x00,    0x00, 0x00,
+//	};
+//	GLuint data[16]={
+//		0xff0000ff,   0x00ff00ff,
+//		0x0000ffff,   0xffff00ff,
+//	};
 	GLubyte data[16]={
-		0xff,0x00,0x00,   0x00,0xff,0x00,    0x00, 0x00,
-		0x00,0x00,0xff,   0xff,0xff,0x00,    0x00, 0x00,
+		0xff,0x00,0x00,0xff,   0x00,0xff,0x00,0xff,
+		0x00,0x00,0xff,0xff,   0xff,0xff,0x00,0xff,
 	};
+//	GLuint data[16]={
+//		0xffff0000,   0xff00ff00,
+//		0xff0000ff,   0xffffff00,
+//	};
 };
 class glo{
+	class texture*tex{nullptr};
 public:
 #ifdef GLESO_EMBEDDED
 	vector<GLfloat>vertices;
 	vector<GLfloat>texture_coords;
-	class texture*tex{nullptr};
 #else
-	GLuint glid_vao{0};
+	GLuint glid_vertex_array{0};
 	GLuint glid_buffer_vertices{0};
+	GLuint glid_texture_coords_array{0};
+	GLuint glid_buffer_texture_coords{0};
 #endif
 	glo(){
 		metrics::nglo++;
@@ -246,29 +265,41 @@ public:
 		vertices=make_vertices();
 		texture_coords=make_texture_coords();
 #else
-		glGenVertexArrays(1,&glid_vao);
-		glBindVertexArray(glid_vao);
+		glGenVertexArrays(1,&glid_vertex_array);
+		p(" vertex array glid=%d\n",glid_vertex_array);
+		glBindVertexArray(glid_vertex_array);
 		glGenBuffers(1,&glid_buffer_vertices);
 		glBindBuffer(GL_ARRAY_BUFFER,glid_buffer_vertices);
 		const vector<GLfloat>vec=make_vertices();
 		glBufferData(GL_ARRAY_BUFFER,GLsizeiptr(vec.size()*sizeof(GLfloat)),vec.data(),GL_STATIC_DRAW);
-		if(shader::check_gl_error("load"))return 1;
+		shader::check_gl_error("load vertices");
+
+//		glGenVertexArrays(1,&glid_texture_coords_array);
+//		glBindVertexArray(glid_texture_coords_array);
+		glGenBuffers(1,&glid_buffer_texture_coords);
+		glBindBuffer(GL_ARRAY_BUFFER,glid_buffer_texture_coords);
+		const vector<GLfloat>v=make_texture_coords();
+		glBufferData(GL_ARRAY_BUFFER,GLsizeiptr(vec.size()*sizeof(GLfloat)),v.data(),GL_STATIC_DRAW);
+		shader::check_gl_error("load texture coords");
 #endif
 		return 0;
 	}
 	void render()const{
+		glEnableVertexAttribArray(gl::apos);
 #ifdef GLESO_EMBEDDED
 		glVertexAttribPointer(gl::apos,2,GL_FLOAT,GL_FALSE,0,&vertices[0]);
 #else
-		glBindVertexArray(glid_vao);
 		glBindBuffer(GL_ARRAY_BUFFER,glid_buffer_vertices);
 		glVertexAttribPointer(gl::apos,2,GL_FLOAT,GL_FALSE,0,0);
 #endif
-		glEnableVertexAttribArray(gl::apos);
-
 		if(tex){
-			glVertexAttribPointer(gl::auv,2,GL_FLOAT,GL_FALSE,0,&texture_coords[0]);
 			glEnableVertexAttribArray(gl::auv);
+#ifdef GLESO_EMBEDDED
+			glVertexAttribPointer(gl::auv,2,GL_FLOAT,GL_FALSE,0,&texture_coords[0]);
+#else
+			glBindBuffer(GL_ARRAY_BUFFER,glid_buffer_texture_coords);
+			glVertexAttribPointer(gl::auv,2,GL_FLOAT,GL_FALSE,0,nullptr);
+#endif
 			tex->enable_for_gl_draw();
 		}
 
