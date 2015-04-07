@@ -73,9 +73,11 @@ int main(int argc,char**argv){
 	}catch(const char*s){
 		p("!!! exception: %s\n",s);
 	}
-	// ommits deinit
+
+	// omits deinit of gleso
+
 	if(window)glfwDestroyWindow(window);
 	glfwTerminate();
-	puts("* done");
+	puts("* gleso exit");
 	return 0;
 }

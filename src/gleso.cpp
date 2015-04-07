@@ -14,7 +14,8 @@ namespace gl{
 	shader*shdr;
 	GLuint apos;// vec2 vertex coords x,y
 	GLuint auv;// vec2 texture coords x,y
-	GLuint umvp;// mat4 model-world-view-projection matrix
+	GLuint umtx_mw;// mat4 model-world matrix
+	GLuint umtx_vp;// mat4 view projection matrix
 	GLuint utex;// texture sampler
 }
 ////////////////////////////////////////////////////////////////////////
@@ -23,7 +24,8 @@ class shader{
 	GLuint glid_program{0};
 	GLuint apos{0};
 	GLuint auv{0};
-	GLuint umvp{0};
+	GLuint umtx_mw{0};
+	GLuint umtx_vp{0};
 	GLuint utex{0};
 public:
 	shader(){metrics::nshader++;}
@@ -144,12 +146,13 @@ protected:
 
 const char*shader_source_vertex=R"(
 #version 100
-uniform mat4 umvp;
-attribute vec4 apos;
-attribute vec2 auv;
+uniform mat4 umtx_mw;// model-world matrix
+uniform mat4 umtx_vp;// view-projection matrix
+attribute vec4 apos;// vertices
+attribute vec2 auv;// texture coords
 varying vec2 vuv;
 void main(){
-	gl_Position=umvp*apos;
+	gl_Position=umtx_vp*umtx_mw*apos;
     vuv=auv;
 }
 )";
@@ -169,11 +172,13 @@ void main(){
 	virtual void bind(){
 		A(apos,"apos");
 		A(auv,"auv");
-		U(umvp,"umvp");
+		U(umtx_mw,"umtx_mw");
+		U(umtx_vp,"umtx_vp");
 		U(utex,"utex");
 	}
 	inline virtual void prepare_gl_for_render(){
-		gl::umvp=umvp;
+		gl::umtx_mw=umtx_mw;
+		gl::umtx_vp=umtx_vp;
 		gl::utex=utex;
 		gl::apos=apos;
 		gl::auv=auv;
@@ -353,7 +358,7 @@ private:
 };
 
 ////
-// lifted from apple examples
+// mtx funcs lifted from apple examples
 static void mtxLoadTranslate(floato*mtx,const floato xTrans,const floato yTrans,const floato zTrans){
 	// [ 0 4  8  x ]
 	// [ 1 5  9  y ]
@@ -422,12 +427,70 @@ static void mtxScaleApply(floato* mtx, floato xScale, floato yScale, floato zSca
 	mtx[ 7] *= yScale;
 	mtx[11] *= xScale;
 }
+void mtxLoadOrthographic(float* mtx,
+							float left, float right,
+							float bottom, float top,
+							float nearZ, float farZ)
+{
+	//See appendix G of OpenGL Red Book
+
+	mtx[ 0] = 2.0f / (right - left);
+	mtx[ 1] = 0.0;
+	mtx[ 2] = 0.0;
+	mtx[ 3] = 0.0;
+
+	mtx[ 4] = 0.0;
+	mtx[ 5] = 2.0f / (top - bottom);
+	mtx[ 6] = 0.0;
+	mtx[ 7] = 0.0;
+
+	mtx[ 8] = 0.0;
+	mtx[ 9] = 0.0;
+	mtx[10] = -2.0f / (farZ - nearZ);
+	mtx[11] = 0.0;
+
+	mtx[12] = -(right + left) / (right - left);
+	mtx[13] = -(top + bottom) / (top - bottom);
+	mtx[14] = -(farZ + nearZ) / (farZ - nearZ);
+	mtx[15] = 1.0f;
+}
+void mtxMultiply(float* ret, const float* lhs, const float* rhs)
+{
+	// [ 0 4  8 12 ]   [ 0 4  8 12 ]
+	// [ 1 5  9 13 ] x [ 1 5  9 13 ]
+	// [ 2 6 10 14 ]   [ 2 6 10 14 ]
+	// [ 3 7 11 15 ]   [ 3 7 11 15 ]
+	ret[ 0] = lhs[ 0]*rhs[ 0] + lhs[ 4]*rhs[ 1] + lhs[ 8]*rhs[ 2] + lhs[12]*rhs[ 3];
+	ret[ 1] = lhs[ 1]*rhs[ 0] + lhs[ 5]*rhs[ 1] + lhs[ 9]*rhs[ 2] + lhs[13]*rhs[ 3];
+	ret[ 2] = lhs[ 2]*rhs[ 0] + lhs[ 6]*rhs[ 1] + lhs[10]*rhs[ 2] + lhs[14]*rhs[ 3];
+	ret[ 3] = lhs[ 3]*rhs[ 0] + lhs[ 7]*rhs[ 1] + lhs[11]*rhs[ 2] + lhs[15]*rhs[ 3];
+
+	ret[ 4] = lhs[ 0]*rhs[ 4] + lhs[ 4]*rhs[ 5] + lhs[ 8]*rhs[ 6] + lhs[12]*rhs[ 7];
+	ret[ 5] = lhs[ 1]*rhs[ 4] + lhs[ 5]*rhs[ 5] + lhs[ 9]*rhs[ 6] + lhs[13]*rhs[ 7];
+	ret[ 6] = lhs[ 2]*rhs[ 4] + lhs[ 6]*rhs[ 5] + lhs[10]*rhs[ 6] + lhs[14]*rhs[ 7];
+	ret[ 7] = lhs[ 3]*rhs[ 4] + lhs[ 7]*rhs[ 5] + lhs[11]*rhs[ 6] + lhs[15]*rhs[ 7];
+
+	ret[ 8] = lhs[ 0]*rhs[ 8] + lhs[ 4]*rhs[ 9] + lhs[ 8]*rhs[10] + lhs[12]*rhs[11];
+	ret[ 9] = lhs[ 1]*rhs[ 8] + lhs[ 5]*rhs[ 9] + lhs[ 9]*rhs[10] + lhs[13]*rhs[11];
+	ret[10] = lhs[ 2]*rhs[ 8] + lhs[ 6]*rhs[ 9] + lhs[10]*rhs[10] + lhs[14]*rhs[11];
+	ret[11] = lhs[ 3]*rhs[ 8] + lhs[ 7]*rhs[ 9] + lhs[11]*rhs[10] + lhs[15]*rhs[11];
+
+	ret[12] = lhs[ 0]*rhs[12] + lhs[ 4]*rhs[13] + lhs[ 8]*rhs[14] + lhs[12]*rhs[15];
+	ret[13] = lhs[ 1]*rhs[12] + lhs[ 5]*rhs[13] + lhs[ 9]*rhs[14] + lhs[13]*rhs[15];
+	ret[14] = lhs[ 2]*rhs[12] + lhs[ 6]*rhs[13] + lhs[10]*rhs[14] + lhs[14]*rhs[15];
+	ret[15] = lhs[ 3]*rhs[12] + lhs[ 7]*rhs[13] + lhs[11]*rhs[14] + lhs[15]*rhs[15];}
+///////////////////////////////////////////////////////
+
 class m4{
 	floato c[16]{0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
 public:
 	inline m4&load_translate(const p3&p){mtxLoadTranslate(c,p.x(),p.y(),p.z());return*this;}
 	inline m4&append_rotation_about_z_axis(const floato degrees){mtxRotateZApply(c,degrees);return*this;}
 	inline m4&append_scaling(const p3&scale){mtxScaleApply(c,scale.x(),scale.y(),scale.z());return*this;}
+	inline m4&load_ortho_projection(floato left,floato right,floato bottom,floato top,floato nearZ,floato farZ){
+		mtxLoadOrthographic(c,left,right,bottom,top,nearZ,farZ);
+		return*this;
+	}
 	inline const floato*array()const{return c;}
 };
 //class linked_list{
@@ -458,7 +521,11 @@ public:
 		matrix_model_world.load_translate(render_info.position());
 		matrix_model_world.append_rotation_about_z_axis(render_info.angle().z());
 		matrix_model_world.append_scaling(render_info.scale());
-		glUniformMatrix4fv(GLint(gl::umvp),1,false,matrix_model_world.array());
+		glUniformMatrix4fv(GLint(gl::umtx_mw),1,false,matrix_model_world.array());
+
+		m4 mtx_wp;
+		mtx_wp.load_translate(p3{});
+		glUniformMatrix4fv(GLint(gl::umtx_vp),1,false,mtx_wp.array());
 		glo->render();
 	}
 	void update(){
