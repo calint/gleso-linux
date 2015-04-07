@@ -134,9 +134,8 @@ private:
 		throw"could not compile shader";
 	}
 protected:
-	inline GLint get_attribute_location(const char*name){return glGetAttribLocation(glid_program,name);}
-	inline GLint get_uniform_location(const char*name){return glGetUniformLocation(glid_program,name);}
-
+	inline virtual const GLchar*vertex_shader_source()const{return shader_source_vertex;}
+	inline virtual const GLchar*fragment_shader_source()const{return shader_source_fragment;}
 const GLchar*shader_source_vertex=R"(
 #version 100
 uniform mat4 umtx_mw;// model-world matrix
@@ -162,9 +161,9 @@ void main(){
 	gl_FragColor=tx+vrgba;
 }
 )";
-	inline virtual const GLchar*vertex_shader_source()const{return shader_source_vertex;}
-	inline virtual const GLchar*fragment_shader_source()const{return shader_source_fragment;}
 
+	inline GLint get_attribute_location(const char*name){return glGetAttribLocation(glid_program,name);}
+	inline GLint get_uniform_location(const char*name){return glGetUniformLocation(glid_program,name);}
 	#define A(x,y)if((x=get_attribute_location(y))==-1){p("shader: cannot find attribute %s\n",y);throw"error";};
 	#define U(x,y)if((x=get_uniform_location(y))==-1){p("shader: cannot find uniform %s\n",y);throw"error";}
 	virtual void bind(){
@@ -205,8 +204,8 @@ public:
 	}
 	void enable_for_gl_draw(){
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D,glid_texture);
 		glUniform1i(glid_texture,0);
+		glBindTexture(GL_TEXTURE_2D,glid_texture);
 	}
 	void refresh_from_data(){
 		glBindTexture(GL_TEXTURE_2D,glid_texture);
@@ -665,13 +664,25 @@ public:
 	}
 	virtual vector<GLfloat>make_vertices()const{
 		vector<GLfloat>v;
-		const static GLfloat verts[]{-1,1, -1,-1, 1,-1, 1,1};
+		const static GLfloat verts[]{
+		//	 x  y
+			-1, 1,
+			-1,-1,
+			 1,-1,
+			 1, 1
+		};
 		v.assign(verts,verts+sizeof(verts)/sizeof(GLfloat));
 		return v;
 	}
 	virtual vector<GLfloat>make_texture_coords()const{
 		vector<GLfloat>v;
-		const static GLfloat verts[]{0,1, 0,0, 1,0, 1,1};
+		const static GLfloat verts[]{
+		//	u v
+			0,1,
+			0,0,
+			1,0,
+			1,1
+		};
 		v.assign(verts,verts+sizeof(verts)/sizeof(GLfloat));
 		return v;
 	}
@@ -687,16 +698,17 @@ public:
 };
 class glo_square_xyuvrgba:public glo_square_xyuv{
 public:
-	glo_square_xyuvrgba(){
-		texture(nullptr);
-	}
+//	glo_square_xyuvrgba(){
+//		texture(nullptr);
+//	}
 	virtual vector<GLfloat>make_colors()const{
 		vector<GLfloat>v;
 		const GLfloat f[]{
-			0,0,0,1,
-			1,1,1,1,
-			0,0,0,1,
-			0,0,0,1,
+		//   R  G  B A
+			 0, 0, 0,1,
+			 1, 1, 1,1,
+			 0, 0, 0,1,
+			-1,-1,-1,1,
 		};
 		v.assign(f,f+sizeof(f)/sizeof(GLfloat));
 		return v;
@@ -841,6 +853,7 @@ int gleso_init(){
 		c.phy.p.x={.5};
 		c.phy.dp.x={1};
 	}
+	gl::active_program=0;
 	p("* load\n");
 	gl::shdr->load();
 	foreach(gleso::textures,[](texture*o){
