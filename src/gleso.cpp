@@ -38,7 +38,7 @@ public:
 
 	static void print_gl_enum(const char *name,const GLenum s){
 		const char*v=(const char*)glGetString(s);
-		p("GL %s = %s\n",name,v);
+		p("%s=%s\n",name,v);
 	}
 
 	static const char*get_gl_error_string(const GLenum error){
@@ -197,7 +197,7 @@ public:
 //	}
 	void load(){
 		glGenTextures(1,&glid_texture);
-		p(" texture  glid=%d\n",glid_texture);
+		p("    texture  glid=%d\n",glid_texture);
 		refresh_from_data();
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
@@ -252,14 +252,14 @@ public:
 		texture_coords=make_texture_coords();
 #else
 		glGenBuffers(1,&glid_buffer_vertices);
-		p(" vertices buffer glid=%d\n",glid_buffer_vertices);
+		p("    vertices buffer glid=%d\n",glid_buffer_vertices);
 		glBindBuffer(GL_ARRAY_BUFFER,glid_buffer_vertices);
 		const vector<GLfloat>v1=make_vertices();
 		glBufferData(GL_ARRAY_BUFFER,GLsizeiptr(v1.size()*sizeof(GLfloat)),v1.data(),GL_STATIC_DRAW);
 		shader::check_gl_error("load vertices");
 
 		glGenBuffers(1,&glid_buffer_texture_coords);
-		p(" texture coords buffer glid=%d\n",glid_buffer_texture_coords);
+		p("    texture coords buffer glid=%d\n",glid_buffer_texture_coords);
 		glBindBuffer(GL_ARRAY_BUFFER,glid_buffer_texture_coords);
 		const vector<GLfloat>v2=make_texture_coords();
 		glBufferData(GL_ARRAY_BUFFER,GLsizeiptr(v1.size()*sizeof(GLfloat)),v2.data(),GL_STATIC_DRAW);
@@ -515,6 +515,7 @@ public:
 		glClearColor(floato{.5},0,floato{.5},1);
 		glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 		mtx_wp.load_translate(position);
+		glUniformMatrix4fv(GLint(gl::umtx_vp),1,false,mtx_wp.array());
 	}
 	inline const m4&matrix_world_view_projection()const{return mtx_wp;}
 };
@@ -534,14 +535,13 @@ public:
 	inline class physics&physics(){return phys;}
 	inline const p3&scale()const{return scal;}
 	inline glob&scale(const p3&scale){scal=scale;return*this;}
-	void render(const camera&c){
+	void render(){
 		if(!glo)return;
 		render_info=render_info_next;
 		matrix_model_world.load_translate(render_info.position());
 		matrix_model_world.append_rotation_about_z_axis(render_info.angle().z());
 		matrix_model_world.append_scaling(render_info.scale());
 		glUniformMatrix4fv(GLint(gl::umtx_mw),1,false,matrix_model_world.array());
-		glUniformMatrix4fv(GLint(gl::umtx_vp),1,false,c.matrix_world_view_projection().array());
 		glo->render();
 	}
 	void update(){
@@ -644,7 +644,7 @@ public://                                          (:)
 	grid(){}//                                    __|__         <- "long neck"
 	void add(glob*g){globs.push_back(g);}        //(.)\\          //
 	void update(){foreach(globs,[](glob*g){g->update();});}//? multicore?
-	void render(camera&c){foreach(globs,[c](glob*g){g->render(c);});}// single thread opengl rendering
+	void render(){foreach(globs,[](glob*g){g->render();});}// single thread opengl rendering
 	void rem(glob*g){globs.remove(g);}//? multicore?||
 	void clr(){globs.clear();}
 	//    void refresh(){}// refreshes the grid, globs dont change grid often, globs often totally inside grid, maximum glob size less than grid    <-- procedurally generated text for vegetation
@@ -737,6 +737,7 @@ static/*gives*/glob*gleso_impl_create_root(){
 #include<typeinfo>
 static struct timeval timeval_after_init;
 int gleso_init(){
+	p("* gleso\n");
 	shader::check_gl_error("init");
 	shader::print_gl_enum("GL_VERSION",GL_VERSION);
 	shader::print_gl_enum("GL_VENDOR",GL_VENDOR);
@@ -744,10 +745,16 @@ int gleso_init(){
 	//	    printGLString("Extensions",GL_EXTENSIONS);
 	shader::print_gl_enum("GL_SHADING_LANGUAGE_VERSION",GL_SHADING_LANGUAGE_VERSION);
 	shader::check_gl_error("after opengl info");
-
-	p("/// gleso init\n");
+	p("* types\n");
 	p("%16s %4u B\n","int",(unsigned int)sizeof(int));
-	p("%16s %4u B\n","float",(unsigned int)sizeof(floato));
+	p("%16s %4u B\n","float",(unsigned int)sizeof(float));
+	p("%16s %4u B\n","long",(unsigned int)sizeof(long));
+	p("%16s %4u B\n","long long",(unsigned int)sizeof(long long));
+	p("%16s %4u B\n","double",(unsigned int)sizeof(double));
+	p("%16s %4u B\n","long double",(unsigned int)sizeof(long double));
+	p("%16s %4u B\n","short",(unsigned int)sizeof(short));
+	p("%16s %4u B\n","bool",(unsigned int)sizeof(bool));
+	p("%16s %4u B\n","char",(unsigned int)sizeof(char));
 	p("%16s %4u B\n","p3",(unsigned int)sizeof(p3));
 	p("%16s %4u B\n","m4",(unsigned int)sizeof(m4));
 	p("%16s %4u B\n","glo",(unsigned int)sizeof(glo));
@@ -756,16 +763,16 @@ int gleso_init(){
 	p("%16s %4lu B\n","physics",sizeof(physics));
 	srand(1);// generate same random numbers in different instances
 	if(!gl::shdr){// init
-		p("* initiating\n");
+		p("* init\n");
 		gl::shdr=new shader();
 		gleso_impl_add_resources();
 		gleso::grd=new grid();
 		gleso::grd->add(/*gives*/gleso_impl_create_root());//? leak? grd->add does not take
 	}
-	p("* loading\n");
+	p("* load\n");
 	gl::shdr->load();
 	foreach(gleso::textures,[](texture*o){
-		p(" texture  %s   %p\n",typeid(*o).name(),(void*)o);
+		p(" texture %p   %s\n",(void*)o,typeid(*o).name());
 		o->load();
 	});
 	foreach(gleso::glos,[](glo*o){
@@ -778,7 +785,7 @@ int gleso_init(){
 	return 0;
 }
 void gleso_viewport(int width,int height){
-	p("/// gleso_viewport  %d x %d\n",width,height);
+	p("* viewport  %d x %d\n",width,height);
 	if(gl::shdr)gl::shdr->viewport(width,height);
 }
 
@@ -803,7 +810,7 @@ void gleso_step(){
 	if(cp.x()>1)dcp.x(-1);
 	else if(cp.x()<-1)dcp.x(1);
 
-	gleso::grd->render(c);//? thread
+	gleso::grd->render();//? thread
 	fps::after_render();
 }
 //void gleso_on_context_destroyed(){

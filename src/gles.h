@@ -1,8 +1,8 @@
 #ifndef gles_h
 #define gles_h
 
-//#define GLESO_NOT_EMBEDDED // macbookair 11
-#define GLESO_EMBEDDED // hp 11
+#define GLESO_NOT_EMBEDDED // macbookair 11
+//#define GLESO_EMBEDDED // hp 11
 
 
 #ifdef GLESO_EMBEDDED
