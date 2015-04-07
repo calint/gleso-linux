@@ -509,35 +509,35 @@ public:
 };
 
 class glob{
-	const class glo*glo{nullptr};// ref to gl renderable
 	m4 matrix_model_world;
 	class render_info render_info;// info for opengl rendering
 	class render_info render_info_next;// next renderinfo, updated during render
-	p3 scal;
+//	p3 scal;
 protected:
 	physics phy_prv;// previous physics state
 //	physics phy_nxt;// next physics state
 public:
 	physics phy;// current physics state
+	glo*gl{nullptr};// ref to gl renderable
 	glob(){metrics::nglob++;}
 	virtual ~glob(){}
-	inline glob&glo_ref(const class glo*g){glo=g;return*this;}
+//	inline glob&glo_ref(const class glo*g){glo=g;return*this;}
 //	inline physics&phys(){return phy;}
-	inline const p3&scale()const{return scal;}
-	inline glob&scale(const p3&scale){scal=scale;return*this;}
+//	inline const p3&scale()const{return scal;}
+//	inline glob&scale(const p3&scale){scal=scale;return*this;}
 	void render(){
-		if(!glo)return;
+		if(!gl)return;
 		render_info=render_info_next;
 		matrix_model_world.load_translate(render_info.position());
 		matrix_model_world.append_rotation_about_z_axis(render_info.angle().z);
 		matrix_model_world.append_scaling(render_info.scale());
 		glUniformMatrix4fv(GLint(gl::umtx_mw),1,false,matrix_model_world.array());
-		glo->render();
+		gl->render();
 	}
 	void update(){
 		phy_prv=phy;
 //		phy=phy_nxt;
-		phy.s=scal;
+//		phy.s=scal;
 		phy.update();
 		on_update();
 		render_info_next.position(phy.p);
@@ -709,8 +709,8 @@ static void gleso_impl_add_resources(){
 }
 static/*gives*/glob*gleso_impl_create_root(){
 	glob*g=new glob();
-	const floato s=floato{.9};
-	g->scale(p3{s,s}).glo_ref(gleso::glos[3]);
+	g->phy.s=p3{.9,.9};
+	g->gl=gleso::glos[3];
 	return g;
 }
 /*
