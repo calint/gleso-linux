@@ -1,2 +1,2 @@
-/Debug/
-!/Debug/gleso-linux
+Debug/**
+!Debug/gleso-linux
