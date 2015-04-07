@@ -60,43 +60,45 @@ public:
 		return str;
 	}
 
-	static bool checkGlError(const char*op){
-		bool err=false;
+	static void checkGlError(const char*op){
 		for(GLenum error=glGetError();error;error=glGetError()){
 			p("at %s() glError (0x%x):  %s\n",op,error,get_gl_error_string(error));
-			err=true;
+			throw"detected gl error";
 		}
-		return err;
 	}
-
+	static const char*get_shader_name_for_type(GLenum shader_type){
+		switch(shader_type){
+		case GL_VERTEX_SHADER:return"vertex";
+		case GL_FRAGMENT_SHADER:return"fragment";
+		default:return"unknown";
+		}
+	}
 	static GLuint loadShader(const GLenum shader_type,const char*source){
 		//throw "error";
  		const GLuint shader=glCreateShader(shader_type);
- 		p("shader %d  glid=%d\n",shader_type,shader);
- 		if(!shader)return 0;
+ 		p("%s shader glid=%d\n",get_shader_name_for_type(shader_type),shader);
+ 		if(!shader)throw"cannot get shader id";
  		glShaderSource(shader,1,&source,NULL);
 		glCompileShader(shader);
 		GLint compiled=0;
 		glGetShaderiv(shader,GL_COMPILE_STATUS,&compiled);
-//		LOGE("compiled: %d\n",compiled);
 		if(compiled)return shader;
 		GLint infolen=0;
 		glGetShaderiv(shader,GL_INFO_LOG_LENGTH,&infolen);
-//		LOGE("info log len: %d\n",infolen);
-		if(!infolen)return 0;
-		char*buf=(char*)malloc(size_t(infolen));
-		if(!buf)return 0;
+		if(!infolen)throw"cannot get infolen";
+		char*buf=new char[infolen];//(char*)malloc(size_t(infolen));
+		if(!buf)throw"cannot get compiler error";
 		glGetShaderInfoLog(shader,infolen,NULL,buf);
-		p("Could not compile shader %d:\n%s\n",shader_type, buf);
+		p("!!! could not compile %s shader:\n%s\n",get_shader_name_for_type(shader_type),buf);
 		free(buf);
 		glDeleteShader(shader);
-		return 0;
+		throw"could not compile shader";
 	}
 
-	bool load(){
+	void load(){
 		createProgram(vertex_shader_source(),fragment_shader_source());
-		if(checkGlError("program"))return false;
-		return !bind();
+		checkGlError("program");
+		bind();
 	}
 
 	void viewport(const int wi,const int hi){
@@ -109,34 +111,32 @@ public:
 	}
 
 private:
-	bool createProgram(const char*vertex_shader_source,const char*fragment_shader_source){
+	void createProgram(const char*vertex_shader_source,const char*fragment_shader_source){
 		GLuint glid_vertex_shader=loadShader(GL_VERTEX_SHADER,vertex_shader_source);
-		if(!glid_vertex_shader)return false;
 		GLuint glid_pixel_shader=loadShader(GL_FRAGMENT_SHADER,fragment_shader_source);
-		if(!glid_pixel_shader)return false;
 		glid_program=glCreateProgram();
-		if(!glid_program)return false;
+		if(!glid_program)throw"cannot create program";
 		glAttachShader(glid_program,glid_vertex_shader);
-		if(checkGlError("glAttachShader vertex"))return false;
+		checkGlError("glAttachShader vertex");
 		glAttachShader(glid_program,glid_pixel_shader);
-		if(checkGlError("glAttachShader fragment"))return false;
+		checkGlError("glAttachShader fragment");
 		glLinkProgram(glid_program);
 		GLint linkStatus=GL_FALSE;
 		glGetProgramiv(glid_program,GL_LINK_STATUS,&linkStatus);
-		if(linkStatus)return true;
+		if(linkStatus)return;
 		GLint bufLength=0;
 		glGetProgramiv(glid_program,GL_INFO_LOG_LENGTH,&bufLength);
 		if(bufLength){
 			char*buf=(char*)malloc(size_t(bufLength));
 			if(buf){
 				glGetProgramInfoLog(glid_program,bufLength,NULL,buf);
-				p("Could not link program:\n%s\n",buf);
+				p("!!! could not link program:\n%s\n",buf);
 				free(buf);
 			}
 		}
 		glDeleteProgram(glid_program);
 		glid_program=0;
-		return false;
+		throw"error while linking";
 	}
 protected:
 	inline GLint get_attribute_location(const char*name){return glGetAttribLocation(glid_program,name);}
@@ -164,15 +164,13 @@ void main(){
 	inline virtual const char*vertex_shader_source()const{return shader_source_vertex;}
 	inline virtual const char*fragment_shader_source()const{return shader_source_fragment;}
 
-	#define A(x,y)if((x=(GLuint)get_attribute_location(y))==(GLuint)-1){p("shader: cannot find attribute %s\n",y);return-1;};
-	#define U(x,y)if((x=(GLuint)get_uniform_location(y))==(GLuint)-1){p("shader: cannot find uniform %s\n",y);return-1;}
-	virtual int bind(){
-//		throw"exception while binding";
+	#define A(x,y)if((x=(GLuint)get_attribute_location(y))==(GLuint)-1){p("shader: cannot find attribute %s\n",y);throw"error";};
+	#define U(x,y)if((x=(GLuint)get_uniform_location(y))==(GLuint)-1){p("shader: cannot find uniform %s\n",y);throw"error";}
+	virtual void bind(){
 		A(apos,"apos");
 		A(auv,"auv");
 		U(umvp,"umvp");
 		U(utex,"utex");
-		return 0;
 	}
 	inline virtual void prepare_gl_for_render(){
 		gl::umvp=umvp;
@@ -674,51 +672,14 @@ int gleso_init(){
 	p("%16s %4lu B\n","physics",sizeof(physics));
 	srand(1);// generate same random numbers in different instances
 	p("\n");
-	try{
-		throw"exception while init";
-	}catch(const char*s){
-    	p("!!! exception caught: %s\n",s);
-  }
-/*
-	if(gl::shdr){
-		delete gl::shdr;
-	}
-	gl::shdr=new shader();
-	if(!gl::shdr->load())
-		return 1;
-
-	if(!gleso::textures.empty()){
-		foreach(gleso::textures,[](texture*o){delete o;});
-		gleso::textures.clear();
-	}
-	if(!gleso::glos.empty()){
-		foreach(gleso::glos,[](glo*o){delete o;});
-		gleso::textures.clear();
-	}
-	if(gleso::grd){
-		delete gleso::grd;
-	}
-	gleso_impl_add_resources();
-	foreach(gleso::textures,[](texture*o){
-		p(" texture %p   %s\n",(void*)o,typeid(*o).name());
-		o->load();
-	});
-	foreach(gleso::glos,[](glo*o){
-		p(" glo %p   %s\n",(void*)o,typeid(*o).name());
-		o->load();
-	});
-	gleso::grd=new grid();
-	gleso::grd->add(gleso_impl_create_root());//? leak? grd->add does not take
-*/
-
 	if(!gl::shdr){// init
+		p("* initiating\n");
 		gl::shdr=new shader();
 		gleso_impl_add_resources();
 		gleso::grd=new grid();
 		gleso::grd->add(/*gives*/gleso_impl_create_root());//? leak? grd->add does not take
 	}
-	if(!gl::shdr->load())
-		return 1;
+	gl::shdr->load();
 	foreach(gleso::textures,[](texture*o){
 		p(" texture %p   %s\n",(void*)o,typeid(*o).name());
 		o->load();

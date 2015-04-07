@@ -60,12 +60,16 @@ int main(int argc,char**argv){
 	glfwMakeContextCurrent(window);
 //	glewExperimental=GL_TRUE; // needed for core profile
 	if (glewInit()!=GLEW_OK)return 3;
-	gleso_init();
-	gleso_viewport(WINDOW_WIDTH,WINDOW_HEIGHT);
-	while(!glfwWindowShouldClose(window)){
-		gleso_step();
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+	try{
+		gleso_init();
+		gleso_viewport(WINDOW_WIDTH,WINDOW_HEIGHT);
+		while(!glfwWindowShouldClose(window)){
+			gleso_step();
+			glfwSwapBuffers(window);
+			glfwPollEvents();
+		}
+	}catch(const char*s){
+		p("!!! exception: %s\n",s);
 	}
 	glfwDestroyWindow(window);
 	glfwTerminate();
