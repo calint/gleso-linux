@@ -67,7 +67,7 @@ public:
 			throw"detected gl error";
 		}
 	}
-	static const char*get_shader_name(GLenum shader_type){
+	static const char*get_shader_name_for_type(GLenum shader_type){
 		switch(shader_type){
 		case GL_VERTEX_SHADER:return"vertex";
 		case GL_FRAGMENT_SHADER:return"fragment";
@@ -76,30 +76,30 @@ public:
 	}
 	static GLuint load_shader(const GLenum shader_type,const char*source){
 		//throw "error";
- 		const GLuint shader=glCreateShader(shader_type);
- 		p(" %s shader glid=%d\n",get_shader_name(shader_type),shader);
- 		if(!shader)throw"cannot get shader id";
- 		glShaderSource(shader,1,&source,NULL);
+		const GLuint shader=glCreateShader(shader_type);
+		p(" %s shader glid=%d\n",get_shader_name_for_type(shader_type),shader);
+//		if(!shader)throw"cannot get shader id";
+		glShaderSource(shader,1,&source,NULL);
 		glCompileShader(shader);
-		GLint compiled=0;
+		GLint compiled{0};
 		glGetShaderiv(shader,GL_COMPILE_STATUS,&compiled);
 		if(compiled)return shader;
-		GLint infolen=0;
-		glGetShaderiv(shader,GL_INFO_LOG_LENGTH,&infolen);
-		if(!infolen)throw"cannot get infolen";
-		char*buf=new char[infolen];//(char*)malloc(size_t(infolen));
-		if(!buf)throw"cannot get compiler error";
-		glGetShaderInfoLog(shader,infolen,NULL,buf);
-		p("!!! could not compile %s shader:\n%s\n",get_shader_name(shader_type),buf);
-		free(buf);
+		GLint info_len{0};
+		glGetShaderiv(shader,GL_INFO_LOG_LENGTH,&info_len);
+		if(!info_len)throw"cannot get infolen";
+		GLchar*info_buf=new GLchar[info_len];//(char*)malloc(size_t(infolen));
+		if(!info_buf)throw"cannot allocate buffer";
+		glGetShaderInfoLog(shader,GLsizei{info_len},NULL,info_buf);
+		p("!!! could not compile %s shader:\n%s\n",get_shader_name_for_type(shader_type),info_buf);
+		free(info_buf);
 		glDeleteShader(shader);
 		throw"could not compile shader";
 	}
 
 	void load(){
 		load_program(vertex_shader_source(),fragment_shader_source());
-		check_gl_error("program");
 		bind();
+//		check_gl_error("program");
 	}
 
 	void viewport(const int wi,const int hi){
