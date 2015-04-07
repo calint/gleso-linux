@@ -751,7 +751,7 @@ int gleso_init(){
 	p("* loading\n");
 	gl::shdr->load();
 	foreach(gleso::textures,[](texture*o){
-		p(" texture %p   %s\n",(void*)o,typeid(*o).name());
+		p(" texture  %s   %p\n",typeid(*o).name(),(void*)o);
 		o->load();
 	});
 	foreach(gleso::glos,[](glo*o){
