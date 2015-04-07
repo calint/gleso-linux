@@ -12,21 +12,21 @@ namespace metrics{
 class shader;
 namespace gl{
 	shader*shdr;
-	GLuint apos;// vec2 vertex coords x,y
-	GLuint auv;// vec2 texture coords x,y
-	GLuint umtx_mw;// mat4 model-world matrix
-	GLuint umtx_vp;// mat4 view projection matrix
-	GLuint utex;// texture sampler
+	GLint apos;// vec2 vertex coords x,y
+	GLint auv;// vec2 texture coords x,y
+	GLint umtx_mw;// mat4 model-world matrix
+	GLint umtx_vp;// mat4 view projection matrix
+	GLint utex;// texture sampler
 }
 ////////////////////////////////////////////////////////////////////////
 #include<string>
 class shader{
-	GLuint glid_program{0};
-	GLuint apos{0};
-	GLuint auv{0};
-	GLuint umtx_mw{0};
-	GLuint umtx_vp{0};
-	GLuint utex{0};
+	GLint glid_program{0};
+	GLint apos{0};
+	GLint auv{0};
+	GLint umtx_mw{0};
+	GLint umtx_vp{0};
+	GLint utex{0};
 public:
 	shader(){metrics::nshader++;}
 
@@ -167,8 +167,8 @@ void main(){
 	inline virtual const char*vertex_shader_source()const{return shader_source_vertex;}
 	inline virtual const char*fragment_shader_source()const{return shader_source_fragment;}
 
-	#define A(x,y)if((x=(GLuint)get_attribute_location(y))==(GLuint)-1){p("shader: cannot find attribute %s\n",y);throw"error";};
-	#define U(x,y)if((x=(GLuint)get_uniform_location(y))==(GLuint)-1){p("shader: cannot find uniform %s\n",y);throw"error";}
+	#define A(x,y)if((x=get_attribute_location(y))==-1){p("shader: cannot find attribute %s\n",y);throw"error";};
+	#define U(x,y)if((x=get_uniform_location(y))==-1){p("shader: cannot find uniform %s\n",y);throw"error";}
 	virtual void bind(){
 		A(apos,"apos");
 		A(auv,"auv");
@@ -509,16 +509,10 @@ public:
 };
 
 class glob{
-	m4 matrix_model_world;
-	class render_info render_info;// info for opengl rendering
-	class render_info render_info_next;// next renderinfo, updated during render
-//	p3 scal;
-protected:
-	physics phy_prv;// previous physics state
-//	physics phy_nxt;// next physics state
 public:
 	physics phy;// current physics state
 	glo*gl{nullptr};// ref to gl renderable
+
 	glob(){metrics::nglob++;}
 	virtual ~glob(){}
 //	inline glob&glo_ref(const class glo*g){glo=g;return*this;}
@@ -535,7 +529,7 @@ public:
 		gl->render();
 	}
 	void update(){
-		phy_prv=phy;
+//		phy_prv=phy;
 //		phy=phy_nxt;
 //		phy.s=scal;
 		phy.update();
@@ -545,6 +539,12 @@ public:
 		render_info_next.scale(phy.s);
 	}
 	virtual void on_update(){}
+private:
+	m4 matrix_model_world;
+	class render_info render_info;// info for opengl rendering
+	class render_info render_info_next;// next renderinfo, updated during render
+//	physics phy_prv;// previous physics state
+//	physics phy_nxt;// next physics state
 };
 
 class camera:public glob{
@@ -558,13 +558,10 @@ public:
 		glUniformMatrix4fv(GLint(gl::umtx_vp),1,false,mtx_wp.array());
 	}
 	virtual void on_update(){
-//		physics p=phys();
-		p(" update camera  %f   %f\n",phy.p.x,phy.dp.x);
 		if(phy.p.x>1)
-			phy.dp.x={-1};
+			phy.dp.x=-1;
 		else if(phy.p.x<-1)
-			phy.dp.x={1};
-		p(" update camera  %f   %f  after\n",phy.p.x,phy.dp.x);
+			phy.dp.x=1;
 	}
 	inline const m4&matrix_world_view_projection()const{return mtx_wp;}
 };
