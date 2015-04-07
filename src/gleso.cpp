@@ -15,8 +15,8 @@ namespace gl{
 	GLint apos;// vec2 vertex coords x,y
 	GLint auv;// vec2 texture coords x,y
 	GLint argba;// vec4 colors
-	GLint umtx_mw;// mat4 model-world matrix
-	GLint umtx_vp;// mat4 view projection matrix
+	GLint umtx_mw;// mat4 model->world matrix
+	GLint umtx_wvp;// mat4 world->view->projection matrix
 	GLint utex;// texture sampler
 
 	GLint active_program;
@@ -29,7 +29,7 @@ class shader{
 	GLint auv{0};
 	GLint argba{0};
 	GLint umtx_mw{0};
-	GLint umtx_vp{0};
+	GLint umtx_wvp{0};
 	GLint utex{0};
 public:
 	shader(){metrics::nshader++;}
@@ -139,14 +139,14 @@ protected:
 const GLchar*shader_source_vertex=R"(
 #version 100
 uniform mat4 umtx_mw;// model-world matrix
-uniform mat4 umtx_vp;// view-projection matrix
+uniform mat4 umtx_wvp;// view-projection matrix
 attribute vec4 apos;// vertices
 attribute vec2 auv;// texture coords
 attribute vec4 argba;// colors
 varying vec2 vuv;
 varying vec4 vrgba;
 void main(){
-	gl_Position=umtx_vp*umtx_mw*apos;
+	gl_Position=umtx_wvp*umtx_mw*apos;
     vuv=auv;
     vrgba=argba;
 }
@@ -171,12 +171,12 @@ void main(){
 		A(auv,"auv");
 		A(argba,"argba");
 		U(umtx_mw,"umtx_mw");
-		U(umtx_vp,"umtx_vp");
+		U(umtx_wvp,"umtx_wvp");
 		U(utex,"utex");
 	}
 	virtual void prepare_gl_for_render(){
 		gl::umtx_mw=umtx_mw;
-		gl::umtx_vp=umtx_vp;
+		gl::umtx_wvp=umtx_wvp;
 		gl::utex=utex;
 		gl::apos=apos;
 		gl::auv=auv;
@@ -595,7 +595,7 @@ public:
 		glClearColor(floato{.5},0,floato{.5},1);
 		glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 		mtx_wp.load_translate(phy.p);
-		glUniformMatrix4fv(GLint(gl::umtx_vp),1,false,mtx_wp.array());
+		glUniformMatrix4fv(GLint(gl::umtx_wvp),1,false,mtx_wp.array());
 	}
 	virtual void on_update(){
 		if(phy.p.x>1)
