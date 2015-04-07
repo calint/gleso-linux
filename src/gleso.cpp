@@ -36,7 +36,7 @@ public:
 //		if(glid_program){glDeleteProgram(glid_program);glid_program=0;}
 	}
 
-	static void print_gl_enum(const char *name,const GLenum s){
+	static void print_gl_string(const char *name,const GLenum s){
 		const char*v=(const char*)glGetString(s);
 		p("%s=%s\n",name,v);
 	}
@@ -67,17 +67,17 @@ public:
 			throw"detected gl error";
 		}
 	}
-	static const char*get_shader_name_for_type(GLenum shader_type){
+	static const char*get_shader_name(GLenum shader_type){
 		switch(shader_type){
 		case GL_VERTEX_SHADER:return"vertex";
 		case GL_FRAGMENT_SHADER:return"fragment";
 		default:return"unknown";
 		}
 	}
-	static GLuint loadShader(const GLenum shader_type,const char*source){
+	static GLuint load_shader(const GLenum shader_type,const char*source){
 		//throw "error";
  		const GLuint shader=glCreateShader(shader_type);
- 		p(" %s shader glid=%d\n",get_shader_name_for_type(shader_type),shader);
+ 		p(" %s shader glid=%d\n",get_shader_name(shader_type),shader);
  		if(!shader)throw"cannot get shader id";
  		glShaderSource(shader,1,&source,NULL);
 		glCompileShader(shader);
@@ -90,14 +90,14 @@ public:
 		char*buf=new char[infolen];//(char*)malloc(size_t(infolen));
 		if(!buf)throw"cannot get compiler error";
 		glGetShaderInfoLog(shader,infolen,NULL,buf);
-		p("!!! could not compile %s shader:\n%s\n",get_shader_name_for_type(shader_type),buf);
+		p("!!! could not compile %s shader:\n%s\n",get_shader_name(shader_type),buf);
 		free(buf);
 		glDeleteShader(shader);
 		throw"could not compile shader";
 	}
 
 	void load(){
-		createProgram(vertex_shader_source(),fragment_shader_source());
+		load_program(vertex_shader_source(),fragment_shader_source());
 		check_gl_error("program");
 		bind();
 	}
@@ -112,9 +112,9 @@ public:
 	}
 
 private:
-	void createProgram(const char*vertex_shader_source,const char*fragment_shader_source){
-		GLuint glid_vertex_shader=loadShader(GL_VERTEX_SHADER,vertex_shader_source);
-		GLuint glid_pixel_shader=loadShader(GL_FRAGMENT_SHADER,fragment_shader_source);
+	void load_program(const char*vertex_shader_source,const char*fragment_shader_source){
+		GLuint glid_vertex_shader=load_shader(GL_VERTEX_SHADER,vertex_shader_source);
+		GLuint glid_pixel_shader=load_shader(GL_FRAGMENT_SHADER,fragment_shader_source);
 		glid_program=glCreateProgram();
 		if(!glid_program)throw"cannot create program";
 		p(" program glid=%d\n",glid_program);
@@ -746,11 +746,11 @@ static camera c;
 int gleso_init(){
 	p("* gleso\n");
 	shader::check_gl_error("init");
-	shader::print_gl_enum("GL_VERSION",GL_VERSION);
-	shader::print_gl_enum("GL_VENDOR",GL_VENDOR);
-	shader::print_gl_enum("GL_RENDERER",GL_RENDERER);
+	shader::print_gl_string("GL_VERSION",GL_VERSION);
+	shader::print_gl_string("GL_VENDOR",GL_VENDOR);
+	shader::print_gl_string("GL_RENDERER",GL_RENDERER);
 	//	    printGLString("Extensions",GL_EXTENSIONS);
-	shader::print_gl_enum("GL_SHADING_LANGUAGE_VERSION",GL_SHADING_LANGUAGE_VERSION);
+	shader::print_gl_string("GL_SHADING_LANGUAGE_VERSION",GL_SHADING_LANGUAGE_VERSION);
 	shader::check_gl_error("after opengl info");
 	p("* types\n");
 	p("%16s %4u B\n","int",(unsigned int)sizeof(int));
