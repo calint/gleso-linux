@@ -356,11 +356,13 @@ public:
 	inline p3():x{0},y{0},z{0}{}
 	inline p3(const floato x):x{x},y{0},z{0}{}
 	inline p3(const floato x,const floato y):x{x},y{y},z{0}{}
+	inline p3(const floato x,const floato y,const floato z):x{x},y{y},z{z}{}
 //	inline p3(const p3&p):x{p.x},y{p.y},z{p.z}{}
 //	inline p3&x(const floato f){x_=f;return*this;}inline floato x()const{return x_;}
 //	inline p3&y(const floato f){y_=f;return*this;}inline floato y()const{return y_;}
 //	inline p3&z(const floato f){z_=f;return*this;}inline floato z()const{return z_;}
 	inline p3&add(const p3&p,const floato dt){x+=p.x*dt;y+=p.y*dt;z+=p.z*dt;return*this;}//? simd
+	p3 operator-()const{return p3{-x,-y,-z};}
 //private:
 	floato x,y,z;
 };
@@ -536,11 +538,48 @@ static void mtxMultiply(float* ret, const float* lhs, const float* rhs)
 ///////////////////////////////////////////////////////
 
 class m4{
-	floato c[16]{0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
 public:
-	inline m4&load_translate(const p3&p){mtxLoadTranslate(c,p.x,p.y,p.z);return*this;}
-	inline m4&append_rotation_about_z_axis(const floato degrees){mtxRotateZApply(c,degrees);return*this;}
-	inline m4&append_scaling(const p3&scale){mtxScaleApply(c,scale.x,scale.y,scale.z);return*this;}
+	floato c[16]{0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
+	inline m4&load_translate(const p3&p){
+		// [ 0 4  8  x ]
+		// [ 1 5  9  y ]
+		// [ 2 6 10  z ]
+		// [ 3 7 11 15 ]
+		c[ 0]=c[ 5]=c[10]=c[15]=1;
+		c[ 1]=c[ 2]=c[ 3]=c[ 4]=
+		c[ 6]=c[ 7]=c[ 8]=c[ 9]=
+		c[11]=0.0;
+		c[12]=p.x;
+		c[13]=p.y;
+		c[14]=p.z;
+		return*this;
+	}
+	inline m4&append_rotation_about_z_axis(const floato degrees){
+		mtxRotateZApply(c,degrees);
+		return*this;
+	}
+	inline m4&append_scaling(const p3&scale){
+		// [ 0 4  8 12 ]   [ x 0 0 0 ]
+		// [ 1 5  9 13 ] x [ 0 y 0 0 ]
+		// [ 2 6 10 14 ]   [ 0 0 z 0 ]
+		// [ 3 7 11 15 ]   [ 0 0 0 1 ]
+		c[ 0]*=scale.x;
+		c[ 4]*=scale.y;
+		c[ 8]*=scale.z;
+
+		c[ 1]*=scale.x;
+		c[ 5]*=scale.y;
+		c[ 9]*=scale.z;
+
+		c[ 2]*=scale.x;
+		c[ 6]*=scale.y;
+		c[10]*=scale.z;
+
+		c[ 3]*=scale.x;
+		c[ 7]*=scale.y;
+		c[11]*=scale.z;
+		return*this;
+	}
 	inline m4&load_ortho_projection(floato left,floato right,floato bottom,floato top,floato nearZ,floato farZ){
 		mtxLoadOrthographic(c,left,right,bottom,top,nearZ,farZ);
 		return*this;
@@ -588,22 +627,29 @@ private:
 };
 
 class camera:public glob{
-	m4 mtx_wp;
+//	m4 mtx_wvp;// world->view->projection
 public:
+	int screen_width,screen_height;
 	void pre_render(){
 		gl::shdr->use_program();
 		glClearColor(floato{.5},0,floato{.5},1);
 		glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
-		mtx_wp.load_translate(phy.p);
-		glUniformMatrix4fv(GLint(gl::umtx_wvp),1,false,mtx_wp.array());
+
+		m4 wvp,wv,p;
+		wv.load_translate(-phy.p);
+		const float aspect_ratio=floato(screen_height)/floato(screen_width);
+		p.load_ortho_projection(-1,1,aspect_ratio,-aspect_ratio,0,1);
+		mtxMultiply(wvp.c, p.c, wv.c);
+
+		glUniformMatrix4fv(GLint(gl::umtx_wvp),1,false,wvp.c);
 	}
-	virtual void on_update(){
-		if(phy.p.x>1)
-			phy.dp.x=-1;
-		else if(phy.p.x<-1)
-			phy.dp.x=1;
-	}
-	inline const m4&matrix_world_view_projection()const{return mtx_wp;}
+//	virtual void on_update(){
+//		if(phy.p.x>1)
+//			phy.dp.x=-1;
+//		else if(phy.p.x<-1)
+//			phy.dp.x=1;
+//	}
+//	inline const m4&matrix_world_view_projection()const{return mtx_wvp;}
 };
 
 /*-----------------------------
@@ -716,8 +762,14 @@ public:
 };
 class glo_grid:public glo{
 	virtual vector<GLfloat>make_vertices()const{
-		const static GLfloat verts[]={-1,1, -1,-1, 1,-1, 1,1};
 		vector<GLfloat>v;
+		const static GLfloat verts[]{
+		//	 x  y
+			-1, 1,
+			-1,-1,
+			 1,-1,
+			 1, 1
+		};
 		v.assign(verts,verts+sizeof(verts)/sizeof(GLfloat));
 		return v;
 	}
@@ -725,10 +777,10 @@ class glo_grid:public glo{
 		vector<GLfloat>v;
 		const GLfloat f[]{
 		//   R  G  B A
-			 1, 1, 1,1,
-			 1, 1, 1,1,
-			 1, 1, 1,1,
-			 1, 1, 1,1,
+			 1, 1, 1, 1,
+			 1, 1, 1, 1,
+			 1, 1, 1, 1,
+			 1, 1, 1, 1,
 		};
 		v.assign(f,f+sizeof(f)/sizeof(GLfloat));
 		return v;
@@ -748,14 +800,30 @@ class grid{
 	std::list<glob*>globs;//                        _
 public://                                          (:)
 	grid(){}//                                    __|__         <- "long neck"
-	void add(glob*g){globs.push_back(g);}        //(.)\\          //
-	void update(){foreach(globs,[](glob*g){g->update();});}//? multicore?
-	void render(){foreach(globs,[](glob*g){g->render();});}// single thread opengl rendering
-	void rem(glob*g){globs.remove(g);}//? multicore?||
-	void clr(){globs.clear();}
-	//    void refresh(){}// refreshes the grid, globs dont change grid often, globs often totally inside grid, maximum glob size less than grid    <-- procedurally generated text for vegetation
-	~grid(){
-		foreach(globs,[](glob*o){delete o;});
+	void add_glob(glob*g){globs.push_back(g);}        //(.)\\          //
+	void update_globs(){foreach(globs,[](glob*g){g->update();});}//? multicore?
+	void render_globs(){foreach(globs,[](glob*g){g->render();});}// single thread opengl rendering
+	void remove_glob(glob*g){globs.remove(g);}//? multicore?||
+	void remove_all_globs(){globs.clear();}
+//	//    void refresh(){}// refreshes the grid, globs dont change grid often, globs often totally inside grid, maximum glob size less than grid    <-- procedurally generated text for vegetation
+//	~grid(){
+//		foreach(globs,[](glob*o){delete o;});
+//	}
+	void render_grid_outline(){
+		_render_outline(rec{p3(),.99});
+	}
+private:
+	class rec{
+	public:
+		p3 pos;
+		floato scale;
+	};
+	void _render_outline(rec gr){
+		m4 m;
+		m.load_translate(gr.pos);
+		m.append_scaling(p3{gr.scale,gr.scale,gr.scale});
+		glUniformMatrix4fv(GLint(gl::umtx_mw),1,false,m.array());
+		gleso::glos[5]->render();
 	}
 };
 //------------------------------------------------------------------------------
@@ -797,19 +865,67 @@ namespace fps{
   ///   ///  \\\///   ///     ///
 ///// /////   \\\/  /////   /////
 */
+class glo_desk:public glo{
+	int nvertices;
+public:
+	glo_desk():nvertices(1+12+1){}
+protected:
+	virtual vector<GLfloat>make_vertices()const{
+		vector<GLfloat>v;
+		v.push_back(0);//x
+		v.push_back(0);//y
+		floato rad=0;
+		const floato drad=2*float(M_PI/12);
+		for(int i=1;i<=nvertices;i++){
+			const floato x=cosf(rad);
+			const floato y=sinf(rad);
+			rad+=drad;
+			v.push_back(x);
+			v.push_back(y);
+		}
+		return v;
+	}
+	virtual vector<GLfloat>make_colors()const{
+		vector<GLfloat>v;
+		const int n=nvertices*4;
+		for(int k=0;k<n;k++){
+			v.push_back(1);
+		}
+		return v;
+	}
+	virtual void gldraw()const{
+		glDrawArrays(GL_TRIANGLE_FAN,0,nvertices);
+	}
+};
 static void gleso_impl_add_resources(){
 	gleso::textures.push_back(/*gives*/new texture());//?? leak
 	gleso::glos.push_back(/*gives*/new glo());//?? leak. push_pack does not /*take*/ ownership of glob
-	gleso::glos.push_back(/*gives*/new glo_square_xy());//??
-	gleso::glos.push_back(/*gives*/new glo_circle_xy());//??
-	gleso::glos.push_back(/*gives*/new glo_square_xyuv());//??
-	gleso::glos.push_back(/*gives*/new glo_square_xyuvrgba());//??
-	gleso::glos.push_back(/*gives*/new glo_grid());//??
+	gleso::glos.push_back(/*gives*/new glo_square_xy());
+	gleso::glos.push_back(/*gives*/new glo_circle_xy());
+	gleso::glos.push_back(/*gives*/new glo_square_xyuv());
+	gleso::glos.push_back(/*gives*/new glo_square_xyuvrgba());
+	gleso::glos.push_back(/*gives*/new glo_grid());
+	gleso::glos.push_back(/*gives*/new glo_desk());
 }
+class glob_desk:public glob{
+public:
+	glob_desk(){
+		gl=gleso::glos[6];
+		phy.s=p3{.2,.2};
+		phy.dp.x=1;
+//		phy.p.z=-1;
+	}
+	virtual void on_update(){
+//		p("update desk  %f    \n",phy.p.x);
+		if(phy.p.x>1)
+			phy.dp.x=-1;
+		else if(phy.p.x<-1)
+			phy.dp.x=1;
+	}
+};
+
 static/*gives*/glob*gleso_impl_create_root(){
-	glob*g=new glob();
-	g->phy.s=p3{.9,.9};
-	g->gl=gleso::glos[5];
+	glob_desk*g=new glob_desk();
 	return g;
 }
 /*
@@ -876,10 +992,10 @@ int gleso_init(){
 		gl::shdr=new shader();
 		gleso_impl_add_resources();
 		gleso::grd=new grid();
-		gleso::grd->add(&c);
-		gleso::grd->add(/*gives*/gleso_impl_create_root());//? leak? grd->add does not take
-		c.phy.p.x={.5};
-		c.phy.dp.x={1};
+		gleso::grd->add_glob(&c);
+		gleso::grd->add_glob(/*gives*/gleso_impl_create_root());//? leak? grd->add does not take
+//		c.phy.p.x={.5};
+//		c.phy.dp.x={1};
 	}
 	gl::active_program=0;
 	p("* load\n");
@@ -900,8 +1016,12 @@ int gleso_init(){
 void gleso_viewport(int width,int height){
 	p("* viewport  %d x %d\n",width,height);
 	if(gl::shdr)gl::shdr->viewport(width,height);
+	c.screen_width=width;
+	c.screen_height=height;
 }
 
+static bool render_globs=true;
+static bool render_grid_outline=true;
 void gleso_step(){
 	fps::before_render();
 	gleso::tick++;
@@ -911,11 +1031,12 @@ void gleso_step(){
 	const int diff_us=tv.tv_usec-timeval_after_init.tv_usec;
 	metrics::time_since_start_in_seconds=(float)diff_s+diff_us/1000000.f;
 	gleso::dt=floato(1./60);
-	gleso::grd->update();//? thread
+	gleso::grd->update_globs();//? thread
 
 //	p("%f  %f\n",cp.x(),gleso::dt);
 	c.pre_render();
-	gleso::grd->render();//? thread
+	if(render_globs)gleso::grd->render_globs();//? thread
+	if(render_grid_outline)gleso::grd->render_grid_outline();
 	fps::after_render();
 }
 //void gleso_on_context_destroyed(){
