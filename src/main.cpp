@@ -45,6 +45,7 @@ static void windowsize_callback(GLFWwindow*window,int width,int height){
 #define WINDOW_HEIGHT 480
 int main(int argc,char**argv){
 	while(argc--)puts(*argv++);
+//	atexit([]{gleso_deinit();});
 	puts(glfwGetVersionString());
 	GLFWwindow*window=nullptr;
 	try{

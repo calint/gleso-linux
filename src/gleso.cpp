@@ -3,10 +3,11 @@
 namespace metrics{
 	unsigned int fps;
 	unsigned int nshader;
+	unsigned int ngrid;
 	unsigned int nglo;
 	unsigned int nglob;
 	float time_since_start_in_seconds;
-	void log(){p("/ metrics %2.2fs – fps:%03d – shaders:%01d – glos:%02d – globs:%05d\n",time_since_start_in_seconds,fps,nshader,nglo,nglob);}
+	void log(){p("/ metrics %2.2fs – fps:%03d – shaders:%01d – glos:%02d – globs:%05d – grids:%02d \n",time_since_start_in_seconds,fps,nshader,nglo,nglob,ngrid);}
 }
 ////////////////////////////////////////////////////////////////////////
 class shader;
@@ -32,11 +33,15 @@ class shader{
 	GLint umtx_wvp{0};
 	GLint utex{0};
 public:
-	shader(){metrics::nshader++;}
+	shader(){
+		p("new shader %p\n",this);
+		metrics::nshader++;
+	}
 
 	virtual~shader(){
+		p("delete shader %p\n",(void*)this);
 		metrics::nshader--;
-		p("deleting shader %p\n",(void*)this);
+		gleso_after_cleanup();
 //		if(glid_program){glDeleteProgram(glid_program);glid_program=0;}
 	}
 
@@ -99,7 +104,7 @@ private:
 	void load_program(const char*vertex_shader_source,const char*fragment_shader_source){
 		glid_program=glCreateProgram();
 		if(!glid_program)throw"cannot create program";
-		p(" program glid=%d\n",glid_program);
+		p("    program glid=%d\n",glid_program);
 		glAttachShader(glid_program,load_shader(GL_VERTEX_SHADER,vertex_shader_source));
 		glAttachShader(glid_program,load_shader(GL_FRAGMENT_SHADER,fragment_shader_source));
 		glLinkProgram(glid_program);
@@ -118,7 +123,7 @@ private:
 	}
 	static GLuint load_shader(const GLenum shader_type,const char*source){
 		const GLuint shader=glCreateShader(shader_type);
-		p(" %s shader glid=%d\n",get_shader_name_for_type(shader_type),shader);
+		p("    %s shader glid=%d\n",get_shader_name_for_type(shader_type),shader);
 		glShaderSource(shader,1,&source,NULL);
 		glCompileShader(shader);
 		GLint compiled{0};
@@ -182,7 +187,10 @@ void main(){
 		gl::auv=auv;
 		gl::argba=argba;
 	}
+public:
+	static shader instance;
 };
+shader shader::instance=shader();
 
 ////////////////////////////////////////////////
 #include<vector>
@@ -190,10 +198,10 @@ using std::vector;
 
 class texture{
 public:
-//	~texture(){
-//		p("deleting texture %p\n",this);
-//		glDeleteTextures(1,&glid_texture);
-//	}
+	~texture(){
+		p("delete texture %p\n",this);
+		glDeleteTextures(1,&glid_texture);
+	}
 	void load(){
 		glGenTextures(1,&glid_texture);
 		p("    texture  glid=%d\n",glid_texture);
@@ -226,7 +234,11 @@ private:
 //		0xffff0000,   0xff00ff00,
 //		0xff0000ff,   0xffffff00,
 //	};
+public:
+	static texture instance;
 };
+texture texture::instance=texture();
+
 class glo{
 	class texture*tex{nullptr};
 #ifdef GLESO_EMBEDDED
@@ -240,13 +252,16 @@ class glo{
 #endif
 public:
 	glo(){
+		p("new glo %p\n",(void*)this);
 		metrics::nglo++;
 	}
 	virtual~glo(){
-		metrics::nglo--;
 		p("delete glo %p\n",this);
+		metrics::nglo--;
 	}
-	inline glo&texture(texture*t){tex=t;return*this;}
+	inline glo&set_texture(texture*t){tex=t;return*this;}
+	inline const texture&textureref()const{return*tex;}
+	inline texture&get_texture_for_update()const{return*tex;}
 	int load(){// called when context is (re)created
 #ifdef GLESO_EMBEDDED
 		vertices=make_vertices();
@@ -366,20 +381,9 @@ public:
 //private:
 	floato x,y,z;
 };
-
-#include<list>
-#include<cstdlib>
-class grid;// forward declaration
 namespace gleso{
 	floato dt;
-	inline floato d(const floato unit_over_second){return unit_over_second*dt;}
-	unsigned int tick;//?? rollover issues when used in comparisons
-	vector<glo*>glos;
-	vector<texture*>textures;
-	grid*grd;
-	floato rnd(){return floato(rand())/RAND_MAX;}
 }
-
 class physics{
 public:
 	void update(){
@@ -415,21 +419,6 @@ private:
 
 ////
 // mtx funcs lifted from apple examples
-static void mtxLoadTranslate(floato*mtx,const floato xTrans,const floato yTrans,const floato zTrans){
-	// [ 0 4  8  x ]
-	// [ 1 5  9  y ]
-	// [ 2 6 10  z ]
-	// [ 3 7 11 15 ]
-	mtx[ 0] = mtx[ 5] = mtx[10] = mtx[15] = 1;
-	
-	mtx[ 1] = mtx[ 2] = mtx[ 3] = mtx[ 4] =
-	mtx[ 6] = mtx[ 7] = mtx[ 8] = mtx[ 9] =
-	mtx[11] = 0.0;
-	
-	mtx[12] = xTrans;
-	mtx[13] = yTrans;
-	mtx[14] = zTrans;
-}
 #include<math.h>
 static void mtxRotateZApply(floato* mtx, floato deg)
 {
@@ -459,29 +448,6 @@ static void mtxRotateZApply(floato* mtx, floato deg)
 
 	mtx[ 3] = mtx[ 7]*sinrad + mtx03*cosrad;
 	mtx[ 7] = mtx[ 7]*cosrad - mtx03*sinrad;
-}
-static void mtxScaleApply(floato* mtx, floato xScale, floato yScale, floato zScale)
-{
-	// [ 0 4  8 12 ]   [ x 0 0 0 ]
-	// [ 1 5  9 13 ] x [ 0 y 0 0 ]
-	// [ 2 6 10 14 ]   [ 0 0 z 0 ]
-	// [ 3 7 11 15 ]   [ 0 0 0 1 ]
-	
-	mtx[ 0] *= xScale;
-	mtx[ 4] *= yScale;
-	mtx[ 8] *= zScale;
-	
-	mtx[ 1] *= xScale;
-	mtx[ 5] *= yScale;
-	mtx[ 9] *= zScale;
-	
-	mtx[ 2] *= xScale;
-	mtx[ 6] *= yScale;
-	mtx[10] *= zScale;
-	
-	mtx[ 3] *= xScale;
-	mtx[ 7] *= yScale;
-	mtx[11] *= xScale;
 }
 static void mtxLoadOrthographic(float* mtx,
 							float left, float right,
@@ -586,15 +552,18 @@ public:
 	}
 	inline const floato*array()const{return c;}
 };
-
+class grid;
 class glob{
 public:
 	physics phy;// current physics state
 	glo*gl{nullptr};// ref to gl renderable
-
-	glob(){metrics::nglob++;}
-	virtual ~glob(){
-		p("delete glob  %p\n",(void*)this);
+	grid*grid_that_updates_this_glob{nullptr};
+	glob(){
+		p("new glob %p\n",(void*)this);
+		metrics::nglob++;
+	}
+	virtual~glob(){
+		p("delete glob %p\n",(void*)this);
 		metrics::nglob--;
 	}
 //	inline glob&glo_ref(const class glo*g){glo=g;return*this;}
@@ -709,7 +678,7 @@ protected:
 class glo_square_xyuv:public glo{
 public:
 	glo_square_xyuv(){
-		texture(gleso::textures[0]);
+		set_texture(&texture::instance);
 	}
 	virtual vector<GLfloat>make_vertices()const{
 		vector<GLfloat>v;
@@ -738,7 +707,7 @@ public:
 	inline virtual void gldraw()const{
 //		texels_rgb[0]++;
 //		texels_rgb[1]++;
-		gleso::textures[0]->refresh_from_data();
+		get_texture_for_update().refresh_from_data();
 		glDrawArrays(GL_TRIANGLE_FAN,0,4);
 	}
 	virtual vector<GLfloat>make_colors()const{
@@ -804,13 +773,32 @@ glo_grid glo_grid::instance=glo_grid();
 #include<algorithm>
 #define foreach(c,f)std::for_each(c.begin(),c.end(),f)
 class grid{
-	std::list<glob*>globs;//                        _
+	std::vector<glob*>globs;//                        _
 public://                                          (:)
-	grid(){}//                                    __|__         <- "long neck"
-	void add_glob(glob*g){globs.push_back(g);}        //(.)\\          //
-	void update_globs(){foreach(globs,[](glob*g){g->update();});}//? multicore?
+	grid(){
+		p("new grid %p\n",this);
+		metrics::ngrid++;
+	}//                                    __|__         <- "long neck"
+	~grid(){
+		p("delete grid %p\n",(void*)this);
+		foreach(globs,[this](glob*g){
+			if(g->grid_that_updates_this_glob==this)
+				delete g;
+		});
+		metrics::ngrid--;
+	}
+	void add_glob(glob*g){
+		g->grid_that_updates_this_glob=this;
+		globs.push_back(g);
+	}        //(.)\\          //
+	void update_globs(){
+		foreach(globs,[this](glob*g){
+			if(g->grid_that_updates_this_glob!=this)return;
+			g->update();
+		});
+	}//? multicore?
 	void render_globs(){foreach(globs,[](glob*g){g->render();});}// single thread opengl rendering
-	void remove_glob(glob*g){globs.remove(g);}//? multicore?||
+//	void remove_glob(glob*g){globs.remove(g);}//? multicore?||
 	void remove_all_globs(){globs.clear();}
 //	//    void refresh(){}// refreshes the grid, globs dont change grid often, globs often totally inside grid, maximum glob size less than grid    <-- procedurally generated text for vegetation
 //	~grid(){
@@ -833,6 +821,19 @@ private:
 		glo_grid::instance.render();
 	}
 };
+//------------------------------------------------------------------------------
+#include<list>
+#include<cstdlib>
+class grid;// forward declaration
+namespace gleso{
+	inline floato d(const floato unit_over_second){return unit_over_second*dt;}
+	unsigned int tick;//?? rollover issues when used in comparisons
+	vector<shader*>shaders;
+	vector<glo*>glos;
+	vector<texture*>textures;
+	grid grd;
+	floato rnd(){return floato(rand())/RAND_MAX;}
+}
 //------------------------------------------------------------------------------
 #include<sys/time.h>
 namespace fps{
@@ -908,9 +909,9 @@ public:
 };
 glo_ball glo_ball::instance=glo_ball();
 
-class glob_ball:public glob{
+class a_ball:public glob{
 public:
-	glob_ball(){
+	a_ball(){
 		gl=&glo_ball::instance;
 		phy.p.x=-1+2*gleso::rnd();
 		phy.p.y=-1+2*gleso::rnd();
@@ -933,19 +934,12 @@ public:
 };
 
 static void gleso_impl_setup(){
-	gleso::textures.push_back(/*gives*/new texture());//?? leak
-
-//	gleso::glos.push_back(/*gives*/new glo());//?? leak. push_pack does not /*take*/ ownership of glob
-//	gleso::glos.push_back(/*gives*/new glo_square_xy());
-//	gleso::glos.push_back(/*gives*/new glo_circle_xy());
-//	gleso::glos.push_back(/*gives*/new glo_square_xyuv());
-//	gleso::glos.push_back(/*gives*/new glo_square_xyuvrgba());
-//	gleso::glos.push_back(/*gives*/new glo_grid());
+	gleso::shaders.push_back(&shader::instance);
+	gleso::textures.push_back(&texture::instance);//?? leak
 	gleso::glos.push_back(&glo_grid::instance);
 	gleso::glos.push_back(&glo_ball::instance);
-
-	gleso::grd->add_glob(new glob_ball());
-	gleso::grd->add_glob(new glob_ball());
+	gleso::grd.add_glob(new a_ball());
+	gleso::grd.add_glob(new a_ball());
 }
 /*
  ascii sprite kit
@@ -977,9 +971,6 @@ static void gleso_impl_setup(){
 //////
 ////
 //  interface
-#include<typeinfo>
-static struct timeval timeval_after_init;
-static camera c;
 #include<signal.h>
 //#include<execinfo.h>
 static void mainsig(const int i){
@@ -990,6 +981,9 @@ static void mainsig(const int i){
 //	backtrace_symbols_fd(va,n,1);
 	exit(i);
 }
+#include<typeinfo>
+static struct timeval timeval_after_init;
+static camera*c;
 int gleso_init(){
 	p("* gleso\n");
 	for(int i=0;i<32;i++)signal(i,mainsig);//?
@@ -1019,14 +1013,17 @@ int gleso_init(){
 	srand(1);// generate same random numbers in different instances
 	if(!gl::shdr){// init
 		p("* init\n");
-		gl::shdr=new shader();
-		gleso::grd=new grid();
-		gleso::grd->add_glob(&c);
+		gl::shdr=&shader::instance;
+		c=new camera();
+		gleso::grd.add_glob(c);
 		gleso_impl_setup();
 	}
 	gl::active_program=0;
 	p("* load\n");
-	gl::shdr->load();
+	foreach(gleso::shaders,[](shader*o){
+		p(" shader %p   %s\n",(void*)o,typeid(*o).name());
+		o->load();
+	});
 	foreach(gleso::textures,[](texture*o){
 		p(" texture %p   %s\n",(void*)o,typeid(*o).name());
 		o->load();
@@ -1043,8 +1040,8 @@ int gleso_init(){
 void gleso_viewport(int width,int height){
 	p("* viewport  %d x %d\n",width,height);
 	if(gl::shdr)gl::shdr->viewport(width,height);
-	c.screen_width=width;
-	c.screen_height=height;
+	c->screen_width=width;
+	c->screen_height=height;
 }
 
 static bool render_globs=true;
@@ -1058,12 +1055,12 @@ void gleso_step(){
 	const int diff_us=tv.tv_usec-timeval_after_init.tv_usec;
 	metrics::time_since_start_in_seconds=(float)diff_s+diff_us/1000000.f;
 	gleso::dt=floato(1./60);
-	gleso::grd->update_globs();//? thread
+	gleso::grd.update_globs();//? thread
 
 //	p("%f  %f\n",cp.x(),gleso::dt);
-	c.pre_render();
-	if(render_globs)gleso::grd->render_globs();//? thread
-	if(render_grid_outline)gleso::grd->render_grid_outline();
+	c->pre_render();
+	if(render_globs)gleso::grd.render_globs();//? thread
+	if(render_grid_outline)gleso::grd.render_grid_outline();
 	fps::after_render();
 }
 //void gleso_on_context_destroyed(){
@@ -1077,4 +1074,7 @@ void gleso_key(int key,int scancode,int action,int mods){
 }
 void gleso_touch(floato x,floato y,int action){
 	p("gleso_touch  x=%.1f   y=%.1f    action=%d\n",x,y,action);
+}
+void gleso_after_cleanup(){
+	p(" shaders:%d   grids:%d   glos:%d   globs:%d\n",metrics::nshader,metrics::ngrid,metrics::nglo,metrics::nglob);
 }
