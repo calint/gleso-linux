@@ -244,7 +244,7 @@ public:
 	}
 	virtual~glo(){
 		metrics::nglo--;
-		p("deleting glo %p\n",this);
+		p("delete glo %p\n",this);
 	}
 	inline glo&texture(texture*t){tex=t;return*this;}
 	int load(){// called when context is (re)created
@@ -593,7 +593,10 @@ public:
 	glo*gl{nullptr};// ref to gl renderable
 
 	glob(){metrics::nglob++;}
-	virtual ~glob(){}
+	virtual ~glob(){
+		p("delete glob  %p\n",(void*)this);
+		metrics::nglob--;
+	}
 //	inline glob&glo_ref(const class glo*g){glo=g;return*this;}
 //	inline physics&phys(){return phy;}
 //	inline const p3&scale()const{return scal;}
@@ -792,7 +795,11 @@ class glo_grid:public glo{
 	inline virtual void gldraw()const{
 		glDrawArrays(GL_LINE_LOOP,0,4);
 	}
+public:
+	static glo_grid instance;
 };
+glo_grid glo_grid::instance=glo_grid();
+
 //------------------------------------------------------------------------------
 #include<algorithm>
 #define foreach(c,f)std::for_each(c.begin(),c.end(),f)
@@ -823,7 +830,7 @@ private:
 		m.load_translate(gr.pos);
 		m.append_scaling(p3{gr.scale,gr.scale,gr.scale});
 		glUniformMatrix4fv(GLint(gl::umtx_mw),1,false,m.array());
-		gleso::glos[5]->render();
+		glo_grid::instance.render();
 	}
 };
 //------------------------------------------------------------------------------
@@ -865,10 +872,10 @@ namespace fps{
   ///   ///  \\\///   ///     ///
 ///// /////   \\\/  /////   /////
 */
-class glo_desk:public glo{
+class glo_ball:public glo{
 	int nvertices;
 public:
-	glo_desk():nvertices(1+12+1){}
+	glo_ball():nvertices(1+12+1){}
 protected:
 	virtual vector<GLfloat>make_vertices()const{
 		vector<GLfloat>v;
@@ -896,37 +903,49 @@ protected:
 	virtual void gldraw()const{
 		glDrawArrays(GL_TRIANGLE_FAN,0,nvertices);
 	}
-};
-static void gleso_impl_add_resources(){
-	gleso::textures.push_back(/*gives*/new texture());//?? leak
-	gleso::glos.push_back(/*gives*/new glo());//?? leak. push_pack does not /*take*/ ownership of glob
-	gleso::glos.push_back(/*gives*/new glo_square_xy());
-	gleso::glos.push_back(/*gives*/new glo_circle_xy());
-	gleso::glos.push_back(/*gives*/new glo_square_xyuv());
-	gleso::glos.push_back(/*gives*/new glo_square_xyuvrgba());
-	gleso::glos.push_back(/*gives*/new glo_grid());
-	gleso::glos.push_back(/*gives*/new glo_desk());
-}
-class glob_desk:public glob{
 public:
-	glob_desk(){
-		gl=gleso::glos[6];
-		phy.s=p3{.2,.2};
+	static glo_ball instance;
+};
+glo_ball glo_ball::instance=glo_ball();
+
+class glob_ball:public glob{
+public:
+	glob_ball(){
+		gl=&glo_ball::instance;
+		phy.p.x=-1+2*gleso::rnd();
+		phy.p.y=-1+2*gleso::rnd();
+		phy.s=p3{.1,.1,.1};
 		phy.dp.x=1;
+		phy.dp.y=.5;
 //		phy.p.z=-1;
 	}
 	virtual void on_update(){
 //		p("update desk  %f    \n",phy.p.x);
-		if(phy.p.x>1)
+		if(phy.p.x>1-phy.s.x)
 			phy.dp.x=-1;
-		else if(phy.p.x<-1)
+		else if(phy.p.x<-1+phy.s.x)
 			phy.dp.x=1;
+		if(phy.p.y>1-phy.s.y)
+			phy.dp.y=-1;
+		else if(phy.p.y<-1+phy.s.y)
+			phy.dp.y=1;
 	}
 };
 
-static/*gives*/glob*gleso_impl_create_root(){
-	glob_desk*g=new glob_desk();
-	return g;
+static void gleso_impl_setup(){
+	gleso::textures.push_back(/*gives*/new texture());//?? leak
+
+//	gleso::glos.push_back(/*gives*/new glo());//?? leak. push_pack does not /*take*/ ownership of glob
+//	gleso::glos.push_back(/*gives*/new glo_square_xy());
+//	gleso::glos.push_back(/*gives*/new glo_circle_xy());
+//	gleso::glos.push_back(/*gives*/new glo_square_xyuv());
+//	gleso::glos.push_back(/*gives*/new glo_square_xyuvrgba());
+//	gleso::glos.push_back(/*gives*/new glo_grid());
+	gleso::glos.push_back(&glo_grid::instance);
+	gleso::glos.push_back(&glo_ball::instance);
+
+	gleso::grd->add_glob(new glob_ball());
+	gleso::grd->add_glob(new glob_ball());
 }
 /*
  ascii sprite kit
@@ -961,8 +980,19 @@ static/*gives*/glob*gleso_impl_create_root(){
 #include<typeinfo>
 static struct timeval timeval_after_init;
 static camera c;
+#include<signal.h>
+//#include<execinfo.h>
+static void mainsig(const int i){
+	p(" ••• terminated with signal %d\n",i);
+//	const int nva=10;
+//	void*va[nva];
+//	int n=backtrace(va,nva);
+//	backtrace_symbols_fd(va,n,1);
+	exit(i);
+}
 int gleso_init(){
 	p("* gleso\n");
+	for(int i=0;i<32;i++)signal(i,mainsig);//?
 	shader::check_gl_error("init");
 	shader::print_gl_string("GL_VERSION",GL_VERSION);
 	shader::print_gl_string("GL_VENDOR",GL_VENDOR);
@@ -990,12 +1020,9 @@ int gleso_init(){
 	if(!gl::shdr){// init
 		p("* init\n");
 		gl::shdr=new shader();
-		gleso_impl_add_resources();
 		gleso::grd=new grid();
 		gleso::grd->add_glob(&c);
-		gleso::grd->add_glob(/*gives*/gleso_impl_create_root());//? leak? grd->add does not take
-//		c.phy.p.x={.5};
-//		c.phy.dp.x={1};
+		gleso_impl_setup();
 	}
 	gl::active_program=0;
 	p("* load\n");
