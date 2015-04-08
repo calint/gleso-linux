@@ -1,9 +1,8 @@
-#ifndef gles_h
-#define gles_h
+#ifndef GLES_H
+#define GLES_H
 
-//#define GLESO_NOT_EMBEDDED // macbookair 11
-#define GLESO_EMBEDDED // hp 11
-
+#define GLESO_NOT_EMBEDDED // macbookair 11
+//#define GLESO_EMBEDDED // hp 11
 
 #ifdef GLESO_EMBEDDED
 #include<GLES2/gl2.h>

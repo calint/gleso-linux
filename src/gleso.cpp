@@ -714,6 +714,33 @@ public:
 		return v;
 	}
 };
+class glo_grid:public glo{
+	virtual vector<GLfloat>make_vertices()const{
+		const static GLfloat verts[]={-1,1, -1,-1, 1,-1, 1,1};
+		vector<GLfloat>v;
+		v.assign(verts,verts+sizeof(verts)/sizeof(GLfloat));
+		return v;
+	}
+	virtual vector<GLfloat>make_colors()const{
+		vector<GLfloat>v;
+		const GLfloat f[]{
+		//   R  G  B A
+			 1, 1, 1,1,
+			 1, 1, 1,1,
+			 1, 1, 1,1,
+			 1, 1, 1,1,
+		};
+		v.assign(f,f+sizeof(f)/sizeof(GLfloat));
+		return v;
+	}
+	virtual vector<GLfloat>make_texture_coords()const{
+		vector<GLfloat>v;
+		return v;
+	}
+	inline virtual void gldraw()const{
+		glDrawArrays(GL_LINE_LOOP,0,4);
+	}
+};
 //------------------------------------------------------------------------------
 #include<algorithm>
 #define foreach(c,f)std::for_each(c.begin(),c.end(),f)
@@ -777,11 +804,12 @@ static void gleso_impl_add_resources(){
 	gleso::glos.push_back(/*gives*/new glo_circle_xy());//??
 	gleso::glos.push_back(/*gives*/new glo_square_xyuv());//??
 	gleso::glos.push_back(/*gives*/new glo_square_xyuvrgba());//??
+	gleso::glos.push_back(/*gives*/new glo_grid());//??
 }
 static/*gives*/glob*gleso_impl_create_root(){
 	glob*g=new glob();
 	g->phy.s=p3{.9,.9};
-	g->gl=gleso::glos[4];
+	g->gl=gleso::glos[5];
 	return g;
 }
 /*
