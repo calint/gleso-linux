@@ -76,6 +76,7 @@ int main(int argc,char**argv){
 	}
 
 	// omits deinit of gleso
+	gleso_cleanup();
 
 	if(window)glfwDestroyWindow(window);
 	glfwTerminate();
