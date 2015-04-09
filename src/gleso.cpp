@@ -470,7 +470,7 @@ static void mtxLoadOrthographic(float* mtx,
 	mtx[ 3] = 0.0;
 
 	mtx[ 4] = 0.0;
-	mtx[ 5] = -2.0f / (top - bottom);
+	mtx[ 5] = 2.0f / (top - bottom);
 	mtx[ 6] = 0.0;
 	mtx[ 7] = 0.0;
 
@@ -798,8 +798,8 @@ class grid{
 	list<glob*>ls;
 	list<glob*>lsmx;
 	grid*grds[8]{nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr};
-	const size_t splitthresh=64;
-	const int subgridlevels=5;
+	const size_t splitthresh=32;
+	const int subgridlevels=3;
 public:
 	grid(const floato size,const p3&p=p3{}):po(p),s(size){
 		metrics::ngrid++;
