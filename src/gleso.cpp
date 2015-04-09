@@ -360,7 +360,10 @@ protected:
 	virtual void gldraw()const{
 		glDrawArrays(GL_TRIANGLES,0,3);
 	}
+public:
+	static glo instance;
 };
+glo glo::instance=glo();
 
 class p3{
 public:
@@ -467,7 +470,7 @@ static void mtxLoadOrthographic(float* mtx,
 	mtx[ 3] = 0.0;
 
 	mtx[ 4] = 0.0;
-	mtx[ 5] = 2.0f / (top - bottom);
+	mtx[ 5] = -2.0f / (top - bottom);
 	mtx[ 6] = 0.0;
 	mtx[ 7] = 0.0;
 
@@ -566,6 +569,8 @@ public:
 	glob(){
 		p("new glob %p\n",(void*)this);
 		metrics::nglob++;
+		phy.r=.1;
+		phy.s={phy.r,phy.r,phy.r};
 	}
 	virtual~glob(){
 		p("delete glob %p\n",(void*)this);
@@ -578,6 +583,7 @@ public:
 	void render(){
 		metrics::rendered_globs++;
 		if(!gl)return;
+//		return;
 		render_info=render_info_next;
 		matrix_model_world.load_translate(render_info.p);
 		matrix_model_world.append_rotation_about_z_axis(render_info.a.z);
@@ -608,7 +614,11 @@ private:
 class camera:public glob{
 //	m4 mtx_wvp;// world->view->projection
 public:
-	int screen_width,screen_height;
+	int screen_width{320},screen_height{240};
+	camera(){
+		gl=&glo::instance;
+		//phy.da.z=30;
+	}
 	void pre_render(){
 		gl::shdr->use_program();
 		glClearColor(floato{.5},0,floato{.5},1);
@@ -616,6 +626,7 @@ public:
 
 		m4 wvp,wv,p;
 		wv.load_translate(-phy.p);
+		wv.append_rotation_about_z_axis(-phy.a.z);
 		const float aspect_ratio=floato(screen_height)/floato(screen_width);
 		p.load_ortho_projection(-1,1,aspect_ratio,-aspect_ratio,0,1);
 		mtxMultiply(wvp.c, p.c, wv.c);
@@ -787,8 +798,8 @@ class grid{
 	list<glob*>ls;
 	list<glob*>lsmx;
 	grid*grds[8]{nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr};
-	const size_t splitthresh=2;
-	const int subgridlevels=4;
+	const size_t splitthresh=64;
+	const int subgridlevels=5;
 public:
 	grid(const floato size,const p3&p=p3{}):po(p),s(size){
 		metrics::ngrid++;
@@ -848,16 +859,20 @@ public:
 
 	}
 	void render_outline(){
+		bool rendered=false;
+		for(auto gr:grds){
+			if(!gr)
+				continue;
+			gr->render_outline();
+			rendered=true;
+		}
+		if(rendered)return;
+//		if(ls.empty())return;
 		m4 m;
 		m.load_translate(po);
 		m.append_scaling(p3{s,s,s});
 		glUniformMatrix4fv(GLint(gl::umtx_mw),1,false,m.array());
 		glo_grid::instance.render();
-		for(auto gr:grds){
-			if(!gr)
-				continue;
-			gr->render_outline();
-		}
 	}
 //	void coldet(){
 //		if(!ls.empty()){
@@ -1112,7 +1127,7 @@ public:
 		gl=&glo_ball::instance;
 		phy.p.x=gleso::rnd(-1,1);
 		phy.p.y=gleso::rnd(-1,1);
-		phy.r=.025;
+		phy.r=.0025;
 		phy.s=p3{phy.r,phy.r,phy.r};
 		phy.dp.x=gleso::rnd(-1,1);
 		phy.dp.y=gleso::rnd(-1,1);
@@ -1120,14 +1135,15 @@ public:
 	}
 	virtual void on_update(){
 //		p("update desk  %f    \n",phy.p.x);
+		const floato d=.1;
 		if(phy.p.x>1-phy.s.x)
-			phy.dp.x=-1;
+			phy.dp.x=-d;
 		else if(phy.p.x<-1+phy.s.x)
-			phy.dp.x=1;
+			phy.dp.x=d;
 		if(phy.p.y>1-phy.s.y)
-			phy.dp.y=-1;
+			phy.dp.y=-d;
 		else if(phy.p.y<-1+phy.s.y)
-			phy.dp.y=1;
+			phy.dp.y=d;
 	}
 };
 
@@ -1135,9 +1151,10 @@ static list<glob*>all_globs;
 static void gleso_impl_setup(){
 	gleso::shaders.push_back(&shader::instance);
 	gleso::textures.push_back(&texture::instance);//?? leak
+	gleso::glos.push_back(&glo::instance);
 	gleso::glos.push_back(&glo_grid::instance);
 	gleso::glos.push_back(&glo_ball::instance);
-	const int instances=4;
+	const int instances=1024*2;
 	for(int n=0;n<instances;n++)
 		all_globs.push_back(new a_ball());
 }
@@ -1266,7 +1283,7 @@ void gleso_step(){
 	if(render_globs)gleso::grd.render_globs();//? thread
 	if(render_grid_outline)gleso::grd.render_outline();
 	fps::after_render();
-	metrics::log();
+//	metrics::log();
 }
 //void gleso_on_context_destroyed(){
 //	if(gl::shdr)delete gl::shdr;
@@ -1276,6 +1293,36 @@ void gleso_step(){
 ///////////////////////////////
 void gleso_key(int key,int scancode,int action,int mods){
 	p("gleso_key  key=%d   scancode=%d    action=%d   mods=%d\n",key,scancode,action,mods);
+	switch(key){
+	case 87://w
+		switch(action){
+			case 1:c->phy.dp.y=1;break;
+			case 0:c->phy.dp.y=0;break;
+		}
+		break;
+	case 83://s
+		switch(action){
+			case 1:c->phy.dp.y=-1;break;
+			case 0:c->phy.dp.y=0;break;
+		}
+		break;
+	case 65://a
+		switch(action){
+//			case 1:c->phy.dp.x=-1;break;
+//			case 0:c->phy.dp.x=0;break;
+			case 1:c->phy.da.z=180;break;
+			case 0:c->phy.da.z=0;break;
+		}
+		break;
+	case 68://d
+		switch(action){
+//			case 1:c->phy.dp.x=1;break;
+//			case 0:c->phy.dp.x=0;break;
+			case 1:c->phy.da.z=-180;break;
+			case 0:c->phy.da.z=0;break;
+		}
+		break;
+	}
 }
 void gleso_touch(floato x,floato y,int action){
 	p("gleso_touch  x=%.1f   y=%.1f    action=%d\n",x,y,action);
