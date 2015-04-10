@@ -1,52 +1,54 @@
 #include"gleso.h"
-////////////////////////////////////////////////////////////////////////
+namespace gl{
+	floato fps;
+}
 namespace metrics{
-	unsigned int fps;
-	unsigned int nshader;
-	unsigned int ngrid;
-	unsigned int nglo;
-	unsigned int nglob;
-	unsigned int ntexture;
+	unsigned int nshaders;
+	unsigned int ngrids;
+	unsigned int nglos;
+	unsigned int nglobs;
+	unsigned int ntextures;
 	unsigned int updated_globs;
 	unsigned int rendered_globs;
-	floato time_since_start_in_seconds;
-	void log(){p("/ metrics %2.2fs – fps:%03d – shaders:%01d – textures:%01d – glos:%02d – globs:%05d – updated:%02d – rendered:%02d – grids:%02d \n",time_since_start_in_seconds,fps,nshader,ntexture,nglo,nglob,updated_globs,rendered_globs,ngrid);}
+	void print(){p("fps:%03.0f – shaders:%01d – textures:%01d – glos:%02d – globs:%05d – updated:%02d – rendered:%02d – grids:%02d \n",gl::fps,nshaders,ntextures,nglos,nglobs,updated_globs,rendered_globs,ngrids);}
 	inline void before_render(){
 		updated_globs=0;
 		rendered_globs=0;
 	}
 }
-////////////////////////////////////////////////////////////////////////
 #include<vector>
 using std::vector;
+#include<list>
+using std::list;
 #include<sys/time.h>
 class shader;
 class texture;
 class glo;
+class camera;
+class glob;
 namespace gl{
-	shader*shdr;
+	// - - glsl bindings - - - - - - -
 	GLint apos;// vec2 vertex coords x,y
 	GLint auv;// vec2 texture coords x,y
 	GLint argba;// vec4 colors
 	GLint umtx_mw;// mat4 model->world matrix
 	GLint umtx_wvp;// mat4 world->view->projection matrix
 	GLint utex;// texture sampler
+	// - - - - - - - - - - - - - - - -
 
+	shader*shdr;
 	GLint active_program;
 	vector<shader*>shaders;
 	vector<texture*>textures;
 	vector<glo*>glos;
+	list<glob*>globs;
+	camera*cam;
 
 	floato dt=floato(1./60);
-//	static inline floato d(const floato unit_over_second){return unit_over_second*dt;}
 	longo frame;//?? rollover issues when used in comparisons
 
-	floato fps;
 	static struct timeval fps_time_prev;
 	static floato fps_frame_prev;
-	static inline void reset(){
-		gettimeofday(&fps_time_prev,NULL);
-	}
 	static inline void before_render(){
 		frame++;
 	}
@@ -61,9 +63,8 @@ namespace gl{
 		const int dframe=frame-fps_frame_prev;
 		fps_frame_prev=frame;
 		fps=dframe/dt;
-		metrics::fps=(unsigned int)fps;
-		reset();
-		metrics::log();
+		fps_time_prev=tv;
+		metrics::print();
 	}
 }
 ////////////////////////////////////////////////////////////////////////
@@ -78,12 +79,12 @@ class shader{
 public:
 	shader(){
 		p("new shader %p\n",this);
-		metrics::nshader++;
+		metrics::nshaders++;
 	}
 
 	virtual~shader(){
 		p("delete shader %p\n",(void*)this);
-		metrics::nshader--;
+		metrics::nshaders--;
 //		gleso_cleanup();
 //		if(glid_program){glDeleteProgram(glid_program);glid_program=0;}
 	}
@@ -240,12 +241,12 @@ class texture{
 public:
 	texture(){
 		p("new texture %p\n",this);
-		metrics::ntexture++;
+		metrics::ntextures++;
 	}
 	~texture(){
 		p("delete texture %p\n",this);
 //		glDeleteTextures(1,&glid_texture);
-		metrics::ntexture--;
+		metrics::ntextures--;
 	}
 	void load(){
 		glGenTextures(1,&glid_texture);
@@ -298,11 +299,11 @@ class glo{
 public:
 	glo(){
 		p("new glo %p\n",(void*)this);
-		metrics::nglo++;
+		metrics::nglos++;
 	}
 	virtual~glo(){
 		p("delete glo %p\n",this);
-		metrics::nglo--;
+		metrics::nglos--;
 	}
 	inline glo&set_texture(texture*t){tex=t;return*this;}
 	inline const texture&textureref()const{return*tex;}
@@ -457,7 +458,6 @@ private:
 
 ////
 // mtx funcs lifted from apple examples
-#include<math.h>
 static void mtxRotateZApply(floato* mtx, floato deg)
 {
 	// [ 0 4  8 12 ]   [ cos -sin 0  0 ]
@@ -598,13 +598,13 @@ public:
 	grid*grid_that_updates_this_glob{nullptr};//managed by grid
 	glob(){
 		p("new glob %p\n",(void*)this);
-		metrics::nglob++;
+		metrics::nglobs++;
 		phy.r=.1;
 		phy.s={phy.r,phy.r,phy.r};
 	}
 	virtual~glob(){
 		p("delete glob %p\n",(void*)this);
-		metrics::nglob--;
+		metrics::nglobs--;
 	}
 //	inline glob&glo_ref(const class glo*g){glo=g;return*this;}
 //	inline physics&phys(){return phy;}
@@ -818,8 +818,6 @@ public:
 glo_grid glo_grid::instance=glo_grid();
 
 //------------------------------------------------------------------------------
-#include<list>
-using std::list;
 #include<algorithm>
 #define foreach(c,f)std::for_each(c.begin(),c.end(),f)
 class grid{
@@ -832,10 +830,10 @@ class grid{
 	const int subgridlevels=3;
 public:
 	grid(const floato size,const p3&p=p3{}):po(p),s(size){
-		metrics::ngrid++;
+		metrics::ngrids++;
 	}
 	~grid(){
-		metrics::ngrid--;
+		metrics::ngrids--;
 		clear();
 	}
 	void clear(){
@@ -1063,11 +1061,8 @@ private:
 //	}
 //};
 //------------------------------------------------------------------------------
-//#include<list>
-//#include<cstdlib>
 static grid grd(1);
 //static floato rnd(){return floato(rand())/RAND_MAX;}
-static floato rnd(floato min,floato max){return min+(floato(rand())/RAND_MAX)*(max-min);}
 //------------------------------------------------------------------------------
 /*
    /////  ///\   ///// ///// /////////
@@ -1137,7 +1132,6 @@ public:
 	}
 };
 
-static list<glob*>all_globs;
 static void gleso_impl_setup(){
 	gl::shaders.push_back(&shader::instance);
 	gl::textures.push_back(&texture::instance);//?? leak
@@ -1146,7 +1140,7 @@ static void gleso_impl_setup(){
 	gl::glos.push_back(&glo_ball::instance);
 	const int instances=16;
 	for(int n=0;n<instances;n++)
-		all_globs.push_back(new a_ball());
+		gl::globs.push_back(new a_ball());
 }
 /*
  ascii sprite kit
@@ -1189,9 +1183,8 @@ static void mainsig(const int i){
 	exit(i);
 }
 #include<typeinfo>
-static struct timeval timeval_after_init;
-static camera*cam;
-int gleso_init(){
+
+void gleso_init(){
 	p("* gleso\n");
 	for(int i=0;i<32;i++)signal(i,mainsig);//?
 	shader::check_gl_error("init");
@@ -1221,8 +1214,8 @@ int gleso_init(){
 	if(!gl::shdr){// init
 		p("* init\n");
 		gl::shdr=&shader::instance;
-		cam=new camera();
-		all_globs.push_back(cam);
+		gl::cam=new camera();
+		gl::globs.push_back(gl::cam);
 		gleso_impl_setup();
 	}
 	gl::active_program=0;
@@ -1239,16 +1232,12 @@ int gleso_init(){
 		p(" glo %p   %s\n",(void*)o,typeid(*o).name());
 		o->load();
 	});
-	gl::reset();
-	gettimeofday(&timeval_after_init,NULL);
-	metrics::time_since_start_in_seconds=0;
-	return 0;
 }
 void gleso_viewport(int width,int height){
 	p("* viewport  %d x %d\n",width,height);
 	if(gl::shdr)gl::shdr->viewport(width,height);
-	cam->screen_width=width;
-	cam->screen_height=height;
+	gl::cam->screen_width=width;
+	gl::cam->screen_height=height;
 }
 
 static bool render_globs=true;
@@ -1256,58 +1245,43 @@ static bool render_grid_outline=true;
 void gleso_step(){
 	gl::before_render();
 	metrics::before_render();
-	struct timeval tv;
-	gettimeofday(&tv,NULL);
-	const time_t diff_s=tv.tv_sec-timeval_after_init.tv_sec;
-	const int diff_us=tv.tv_usec-timeval_after_init.tv_usec;
-	metrics::time_since_start_in_seconds=(float)diff_s+diff_us/1000000.f;
-
-//	p("*** gleso tick:%d\n",gleso::tick);
 	grd.clear();
-	grd.addall(all_globs);
+	grd.addall(gl::globs);
 	grd.update_globs();//? thread
-
-	cam->pre_render();
+	gl::cam->pre_render();
 	if(render_globs)grd.render_globs();//? thread
 	if(render_grid_outline)grd.render_outline();
 	gl::after_render();
-//	metrics::log();
 }
-//void gleso_on_context_destroyed(){
-//	if(gl::shdr)delete gl::shdr;
-//	std::for_each(gleso::glos.begin(),gleso::glos.end(),[](glo*g){delete g;});
-//	if(gleso::grd)delete gleso::grd;
-//}
-///////////////////////////////
 void gleso_key(int key,int scancode,int action,int mods){
 	p("gleso_key  key=%d   scancode=%d    action=%d   mods=%d\n",key,scancode,action,mods);
 	switch(key){
 	case 87://w
 		switch(action){
-			case 1:cam->phy.dp.y=1;break;
-			case 0:cam->phy.dp.y=0;break;
+			case 1:gl::cam->phy.dp.y=1;break;
+			case 0:gl::cam->phy.dp.y=0;break;
 		}
 		break;
 	case 83://s
 		switch(action){
-			case 1:cam->phy.dp.y=-1;break;
-			case 0:cam->phy.dp.y=0;break;
+			case 1:gl::cam->phy.dp.y=-1;break;
+			case 0:gl::cam->phy.dp.y=0;break;
 		}
 		break;
 	case 65://a
 		switch(action){
 //			case 1:c->phy.dp.x=-1;break;
 //			case 0:c->phy.dp.x=0;break;
-			case 1:cam->phy.da.z=180;break;
-			case 0:cam->phy.da.z=0;break;
+			case 1:gl::cam->phy.da.z=180;break;
+			case 0:gl::cam->phy.da.z=0;break;
 		}
 		break;
 	case 68://d
 		switch(action){
 //			case 1:c->phy.dp.x=1;break;
 //			case 0:c->phy.dp.x=0;break;
-			case 1:cam->phy.da.z=-180;break;
-			case 0:cam->phy.da.z=0;break;
+			case 1:gl::cam->phy.da.z=-180;break;
+			case 0:gl::cam->phy.da.z=0;break;
 		}
 		break;
 	}
@@ -1316,8 +1290,7 @@ void gleso_touch(floato x,floato y,int action){
 	p("gleso_touch  x=%.1f   y=%.1f    action=%d\n",x,y,action);
 }
 void gleso_cleanup(){
-	for(auto o:all_globs){
+	for(auto o:gl::globs){
 		delete o;
 	}
-//	p(" shaders:%d   grids:%d   glos:%d   globs:%d\n",metrics::nshader,metrics::ngrid,metrics::nglo,metrics::nglob);
 }

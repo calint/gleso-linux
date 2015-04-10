@@ -10,7 +10,7 @@ extern "C" {
 #endif
 //	int gleso_argc;
 //	char**gleso_argv;
-	int gleso_init();// called when opengl context needs reload
+	void gleso_init();// called when opengl context needs reload
 	void gleso_viewport(const int width,const int height);// called when screen size changes
 	void gleso_step();// called when opengl ready for render
 	void gleso_key(const int key,const int scancode,const int action,const int mods);// called on key event
@@ -20,4 +20,8 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+
+#include<cmath>
+#include<cstdlib>
+inline floato rnd(floato min,floato max){return min+(floato(rand())/RAND_MAX)*(max-min);}
 #endif
