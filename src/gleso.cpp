@@ -672,16 +672,6 @@ public:
 //	inline const m4&matrix_world_view_projection()const{return mtx_wvp;}
 };
 
-/*-----------------------------
-     __    _       __     __
-    /  \   |      /  \   /  \
-   /       |     |    | |
-   |  ___  |     |    |  \__
-   |    |  |     |    |     \
-    \___/  |___|  \__/   \__/
- 
-------------------------------
-"defglo" */
 class glo_square_xy:public glo{
 	virtual vector<GLfloat>make_vertices()const{
 		const static GLfloat verts[]={-1,1, -1,-1, 1,-1, 1,1};
@@ -1080,32 +1070,16 @@ static grid grd(1);
 
 
 
-/*
- ascii sprite kit
+/*-----------------------------
+     __    _       __     __
+    /  \   |      /  \   /  \
+   /       |     |    | |
+   |  ___  |     |    |  \__
+   |    |  |     |    |     \
+    \___/  |___|  \__/   \__/
 
-             ____
-            |O  O|
-            |_  _|         <- "medusa"
-             /||\
-
- _______________
-   |____|     <- stuff to slide under
-  //||\|\\
-
-
- _______________     <- floor and roof
-
-
-
-
-     _\|/_
- _____/ \_______   <- stuff to jump over
-
-
-
-       stuff that scores -->   . o O *     <-- stuff to avoid
-
-*/
+------------------------------
+"defglo" */
 class glo_ball:public glo{
 	int nvertices;
 public:
@@ -1142,6 +1116,39 @@ public:
 };
 glo_ball glo_ball::instance=glo_ball();
 
+
+
+
+
+
+
+
+/*
+ ascii sprite kit
+
+             ____
+            |O  O|
+            |_  _|         <- "medusa"
+             /||\
+
+ _______________
+   |____|     <- stuff to slide under
+  //||\|\\
+
+
+ _______________     <- floor and roof
+
+
+
+
+     _\|/_
+ _____/ \_______   <- stuff to jump over
+
+
+
+       stuff that scores -->   . o O *     <-- stuff to avoid
+
+*/
 class a_ball:public glob{
 public:
 	a_ball(){
