@@ -26,7 +26,7 @@ namespace metrics{
 		const time_t diff_s=tv.tv_sec-fps_time_prev.tv_sec;
 		const int diff_us=tv.tv_usec-fps_time_prev.tv_usec;
 		const floato dt=(float)diff_s+diff_us/1000000.f;
-		if(dt<3)
+		if(dt<1)
 			return;
 		const int dframe=frame-fps_frame_prev;
 		fps_frame_prev=frame;
@@ -1147,24 +1147,26 @@ class a_ball:public glob{
 public:
 	a_ball(){
 		gl=&glo_ball::instance;
-		phy.p.x=rnd(-1,1);
-		phy.p.y=rnd(-1,1);
+		const floato sq=.5;
+		phy.p.x=rnd(-sq,sq);
+		phy.p.y=rnd(-sq,sq);
 		phy.r=.0025;
 		phy.s=p3{phy.r,phy.r,phy.r};
-		phy.dp.x=rnd(-1,1);
-		phy.dp.y=rnd(-1,1);
+		phy.dp.x=rnd(-sq,sq);
+		phy.dp.y=rnd(-sq,sq);
 //		phy.p.z=-1;
 	}
 	virtual void on_update(){
 //		p("update desk  %f    \n",phy.p.x);
 		const floato d=.1;
-		if(phy.p.x>1-phy.s.x)
+		const floato sq=.5;
+		if(phy.p.x>sq-phy.s.x)
 			phy.dp.x=-d;
-		else if(phy.p.x<-1+phy.s.x)
+		else if(phy.p.x<-sq+phy.s.x)
 			phy.dp.x=d;
-		if(phy.p.y>1-phy.s.y)
+		if(phy.p.y>sq-phy.s.y)
 			phy.dp.y=-d;
-		else if(phy.p.y<-1+phy.s.y)
+		else if(phy.p.y<-sq+phy.s.y)
 			phy.dp.y=d;
 	}
 };
