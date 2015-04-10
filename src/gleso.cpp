@@ -1,7 +1,5 @@
 #include"gleso.h"
-namespace gl{
-	floato fps;
-}
+#include<sys/time.h>
 namespace metrics{
 	int nshaders;
 	int ngrids;
@@ -10,17 +8,37 @@ namespace metrics{
 	int ntextures;
 	int updated_globs;
 	int rendered_globs;
-	void print(){p("fps:%03.0f – shaders:%01d – textures:%01d – glos:%02d – globs:%05d – updated:%02d – rendered:%02d – grids:%02d \n",gl::fps,nshaders,ntextures,nglos,nglobs,updated_globs,rendered_globs,ngrids);}
-	inline void before_render(){
+
+	floato dt{1./60};
+	longo frame;//?? rollover issues when used in comparisons
+	floato fps;
+	static struct timeval fps_time_prev;
+	static floato fps_frame_prev;
+	static inline void before_render(){
+		frame++;
 		updated_globs=0;
 		rendered_globs=0;
+	}
+	void print(){p("fps:%03.0f – shaders:%01d – textures:%01d – glos:%02d – globs:%05d – updated:%02d – rendered:%02d – grids:%02d \n",fps,nshaders,ntextures,nglos,nglobs,updated_globs,rendered_globs,ngrids);}
+	static void after_render(){
+		struct timeval tv;
+		gettimeofday(&tv,NULL);
+		const time_t diff_s=tv.tv_sec-fps_time_prev.tv_sec;
+		const int diff_us=tv.tv_usec-fps_time_prev.tv_usec;
+		const floato dt=(float)diff_s+diff_us/1000000.f;
+		if(dt<3)
+			return;
+		const int dframe=frame-fps_frame_prev;
+		fps_frame_prev=frame;
+		fps=dframe/dt;
+		fps_time_prev=tv;
+		print();
 	}
 }
 #include<vector>
 using std::vector;
 #include<list>
 using std::list;
-#include<sys/time.h>
 class shader;
 class texture;
 class glo;
@@ -35,7 +53,6 @@ namespace gl{
 	GLint umtx_wvp;// mat4 world->view->projection matrix
 	GLint utex;// texture sampler
 	// - - - - - - - - - - - - - - - -
-
 	shader*shdr;
 	GLint active_program;
 	vector<shader*>shaders;
@@ -43,29 +60,6 @@ namespace gl{
 	vector<glo*>glos;
 	list<glob*>globs;
 	camera*cam;
-
-	floato dt=floato(1./60);
-	longo frame;//?? rollover issues when used in comparisons
-
-	static struct timeval fps_time_prev;
-	static floato fps_frame_prev;
-	static inline void before_render(){
-		frame++;
-	}
-	static void after_render(){
-		struct timeval tv;
-		gettimeofday(&tv,NULL);
-		const time_t diff_s=tv.tv_sec-fps_time_prev.tv_sec;
-		const int diff_us=tv.tv_usec-fps_time_prev.tv_usec;
-		const floato dt=(float)diff_s+diff_us/1000000.f;
-		if(dt<3)
-			return;
-		const int dframe=frame-fps_frame_prev;
-		fps_frame_prev=frame;
-		fps=dframe/dt;
-		fps_time_prev=tv;
-		metrics::print();
-	}
 }
 ////////////////////////////////////////////////////////////////////////
 class shader{
@@ -429,10 +423,10 @@ public:
 	p3 s{0,0,0};//scale
 	floato r;//radius
 	void update(){
-		dp.add(ddp,gl::dt);
-		p.add(dp,gl::dt);
-		da.add(dda,gl::dt);
-		a.add(da,gl::dt);
+		dp.add(ddp,metrics::dt);
+		p.add(dp,metrics::dt);
+		da.add(dda,metrics::dt);
+		a.add(da,metrics::dt);
 	}
 //	inline p3&position(){return p;}
 //	inline p3&pos(){return p;}
@@ -1284,7 +1278,7 @@ void gleso_viewport(int width,int height){
 static bool render_globs=true;
 static bool render_grid_outline=true;
 void gleso_step(){
-	gl::before_render();
+	metrics::before_render();
 	metrics::before_render();
 	grd.clear();
 	grd.addall(gl::globs);
@@ -1292,7 +1286,7 @@ void gleso_step(){
 	gl::cam->pre_render();
 	if(render_globs)grd.render_globs();//? thread
 	if(render_grid_outline)grd.render_outline();
-	gl::after_render();
+	metrics::after_render();
 }
 void gleso_key(int key,int scancode,int action,int mods){
 	p("gleso_key  key=%d   scancode=%d    action=%d   mods=%d\n",key,scancode,action,mods);
