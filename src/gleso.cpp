@@ -3,13 +3,13 @@ namespace gl{
 	floato fps;
 }
 namespace metrics{
-	unsigned int nshaders;
-	unsigned int ngrids;
-	unsigned int nglos;
-	unsigned int nglobs;
-	unsigned int ntextures;
-	unsigned int updated_globs;
-	unsigned int rendered_globs;
+	int nshaders;
+	int ngrids;
+	int nglos;
+	int nglobs;
+	int ntextures;
+	int updated_globs;
+	int rendered_globs;
 	void print(){p("fps:%03.0f – shaders:%01d – textures:%01d – glos:%02d – globs:%05d – updated:%02d – rendered:%02d – grids:%02d \n",gl::fps,nshaders,ntextures,nglos,nglobs,updated_globs,rendered_globs,ngrids);}
 	inline void before_render(){
 		updated_globs=0;
@@ -1176,10 +1176,10 @@ public:
 };
 
 /*
-   /////  ///\   ///// ///// /////////
-   ///   ///\\\  ///   ///  // /// //
-  ///   ///  \\\///   ///     ///
-///// /////   \\\/  /////   /////
+     /////  ///\   ///// ///// /////////
+     ///   ///\\\  ///   ///  // /// //
+    ///   ///  \\\///   ///     ///
+  ///// /////   \\\/  /////   /////
 */
 static void setup(){
 	gl::shaders.push_back(&shader::instance);
