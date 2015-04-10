@@ -1281,7 +1281,6 @@ static bool render_globs=true;
 static bool render_grid_outline=true;
 void gleso_step(){
 	metrics::before_render();
-	metrics::before_render();
 	grd.clear();
 	grd.addall(gl::globs);
 	grd.update_globs();//? thread
