@@ -1,4 +1,4 @@
-#include "gleso.h"
+#include"gleso.h"
 ////////////////////////////////////////////////////////////////////////
 namespace metrics{
 	unsigned int fps;
@@ -9,7 +9,7 @@ namespace metrics{
 	unsigned int ntexture;
 	unsigned int updated_globs;
 	unsigned int rendered_globs;
-	float time_since_start_in_seconds;
+	floato time_since_start_in_seconds;
 	void log(){p("/ metrics %2.2fs – fps:%03d – shaders:%01d – textures:%01d – glos:%02d – globs:%05d – updated:%02d – rendered:%02d – grids:%02d \n",time_since_start_in_seconds,fps,nshader,ntexture,nglo,nglob,updated_globs,rendered_globs,ngrid);}
 	inline void before_render(){
 		updated_globs=0;
@@ -17,7 +17,12 @@ namespace metrics{
 	}
 }
 ////////////////////////////////////////////////////////////////////////
+#include<vector>
+using std::vector;
+#include<sys/time.h>
 class shader;
+class texture;
+class glo;
 namespace gl{
 	shader*shdr;
 	GLint apos;// vec2 vertex coords x,y
@@ -28,9 +33,40 @@ namespace gl{
 	GLint utex;// texture sampler
 
 	GLint active_program;
+	vector<shader*>shaders;
+	vector<texture*>textures;
+	vector<glo*>glos;
+
+	floato dt=floato(1./60);
+//	static inline floato d(const floato unit_over_second){return unit_over_second*dt;}
+	longo frame;//?? rollover issues when used in comparisons
+
+	floato fps;
+	static struct timeval fps_time_prev;
+	static floato fps_frame_prev;
+	static inline void reset(){
+		gettimeofday(&fps_time_prev,NULL);
+	}
+	static inline void before_render(){
+		frame++;
+	}
+	static void after_render(){
+		struct timeval tv;
+		gettimeofday(&tv,NULL);
+		const time_t diff_s=tv.tv_sec-fps_time_prev.tv_sec;
+		const int diff_us=tv.tv_usec-fps_time_prev.tv_usec;
+		const floato dt=(float)diff_s+diff_us/1000000.f;
+		if(dt<3)
+			return;
+		const int dframe=frame-fps_frame_prev;
+		fps_frame_prev=frame;
+		fps=dframe/dt;
+		metrics::fps=(unsigned int)fps;
+		reset();
+		metrics::log();
+	}
 }
 ////////////////////////////////////////////////////////////////////////
-#include<string>
 class shader{
 	GLint glid_program{0};
 	GLint apos{0};
@@ -48,7 +84,7 @@ public:
 	virtual~shader(){
 		p("delete shader %p\n",(void*)this);
 		metrics::nshader--;
-		gleso_cleanup();
+//		gleso_cleanup();
 //		if(glid_program){glDeleteProgram(glid_program);glid_program=0;}
 	}
 
@@ -248,8 +284,6 @@ public:
 };
 texture texture::instance=texture();
 
-#include<vector>
-using std::vector;
 class glo{
 	class texture*tex{nullptr};
 #ifdef GLESO_EMBEDDED
@@ -387,10 +421,6 @@ p3 operator+(const p3&a,const p3&b){
 p3 operator-(const p3&a,const p3&b){
 	return p3{a.x-b.x,a.y-b.y,a.z-b.z};
 }
-
-namespace gleso{
-	floato dt;
-}
 class physics{
 public:
 	p3 p{0,0,0},dp{0,0,0},ddp{0,0,0};//position
@@ -398,10 +428,10 @@ public:
 	p3 s{0,0,0};//scale
 	floato r;//radius
 	void update(){
-		dp.add(ddp,gleso::dt);
-		p.add(dp,gleso::dt);
-		da.add(dda,gleso::dt);
-		a.add(da,gleso::dt);
+		dp.add(ddp,gl::dt);
+		p.add(dp,gl::dt);
+		da.add(dda,gl::dt);
+		a.add(da,gl::dt);
 	}
 //	inline p3&position(){return p;}
 //	inline p3&pos(){return p;}
@@ -798,7 +828,7 @@ class grid{
 	list<glob*>ls;
 	list<glob*>lsmx;
 	grid*grds[8]{nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr};
-	const size_t splitthresh=32;
+	const size_t splitthresh=1;
 	const int subgridlevels=3;
 public:
 	grid(const floato size,const p3&p=p3{}):po(p),s(size){
@@ -1033,51 +1063,11 @@ private:
 //	}
 //};
 //------------------------------------------------------------------------------
-#include<list>
-#include<cstdlib>
-class grid;// forward declaration
-namespace gleso{
-	inline floato d(const floato unit_over_second){return unit_over_second*dt;}
-	unsigned int tick;//?? rollover issues when used in comparisons
-	vector<shader*>shaders;
-	vector<glo*>glos;
-	vector<texture*>textures;
-	grid grd(1);
-	floato rnd(){return floato(rand())/RAND_MAX;}
-	floato rnd(floato min,floato max){return min+(floato(rand())/RAND_MAX)*(max-min);}
-}
-//------------------------------------------------------------------------------
-#include<sys/time.h>
-namespace fps{
-	float fps;
-	struct timeval t0;
-	static int frameno;
-	static int last_frameno;
-	static inline void reset(){
-		gettimeofday(&t0,NULL);
-	}
-	static inline float dt(){
-		struct timeval tv;
-		gettimeofday(&tv,NULL);
-		const time_t diff_s=tv.tv_sec-t0.tv_sec;
-		const int diff_us=tv.tv_usec-t0.tv_usec;
-		return (float)diff_s+diff_us/1000000.f;
-	}
-	inline void before_render(){
-		frameno++;
-	}
-	void after_render(){
-		const float d=dt();
-		if(d<3)
-			return;
-		const int dframe=frameno-last_frameno;
-		last_frameno=frameno;
-		fps=dframe/d;
-		metrics::fps=(unsigned int)fps;
-		reset();
-		metrics::log();
-	}
-}
+//#include<list>
+//#include<cstdlib>
+static grid grd(1);
+//static floato rnd(){return floato(rand())/RAND_MAX;}
+static floato rnd(floato min,floato max){return min+(floato(rand())/RAND_MAX)*(max-min);}
 //------------------------------------------------------------------------------
 /*
    /////  ///\   ///// ///// /////////
@@ -1125,12 +1115,12 @@ class a_ball:public glob{
 public:
 	a_ball(){
 		gl=&glo_ball::instance;
-		phy.p.x=gleso::rnd(-1,1);
-		phy.p.y=gleso::rnd(-1,1);
+		phy.p.x=rnd(-1,1);
+		phy.p.y=rnd(-1,1);
 		phy.r=.0025;
 		phy.s=p3{phy.r,phy.r,phy.r};
-		phy.dp.x=gleso::rnd(-1,1);
-		phy.dp.y=gleso::rnd(-1,1);
+		phy.dp.x=rnd(-1,1);
+		phy.dp.y=rnd(-1,1);
 //		phy.p.z=-1;
 	}
 	virtual void on_update(){
@@ -1149,12 +1139,12 @@ public:
 
 static list<glob*>all_globs;
 static void gleso_impl_setup(){
-	gleso::shaders.push_back(&shader::instance);
-	gleso::textures.push_back(&texture::instance);//?? leak
-	gleso::glos.push_back(&glo::instance);
-	gleso::glos.push_back(&glo_grid::instance);
-	gleso::glos.push_back(&glo_ball::instance);
-	const int instances=1024*2;
+	gl::shaders.push_back(&shader::instance);
+	gl::textures.push_back(&texture::instance);//?? leak
+	gl::glos.push_back(&glo::instance);
+	gl::glos.push_back(&glo_grid::instance);
+	gl::glos.push_back(&glo_ball::instance);
+	const int instances=16;
 	for(int n=0;n<instances;n++)
 		all_globs.push_back(new a_ball());
 }
@@ -1200,7 +1190,7 @@ static void mainsig(const int i){
 }
 #include<typeinfo>
 static struct timeval timeval_after_init;
-static camera*c;
+static camera*cam;
 int gleso_init(){
 	p("* gleso\n");
 	for(int i=0;i<32;i++)signal(i,mainsig);//?
@@ -1231,25 +1221,25 @@ int gleso_init(){
 	if(!gl::shdr){// init
 		p("* init\n");
 		gl::shdr=&shader::instance;
-		c=new camera();
-		all_globs.push_back(c);
+		cam=new camera();
+		all_globs.push_back(cam);
 		gleso_impl_setup();
 	}
 	gl::active_program=0;
 	p("* load\n");
-	foreach(gleso::shaders,[](shader*o){
+	foreach(gl::shaders,[](shader*o){
 		p(" shader %p   %s\n",(void*)o,typeid(*o).name());
 		o->load();
 	});
-	foreach(gleso::textures,[](texture*o){
+	foreach(gl::textures,[](texture*o){
 		p(" texture %p   %s\n",(void*)o,typeid(*o).name());
 		o->load();
 	});
-	foreach(gleso::glos,[](glo*o){
+	foreach(gl::glos,[](glo*o){
 		p(" glo %p   %s\n",(void*)o,typeid(*o).name());
 		o->load();
 	});
-	fps::reset();
+	gl::reset();
 	gettimeofday(&timeval_after_init,NULL);
 	metrics::time_since_start_in_seconds=0;
 	return 0;
@@ -1257,32 +1247,30 @@ int gleso_init(){
 void gleso_viewport(int width,int height){
 	p("* viewport  %d x %d\n",width,height);
 	if(gl::shdr)gl::shdr->viewport(width,height);
-	c->screen_width=width;
-	c->screen_height=height;
+	cam->screen_width=width;
+	cam->screen_height=height;
 }
 
 static bool render_globs=true;
 static bool render_grid_outline=true;
 void gleso_step(){
-	fps::before_render();
+	gl::before_render();
 	metrics::before_render();
-	gleso::tick++;
 	struct timeval tv;
 	gettimeofday(&tv,NULL);
 	const time_t diff_s=tv.tv_sec-timeval_after_init.tv_sec;
 	const int diff_us=tv.tv_usec-timeval_after_init.tv_usec;
 	metrics::time_since_start_in_seconds=(float)diff_s+diff_us/1000000.f;
-	gleso::dt=floato(1./60);
 
 //	p("*** gleso tick:%d\n",gleso::tick);
-	gleso::grd.clear();
-	gleso::grd.addall(all_globs);
-	gleso::grd.update_globs();//? thread
+	grd.clear();
+	grd.addall(all_globs);
+	grd.update_globs();//? thread
 
-	c->pre_render();
-	if(render_globs)gleso::grd.render_globs();//? thread
-	if(render_grid_outline)gleso::grd.render_outline();
-	fps::after_render();
+	cam->pre_render();
+	if(render_globs)grd.render_globs();//? thread
+	if(render_grid_outline)grd.render_outline();
+	gl::after_render();
 //	metrics::log();
 }
 //void gleso_on_context_destroyed(){
@@ -1296,30 +1284,30 @@ void gleso_key(int key,int scancode,int action,int mods){
 	switch(key){
 	case 87://w
 		switch(action){
-			case 1:c->phy.dp.y=1;break;
-			case 0:c->phy.dp.y=0;break;
+			case 1:cam->phy.dp.y=1;break;
+			case 0:cam->phy.dp.y=0;break;
 		}
 		break;
 	case 83://s
 		switch(action){
-			case 1:c->phy.dp.y=-1;break;
-			case 0:c->phy.dp.y=0;break;
+			case 1:cam->phy.dp.y=-1;break;
+			case 0:cam->phy.dp.y=0;break;
 		}
 		break;
 	case 65://a
 		switch(action){
 //			case 1:c->phy.dp.x=-1;break;
 //			case 0:c->phy.dp.x=0;break;
-			case 1:c->phy.da.z=180;break;
-			case 0:c->phy.da.z=0;break;
+			case 1:cam->phy.da.z=180;break;
+			case 0:cam->phy.da.z=0;break;
 		}
 		break;
 	case 68://d
 		switch(action){
 //			case 1:c->phy.dp.x=1;break;
 //			case 0:c->phy.dp.x=0;break;
-			case 1:c->phy.da.z=-180;break;
-			case 0:c->phy.da.z=0;break;
+			case 1:cam->phy.da.z=-180;break;
+			case 0:cam->phy.da.z=0;break;
 		}
 		break;
 	}
@@ -1328,8 +1316,8 @@ void gleso_touch(floato x,floato y,int action){
 	p("gleso_touch  x=%.1f   y=%.1f    action=%d\n",x,y,action);
 }
 void gleso_cleanup(){
-//	for(auto o:all_globs){
-//		delete o;
-//	}
-	p(" shaders:%d   grids:%d   glos:%d   globs:%d\n",metrics::nshader,metrics::ngrid,metrics::nglo,metrics::nglob);
+	for(auto o:all_globs){
+		delete o;
+	}
+//	p(" shaders:%d   grids:%d   glos:%d   globs:%d\n",metrics::nshader,metrics::ngrid,metrics::nglo,metrics::nglob);
 }

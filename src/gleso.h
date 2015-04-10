@@ -4,6 +4,7 @@
 #include "gles.h"
 typedef GLfloat floato;
 typedef GLint into;
+typedef long long longo;
 #ifdef __cplusplus
 extern "C" {
 #endif
