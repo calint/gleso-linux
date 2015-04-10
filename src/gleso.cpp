@@ -1064,11 +1064,47 @@ private:
 static grid grd(1);
 //static floato rnd(){return floato(rand())/RAND_MAX;}
 //------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*
-   /////  ///\   ///// ///// /////////
-   ///   ///\\\  ///   ///  // /// //
-  ///   ///  \\\///   ///     ///
-///// /////   \\\/  /////   /////
+ ascii sprite kit
+
+             ____
+            |O  O|
+            |_  _|         <- "medusa"
+             /||\
+
+ _______________
+   |____|     <- stuff to slide under
+  //||\|\\
+
+
+ _______________     <- floor and roof
+
+
+
+
+     _\|/_
+ _____/ \_______   <- stuff to jump over
+
+
+
+       stuff that scores -->   . o O *     <-- stuff to avoid
+
 */
 class glo_ball:public glo{
 	int nvertices;
@@ -1132,7 +1168,13 @@ public:
 	}
 };
 
-static void gleso_impl_setup(){
+/*
+   /////  ///\   ///// ///// /////////
+   ///   ///\\\  ///   ///  // /// //
+  ///   ///  \\\///   ///     ///
+///// /////   \\\/  /////   /////
+*/
+static void setup(){
 	gl::shaders.push_back(&shader::instance);
 	gl::textures.push_back(&texture::instance);//?? leak
 	gl::glos.push_back(&glo::instance);
@@ -1142,32 +1184,24 @@ static void gleso_impl_setup(){
 	for(int n=0;n<instances;n++)
 		gl::globs.push_back(new a_ball());
 }
-/*
- ascii sprite kit
-
-             ____
-            |O  O|
-            |_  _|         <- "medusa"
-             /||\
-
- _______________
-   |____|     <- stuff to slide under
-  //||\|\\
-
-
- _______________     <- floor and roof
 
 
 
 
-     _\|/_
- _____/ \_______   <- stuff to jump over
 
 
 
-       stuff that scores -->   . o O *     <-- stuff to avoid
 
-*/
+
+
+
+
+
+
+
+
+
+
 
 //////
 ////
@@ -1216,7 +1250,7 @@ void gleso_init(){
 		gl::shdr=&shader::instance;
 		gl::cam=new camera();
 		gl::globs.push_back(gl::cam);
-		gleso_impl_setup();
+		setup();
 	}
 	gl::active_program=0;
 	p("* load\n");
