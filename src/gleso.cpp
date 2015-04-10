@@ -14,7 +14,7 @@ namespace metrics{
 	floato fps;
 	static struct timeval fps_time_prev;
 	static floato fps_frame_prev;
-	static inline void before_render(){
+	static void before_render(){
 		frame++;
 		updated_globs=0;
 		rendered_globs=0;
@@ -42,8 +42,9 @@ using std::list;
 class shader;
 class texture;
 class glo;
-class camera;
+class a_camera;
 class glob;
+// - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
 namespace gl{
 	// - - glsl bindings - - - - - - -
 	GLint apos;// vec2 vertex coords x,y
@@ -53,15 +54,15 @@ namespace gl{
 	GLint umtx_wvp;// mat4 world->view->projection matrix
 	GLint utex;// texture sampler
 	// - - - - - - - - - - - - - - - -
-	shader*shdr;
+	shader*active_shader;
 	GLint active_program;
 	vector<shader*>shaders;
 	vector<texture*>textures;
 	vector<glo*>glos;
 	list<glob*>globs;
-	camera*cam;
+	a_camera*active_camera;
 }
-////////////////////////////////////////////////////////////////////////
+// - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
 class shader{
 	GLint glid_program{0};
 	GLint apos{0};
@@ -79,7 +80,7 @@ public:
 	virtual~shader(){
 		p("delete shader %p\n",(void*)this);
 		metrics::nshaders--;
-//		gleso_cleanup();
+		metrics::print();
 //		if(glid_program){glDeleteProgram(glid_program);glid_program=0;}
 	}
 
@@ -229,8 +230,7 @@ public:
 	static shader instance;
 };
 shader shader::instance=shader();
-
-////////////////////////////////////////////////
+// - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
 class texture{
 public:
 	texture(){
@@ -278,7 +278,7 @@ public:
 	static texture instance;
 };
 texture texture::instance=texture();
-
+// - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
 class glo{
 	class texture*tex{nullptr};
 #ifdef GLESO_EMBEDDED
@@ -393,7 +393,7 @@ public:
 	static glo instance;
 };
 glo glo::instance=glo();
-
+// - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
 class p3{
 public:
 	inline p3():x{0},y{0},z{0}{}
@@ -416,6 +416,7 @@ p3 operator+(const p3&a,const p3&b){
 p3 operator-(const p3&a,const p3&b){
 	return p3{a.x-b.x,a.y-b.y,a.z-b.z};
 }
+// - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
 class physics{
 public:
 	p3 p{0,0,0},dp{0,0,0},ddp{0,0,0};//position
@@ -428,30 +429,15 @@ public:
 		da.add(dda,metrics::dt);
 		a.add(da,metrics::dt);
 	}
-//	inline p3&position(){return p;}
-//	inline p3&pos(){return p;}
-//	inline p3&dpos(){return dp;}
-//	inline p3&angle(){return a;}
-//	inline p3&dagl(){return da;}
-//	inline p3&scale(){return s;}
-//private:
-	//? list of forces/velocities applied
 };
-
-class render_info{
+// - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
+class glinfo{
 public:
 	p3 p{0,0,0},a{0,0,0},s{0,0,0};
-//	inline const p3&position()const{return p;}
-//	inline render_info&position(const p3&pos){p=pos;return*this;}
-//	inline const p3&angle()const{return a;}
-//	inline render_info&angle(const p3&agl){a=agl;return*this;}
-//	inline const p3&scale()const{return s;}
-//	inline render_info&scale(const p3&scl){s=scl;return*this;}
-private:
 };
-
 ////
 // mtx funcs lifted from apple examples
+// - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
 static void mtxRotateZApply(floato* mtx, floato deg)
 {
 	// [ 0 4  8 12 ]   [ cos -sin 0  0 ]
@@ -481,6 +467,7 @@ static void mtxRotateZApply(floato* mtx, floato deg)
 	mtx[ 3] = mtx[ 7]*sinrad + mtx03*cosrad;
 	mtx[ 7] = mtx[ 7]*cosrad - mtx03*sinrad;
 }
+// - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
 static void mtxLoadOrthographic(float* mtx,
 							float left, float right,
 							float bottom, float top,
@@ -508,6 +495,7 @@ static void mtxLoadOrthographic(float* mtx,
 	mtx[14] = -(farZ + nearZ) / (farZ - nearZ);
 	mtx[15] = 1.0f;
 }
+// - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
 static void mtxMultiply(float* ret, const float* lhs, const float* rhs)
 {
 	// [ 0 4  8 12 ]   [ 0 4  8 12 ]
@@ -533,12 +521,11 @@ static void mtxMultiply(float* ret, const float* lhs, const float* rhs)
 	ret[13] = lhs[ 1]*rhs[12] + lhs[ 5]*rhs[13] + lhs[ 9]*rhs[14] + lhs[13]*rhs[15];
 	ret[14] = lhs[ 2]*rhs[12] + lhs[ 6]*rhs[13] + lhs[10]*rhs[14] + lhs[14]*rhs[15];
 	ret[15] = lhs[ 3]*rhs[12] + lhs[ 7]*rhs[13] + lhs[11]*rhs[14] + lhs[15]*rhs[15];}
-///////////////////////////////////////////////////////
-
+// - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
 class m4{
 public:
 	floato c[16]{0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
-	inline m4&load_translate(const p3&p){
+	m4&load_translate(const p3&p){
 		// [ 0 4  8  x ]
 		// [ 1 5  9  y ]
 		// [ 2 6 10  z ]
@@ -552,11 +539,11 @@ public:
 		c[14]=p.z;
 		return*this;
 	}
-	inline m4&append_rotation_about_z_axis(const floato degrees){
+	m4&append_rotation_about_z_axis(const floato degrees){
 		mtxRotateZApply(c,degrees);
 		return*this;
 	}
-	inline m4&append_scaling(const p3&scale){
+	m4&append_scaling(const p3&scale){
 		// [ 0 4  8 12 ]   [ x 0 0 0 ]
 		// [ 1 5  9 13 ] x [ 0 y 0 0 ]
 		// [ 2 6 10 14 ]   [ 0 0 z 0 ]
@@ -578,13 +565,14 @@ public:
 		c[11]*=scale.z;
 		return*this;
 	}
-	inline m4&load_ortho_projection(floato left,floato right,floato bottom,floato top,floato nearZ,floato farZ){
+	m4&load_ortho_projection(floato left,floato right,floato bottom,floato top,floato nearZ,floato farZ){
 		mtxLoadOrthographic(c,left,right,bottom,top,nearZ,farZ);
 		return*this;
 	}
 	inline const floato*array()const{return c;}
 };
 class grid;
+// - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
 class glob{
 public:
 	physics phy;// current physics state
@@ -600,72 +588,33 @@ public:
 		p("delete glob %p\n",(void*)this);
 		metrics::nglobs--;
 	}
-//	inline glob&glo_ref(const class glo*g){glo=g;return*this;}
-//	inline physics&phys(){return phy;}
-//	inline const p3&scale()const{return scal;}
-//	inline glob&scale(const p3&scale){scal=scale;return*this;}
 	void render(){
 		metrics::rendered_globs++;
 		if(!gl)return;
-//		return;
-		render_info=render_info_next;
-		matrix_model_world.load_translate(render_info.p);
-		matrix_model_world.append_rotation_about_z_axis(render_info.a.z);
-		matrix_model_world.append_scaling(render_info.s);
-		glUniformMatrix4fv(GLint(gl::umtx_mw),1,false,matrix_model_world.array());
+		ginfo=ginfo_nxt;
+		matrix_model_world.load_translate(ginfo.p);
+		matrix_model_world.append_rotation_about_z_axis(ginfo.a.z);
+		matrix_model_world.append_scaling(ginfo.s);
+		glUniformMatrix4fv(gl::umtx_mw,1,false,matrix_model_world.array());
 		gl->render();
 	}
 	void update(){
 		metrics::updated_globs++;
-//		phy_prv=phy;
-//		phy=phy_nxt;
-//		phy.s=scal;
 		phy.update();
 		on_update();
-		render_info_next.p=phy.p;
-		render_info_next.a=phy.a;
-		render_info_next.s=phy.s;
+		ginfo_nxt.p=phy.p;
+		ginfo_nxt.a=phy.a;
+		ginfo_nxt.s=phy.s;
 	}
 	virtual void on_update(){}
 private:
 	m4 matrix_model_world;
-	class render_info render_info;// info for opengl rendering
-	class render_info render_info_next;// next renderinfo, updated during render
+	glinfo ginfo;// info for opengl rendering
+	glinfo ginfo_nxt;// next renderinfo, updated during render
 //	physics phy_prv;// previous physics state
 //	physics phy_nxt;// next physics state
 };
-
-class camera:public glob{
-//	m4 mtx_wvp;// world->view->projection
-public:
-	int screen_width{320},screen_height{240};
-	camera(){
-		gl=&glo::instance;
-		//phy.da.z=30;
-	}
-	void pre_render(){
-		gl::shdr->use_program();
-		glClearColor(floato{.5},0,floato{.5},1);
-		glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
-
-		m4 wvp,wv,p;
-		wv.load_translate(-phy.p);
-		wv.append_rotation_about_z_axis(-phy.a.z);
-		const float aspect_ratio=floato(screen_height)/floato(screen_width);
-		p.load_ortho_projection(-1,1,aspect_ratio,-aspect_ratio,0,1);
-		mtxMultiply(wvp.c, p.c, wv.c);
-
-		glUniformMatrix4fv(GLint(gl::umtx_wvp),1,false,wvp.c);
-	}
-//	virtual void on_update(){
-//		if(phy.p.x>1)
-//			phy.dp.x=-1;
-//		else if(phy.p.x<-1)
-//			phy.dp.x=1;
-//	}
-//	inline const m4&matrix_world_view_projection()const{return mtx_wvp;}
-};
-
+// - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
 class glo_square_xy:public glo{
 	virtual vector<GLfloat>make_vertices()const{
 		const static GLfloat verts[]={-1,1, -1,-1, 1,-1, 1,1};
@@ -683,6 +632,7 @@ class glo_square_xy:public glo{
 		glDrawArrays(GL_TRIANGLE_FAN,0,4);
 	}
 };
+// - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
 class glo_circle_xy:public glo{
 	int nvertices;
 public:
@@ -706,7 +656,42 @@ protected:
 	virtual void gldraw()const{
 		glDrawArrays(GL_TRIANGLE_FAN,0,nvertices);
 	}
+public:
+	static glo_circle_xy instance;
 };
+glo_circle_xy glo_circle_xy::instance=glo_circle_xy();
+// - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
+class a_camera:public glob{
+//	m4 mtx_wvp;// world->view->projection
+public:
+	int screen_width{320},screen_height{240};
+	a_camera(){
+		gl=&glo_circle_xy::instance;
+		//phy.da.z=30;
+	}
+	void pre_render(){
+		gl::active_shader->use_program();
+		glClearColor(floato{.5},0,floato{.5},1);
+		glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
+
+		m4 wvp,wv,p;
+		wv.load_translate(-phy.p);
+		wv.append_rotation_about_z_axis(-phy.a.z);
+		const float aspect_ratio=floato(screen_height)/floato(screen_width);
+		p.load_ortho_projection(-1,1,aspect_ratio,-aspect_ratio,0,1);
+		mtxMultiply(wvp.c, p.c, wv.c);
+
+		glUniformMatrix4fv(GLint(gl::umtx_wvp),1,false,wvp.c);
+	}
+//	virtual void on_update(){
+//		if(phy.p.x>1)
+//			phy.dp.x=-1;
+//		else if(phy.p.x<-1)
+//			phy.dp.x=1;
+//	}
+//	inline const m4&matrix_world_view_projection()const{return mtx_wvp;}
+};
+// - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
 class glo_square_xyuv:public glo{
 public:
 	glo_square_xyuv(){
@@ -746,6 +731,7 @@ public:
 		return vector<GLfloat>();
 	}
 };
+// - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
 class glo_square_xyuvrgba:public glo_square_xyuv{
 public:
 //	glo_square_xyuvrgba(){
@@ -764,6 +750,7 @@ public:
 		return v;
 	}
 };
+// - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
 class glo_grid:public glo{
 	virtual vector<GLfloat>make_vertices()const{
 		vector<GLfloat>v;
@@ -800,7 +787,6 @@ public:
 	static glo_grid instance;
 };
 glo_grid glo_grid::instance=glo_grid();
-
 //------------------------------------------------------------------------------
 #include<algorithm>
 #define foreach(c,f)std::for_each(c.begin(),c.end(),f)
@@ -1180,7 +1166,7 @@ public:
 static void setup(){
 	gl::shaders.push_back(&shader::instance);
 	gl::textures.push_back(&texture::instance);//?? leak
-	gl::glos.push_back(&glo::instance);
+	gl::glos.push_back(&glo_circle_xy::instance);
 	gl::glos.push_back(&glo_grid::instance);
 	gl::glos.push_back(&glo_ball::instance);
 	const int instances=16;
@@ -1248,11 +1234,11 @@ void gleso_init(){
 	p("%16s %4u B\n","grid",(unsigned int)sizeof(grid));
 	p("%16s %4u B\n","physics",(unsigned int)sizeof(physics));
 	srand(1);// generate same random numbers in different instances
-	if(!gl::shdr){// init
+	if(!gl::active_shader){// init
 		p("* init\n");
-		gl::shdr=&shader::instance;
-		gl::cam=new camera();
-		gl::globs.push_back(gl::cam);
+		gl::active_shader=&shader::instance;
+		gl::active_camera=new a_camera();
+		gl::globs.push_back(gl::active_camera);
 		setup();
 	}
 	gl::active_program=0;
@@ -1272,9 +1258,9 @@ void gleso_init(){
 }
 void gleso_viewport(int width,int height){
 	p("* viewport  %d x %d\n",width,height);
-	if(gl::shdr)gl::shdr->viewport(width,height);
-	gl::cam->screen_width=width;
-	gl::cam->screen_height=height;
+	if(gl::active_shader)gl::active_shader->viewport(width,height);
+	gl::active_camera->screen_width=width;
+	gl::active_camera->screen_height=height;
 }
 
 static bool render_globs=true;
@@ -1284,7 +1270,7 @@ void gleso_step(){
 	grd.clear();
 	grd.addall(gl::globs);
 	grd.update_globs();//? thread
-	gl::cam->pre_render();
+	gl::active_camera->pre_render();
 	if(render_globs)grd.render_globs();//? thread
 	if(render_grid_outline)grd.render_outline();
 	metrics::after_render();
@@ -1294,30 +1280,30 @@ void gleso_key(int key,int scancode,int action,int mods){
 	switch(key){
 	case 87://w
 		switch(action){
-			case 1:gl::cam->phy.dp.y=1;break;
-			case 0:gl::cam->phy.dp.y=0;break;
+			case 1:gl::active_camera->phy.dp.y=1;break;
+			case 0:gl::active_camera->phy.dp.y=0;break;
 		}
 		break;
 	case 83://s
 		switch(action){
-			case 1:gl::cam->phy.dp.y=-1;break;
-			case 0:gl::cam->phy.dp.y=0;break;
+			case 1:gl::active_camera->phy.dp.y=-1;break;
+			case 0:gl::active_camera->phy.dp.y=0;break;
 		}
 		break;
 	case 65://a
 		switch(action){
 //			case 1:c->phy.dp.x=-1;break;
 //			case 0:c->phy.dp.x=0;break;
-			case 1:gl::cam->phy.da.z=180;break;
-			case 0:gl::cam->phy.da.z=0;break;
+			case 1:gl::active_camera->phy.da.z=180;break;
+			case 0:gl::active_camera->phy.da.z=0;break;
 		}
 		break;
 	case 68://d
 		switch(action){
 //			case 1:c->phy.dp.x=1;break;
 //			case 0:c->phy.dp.x=0;break;
-			case 1:gl::cam->phy.da.z=-180;break;
-			case 0:gl::cam->phy.da.z=0;break;
+			case 1:gl::active_camera->phy.da.z=-180;break;
+			case 0:gl::active_camera->phy.da.z=0;break;
 		}
 		break;
 	}
