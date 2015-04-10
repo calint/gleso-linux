@@ -396,24 +396,14 @@ glo glo::instance=glo();
 // - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
 class p3{
 public:
-	inline p3():x{0},y{0},z{0}{}
-//	inline p3(const floato x):x{x},y{0},z{0}{}
-//	inline p3(const floato x,const floato y):x{x},y{y},z{0}{}
-	inline p3(const floato x,const floato y,const floato z):x{x},y{y},z{z}{}
-//	inline p3(const p3&p):x{p.x},y{p.y},z{p.z}{}
-//	inline p3&x(const floato f){x_=f;return*this;}inline floato x()const{return x_;}
-//	inline p3&y(const floato f){y_=f;return*this;}inline floato y()const{return y_;}
-//	inline p3&z(const floato f){z_=f;return*this;}inline floato z()const{return z_;}
 	inline p3&add(const p3&p,const floato dt){x+=p.x*dt;y+=p.y*dt;z+=p.z*dt;return*this;}//? simd
-	p3 operator-()const{return p3{-x,-y,-z};}
-	friend p3 operator+(const p3&a,const p3&b);
-//private:
+	inline p3 operator-()const{return p3{-x,-y,-z};}
 	floato x,y,z;
 };
-p3 operator+(const p3&a,const p3&b){
+inline p3 operator+(const p3&a,const p3&b){
 	return p3{a.x+b.x,a.y+b.y,a.z+b.z};
 }
-p3 operator-(const p3&a,const p3&b){
+inline p3 operator-(const p3&a,const p3&b){
 	return p3{a.x-b.x,a.y-b.y,a.z-b.z};
 }
 // - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
@@ -438,109 +428,80 @@ public:
 ////
 // mtx funcs lifted from apple examples
 // - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
-static void mtxRotateZApply(floato* mtx, floato deg)
-{
-	// [ 0 4  8 12 ]   [ cos -sin 0  0 ]
-	// [ 1 5  9 13 ] x [ sin cos  0  0 ]
-	// [ 2 6 10 14 ]   [ 0   0    1  0 ]
-	// [ 3 7 11 15 ]   [ 0   0    0  1 ]
-
-	float rad = deg*float(M_PI/180.0f);
-
-	float cosrad = cosf(rad);
-	float sinrad = sinf(rad);
-
-	float mtx00 = mtx[0];
-	float mtx01 = mtx[1];
-	float mtx02 = mtx[2];
-	float mtx03 = mtx[3];
-
-	mtx[ 0] = mtx[ 4]*sinrad + mtx00*cosrad;
-	mtx[ 4] = mtx[ 4]*cosrad - mtx00*sinrad;
-
-	mtx[ 1] = mtx[ 5]*sinrad + mtx01*cosrad;
-	mtx[ 5] = mtx[ 5]*cosrad - mtx01*sinrad;
-
-	mtx[ 2] = mtx[ 6]*sinrad + mtx02*cosrad;
-	mtx[ 6] = mtx[ 6]*cosrad - mtx02*sinrad;
-
-	mtx[ 3] = mtx[ 7]*sinrad + mtx03*cosrad;
-	mtx[ 7] = mtx[ 7]*cosrad - mtx03*sinrad;
-}
 // - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
-static void mtxLoadOrthographic(float* mtx,
-							float left, float right,
-							float bottom, float top,
-							float nearZ, float farZ)
-{
-	//See appendix G of OpenGL Red Book
+//static void mtxMultiply(float* ret, const float* lhs, const float* rhs)
+//{
+//	// [ 0 4  8 12 ]   [ 0 4  8 12 ]
+//	// [ 1 5  9 13 ] x [ 1 5  9 13 ]
+//	// [ 2 6 10 14 ]   [ 2 6 10 14 ]
+//	// [ 3 7 11 15 ]   [ 3 7 11 15 ]
+//	ret[ 0] = lhs[ 0]*rhs[ 0] + lhs[ 4]*rhs[ 1] + lhs[ 8]*rhs[ 2] + lhs[12]*rhs[ 3];
+//	ret[ 1] = lhs[ 1]*rhs[ 0] + lhs[ 5]*rhs[ 1] + lhs[ 9]*rhs[ 2] + lhs[13]*rhs[ 3];
+//	ret[ 2] = lhs[ 2]*rhs[ 0] + lhs[ 6]*rhs[ 1] + lhs[10]*rhs[ 2] + lhs[14]*rhs[ 3];
+//	ret[ 3] = lhs[ 3]*rhs[ 0] + lhs[ 7]*rhs[ 1] + lhs[11]*rhs[ 2] + lhs[15]*rhs[ 3];
+//
+//	ret[ 4] = lhs[ 0]*rhs[ 4] + lhs[ 4]*rhs[ 5] + lhs[ 8]*rhs[ 6] + lhs[12]*rhs[ 7];
+//	ret[ 5] = lhs[ 1]*rhs[ 4] + lhs[ 5]*rhs[ 5] + lhs[ 9]*rhs[ 6] + lhs[13]*rhs[ 7];
+//	ret[ 6] = lhs[ 2]*rhs[ 4] + lhs[ 6]*rhs[ 5] + lhs[10]*rhs[ 6] + lhs[14]*rhs[ 7];
+//	ret[ 7] = lhs[ 3]*rhs[ 4] + lhs[ 7]*rhs[ 5] + lhs[11]*rhs[ 6] + lhs[15]*rhs[ 7];
+//
+//	ret[ 8] = lhs[ 0]*rhs[ 8] + lhs[ 4]*rhs[ 9] + lhs[ 8]*rhs[10] + lhs[12]*rhs[11];
+//	ret[ 9] = lhs[ 1]*rhs[ 8] + lhs[ 5]*rhs[ 9] + lhs[ 9]*rhs[10] + lhs[13]*rhs[11];
+//	ret[10] = lhs[ 2]*rhs[ 8] + lhs[ 6]*rhs[ 9] + lhs[10]*rhs[10] + lhs[14]*rhs[11];
+//	ret[11] = lhs[ 3]*rhs[ 8] + lhs[ 7]*rhs[ 9] + lhs[11]*rhs[10] + lhs[15]*rhs[11];
+//
+//	ret[12] = lhs[ 0]*rhs[12] + lhs[ 4]*rhs[13] + lhs[ 8]*rhs[14] + lhs[12]*rhs[15];
+//	ret[13] = lhs[ 1]*rhs[12] + lhs[ 5]*rhs[13] + lhs[ 9]*rhs[14] + lhs[13]*rhs[15];
+//	ret[14] = lhs[ 2]*rhs[12] + lhs[ 6]*rhs[13] + lhs[10]*rhs[14] + lhs[14]*rhs[15];
+//	ret[15] = lhs[ 3]*rhs[12] + lhs[ 7]*rhs[13] + lhs[11]*rhs[14] + lhs[15]*rhs[15];}
 
-	mtx[ 0] = 2.0f / (right - left);
-	mtx[ 1] = 0.0;
-	mtx[ 2] = 0.0;
-	mtx[ 3] = 0.0;
-
-	mtx[ 4] = 0.0;
-	mtx[ 5] = 2.0f / (top - bottom);
-	mtx[ 6] = 0.0;
-	mtx[ 7] = 0.0;
-
-	mtx[ 8] = 0.0;
-	mtx[ 9] = 0.0;
-	mtx[10] = -2.0f / (farZ - nearZ);
-	mtx[11] = 0.0;
-
-	mtx[12] = -(right + left) / (right - left);
-	mtx[13] = -(top + bottom) / (top - bottom);
-	mtx[14] = -(farZ + nearZ) / (farZ - nearZ);
-	mtx[15] = 1.0f;
-}
 // - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
-static void mtxMultiply(float* ret, const float* lhs, const float* rhs)
-{
-	// [ 0 4  8 12 ]   [ 0 4  8 12 ]
-	// [ 1 5  9 13 ] x [ 1 5  9 13 ]
-	// [ 2 6 10 14 ]   [ 2 6 10 14 ]
-	// [ 3 7 11 15 ]   [ 3 7 11 15 ]
-	ret[ 0] = lhs[ 0]*rhs[ 0] + lhs[ 4]*rhs[ 1] + lhs[ 8]*rhs[ 2] + lhs[12]*rhs[ 3];
-	ret[ 1] = lhs[ 1]*rhs[ 0] + lhs[ 5]*rhs[ 1] + lhs[ 9]*rhs[ 2] + lhs[13]*rhs[ 3];
-	ret[ 2] = lhs[ 2]*rhs[ 0] + lhs[ 6]*rhs[ 1] + lhs[10]*rhs[ 2] + lhs[14]*rhs[ 3];
-	ret[ 3] = lhs[ 3]*rhs[ 0] + lhs[ 7]*rhs[ 1] + lhs[11]*rhs[ 2] + lhs[15]*rhs[ 3];
-
-	ret[ 4] = lhs[ 0]*rhs[ 4] + lhs[ 4]*rhs[ 5] + lhs[ 8]*rhs[ 6] + lhs[12]*rhs[ 7];
-	ret[ 5] = lhs[ 1]*rhs[ 4] + lhs[ 5]*rhs[ 5] + lhs[ 9]*rhs[ 6] + lhs[13]*rhs[ 7];
-	ret[ 6] = lhs[ 2]*rhs[ 4] + lhs[ 6]*rhs[ 5] + lhs[10]*rhs[ 6] + lhs[14]*rhs[ 7];
-	ret[ 7] = lhs[ 3]*rhs[ 4] + lhs[ 7]*rhs[ 5] + lhs[11]*rhs[ 6] + lhs[15]*rhs[ 7];
-
-	ret[ 8] = lhs[ 0]*rhs[ 8] + lhs[ 4]*rhs[ 9] + lhs[ 8]*rhs[10] + lhs[12]*rhs[11];
-	ret[ 9] = lhs[ 1]*rhs[ 8] + lhs[ 5]*rhs[ 9] + lhs[ 9]*rhs[10] + lhs[13]*rhs[11];
-	ret[10] = lhs[ 2]*rhs[ 8] + lhs[ 6]*rhs[ 9] + lhs[10]*rhs[10] + lhs[14]*rhs[11];
-	ret[11] = lhs[ 3]*rhs[ 8] + lhs[ 7]*rhs[ 9] + lhs[11]*rhs[10] + lhs[15]*rhs[11];
-
-	ret[12] = lhs[ 0]*rhs[12] + lhs[ 4]*rhs[13] + lhs[ 8]*rhs[14] + lhs[12]*rhs[15];
-	ret[13] = lhs[ 1]*rhs[12] + lhs[ 5]*rhs[13] + lhs[ 9]*rhs[14] + lhs[13]*rhs[15];
-	ret[14] = lhs[ 2]*rhs[12] + lhs[ 6]*rhs[13] + lhs[10]*rhs[14] + lhs[14]*rhs[15];
-	ret[15] = lhs[ 3]*rhs[12] + lhs[ 7]*rhs[13] + lhs[11]*rhs[14] + lhs[15]*rhs[15];}
+//#include<utility>
 // - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
 class m4{
 public:
-	floato c[16]{0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
+//	m4(m4&&o){c=o.c;}
+	floato c[16]={0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
+//	inline const floato*array()const{return c;}
 	m4&load_translate(const p3&p){
 		// [ 0 4  8  x ]
 		// [ 1 5  9  y ]
 		// [ 2 6 10  z ]
 		// [ 3 7 11 15 ]
-		c[ 0]=c[ 5]=c[10]=c[15]=1;
 		c[ 1]=c[ 2]=c[ 3]=c[ 4]=
 		c[ 6]=c[ 7]=c[ 8]=c[ 9]=
-		c[11]=0.0;
+		c[11]=0;
+		c[ 0]=c[ 5]=c[10]=c[15]=1;
 		c[12]=p.x;
 		c[13]=p.y;
 		c[14]=p.z;
 		return*this;
 	}
 	m4&append_rotation_about_z_axis(const floato degrees){
-		mtxRotateZApply(c,degrees);
+		// [ 0 4  8 12 ]   [ cos -sin 0  0 ]
+		// [ 1 5  9 13 ] x [ sin cos  0  0 ]
+		// [ 2 6 10 14 ]   [ 0   0    1  0 ]
+		// [ 3 7 11 15 ]   [ 0   0    0  1 ]
+		const floato rad=degrees*floato(M_PI/180.0f);
+		const floato cosrad = cosf(rad);
+		const floato sinrad = sinf(rad);
+
+		const floato mtx00=c[0];
+		const floato mtx01=c[1];
+		const floato mtx02=c[2];
+		const floato mtx03=c[3];
+
+		c[ 0]=c[ 4]*sinrad+mtx00*cosrad;
+		c[ 4]=c[ 4]*cosrad-mtx00*sinrad;
+
+		c[ 1]=c[ 5]*sinrad+mtx01*cosrad;
+		c[ 5]=c[ 5]*cosrad-mtx01*sinrad;
+
+		c[ 2]=c[ 6]*sinrad+mtx02*cosrad;
+		c[ 6]=c[ 6]*cosrad-mtx02*sinrad;
+
+		c[ 3]=c[ 7]*sinrad+mtx03*cosrad;
+		c[ 7]=c[ 7]*cosrad-mtx03*sinrad;
 		return*this;
 	}
 	m4&append_scaling(const p3&scale){
@@ -565,12 +526,61 @@ public:
 		c[11]*=scale.z;
 		return*this;
 	}
-	m4&load_ortho_projection(floato left,floato right,floato bottom,floato top,floato nearZ,floato farZ){
-		mtxLoadOrthographic(c,left,right,bottom,top,nearZ,farZ);
+	m4&load_ortho_projection(const floato left,const floato right,const floato bottom,const floato top,const floato nearz,const floato farz){
+		c[ 0]=2.f/(right-left);
+		c[ 1]=0;
+		c[ 2]=0;
+		c[ 3]=0;
+
+		c[ 4]=0;
+		c[ 5]=2.f/(top-bottom);
+		c[ 6]=0;
+		c[ 7]=0;
+
+		c[ 8]=0;
+		c[ 9]=0;
+		c[10]=-2.f/(farz-nearz);
+		c[11]=0;
+
+		c[12]=-(right+left)/(right-left);
+		c[13]=-(top+bottom)/(top-bottom);
+		c[14]=-(farz+nearz)/(farz-nearz);
+		c[15]=1;
 		return*this;
 	}
-	inline const floato*array()const{return c;}
 };
+// - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
+m4 operator*(const m4&lh,const m4&rh){
+	// [ 0 4  8 12 ]   [ 0 4  8 12 ]
+	// [ 1 5  9 13 ] x [ 1 5  9 13 ]
+	// [ 2 6 10 14 ]   [ 2 6 10 14 ]
+	// [ 3 7 11 15 ]   [ 3 7 11 15 ]
+	m4 m;
+	floato*ret=m.c;
+	const floato*lhs=lh.c;
+	const floato*rhs=rh.c;
+	ret[ 0] = lhs[ 0]*rhs[ 0] + lhs[ 4]*rhs[ 1] + lhs[ 8]*rhs[ 2] + lhs[12]*rhs[ 3];
+	ret[ 1] = lhs[ 1]*rhs[ 0] + lhs[ 5]*rhs[ 1] + lhs[ 9]*rhs[ 2] + lhs[13]*rhs[ 3];
+	ret[ 2] = lhs[ 2]*rhs[ 0] + lhs[ 6]*rhs[ 1] + lhs[10]*rhs[ 2] + lhs[14]*rhs[ 3];
+	ret[ 3] = lhs[ 3]*rhs[ 0] + lhs[ 7]*rhs[ 1] + lhs[11]*rhs[ 2] + lhs[15]*rhs[ 3];
+
+	ret[ 4] = lhs[ 0]*rhs[ 4] + lhs[ 4]*rhs[ 5] + lhs[ 8]*rhs[ 6] + lhs[12]*rhs[ 7];
+	ret[ 5] = lhs[ 1]*rhs[ 4] + lhs[ 5]*rhs[ 5] + lhs[ 9]*rhs[ 6] + lhs[13]*rhs[ 7];
+	ret[ 6] = lhs[ 2]*rhs[ 4] + lhs[ 6]*rhs[ 5] + lhs[10]*rhs[ 6] + lhs[14]*rhs[ 7];
+	ret[ 7] = lhs[ 3]*rhs[ 4] + lhs[ 7]*rhs[ 5] + lhs[11]*rhs[ 6] + lhs[15]*rhs[ 7];
+
+	ret[ 8] = lhs[ 0]*rhs[ 8] + lhs[ 4]*rhs[ 9] + lhs[ 8]*rhs[10] + lhs[12]*rhs[11];
+	ret[ 9] = lhs[ 1]*rhs[ 8] + lhs[ 5]*rhs[ 9] + lhs[ 9]*rhs[10] + lhs[13]*rhs[11];
+	ret[10] = lhs[ 2]*rhs[ 8] + lhs[ 6]*rhs[ 9] + lhs[10]*rhs[10] + lhs[14]*rhs[11];
+	ret[11] = lhs[ 3]*rhs[ 8] + lhs[ 7]*rhs[ 9] + lhs[11]*rhs[10] + lhs[15]*rhs[11];
+
+	ret[12] = lhs[ 0]*rhs[12] + lhs[ 4]*rhs[13] + lhs[ 8]*rhs[14] + lhs[12]*rhs[15];
+	ret[13] = lhs[ 1]*rhs[12] + lhs[ 5]*rhs[13] + lhs[ 9]*rhs[14] + lhs[13]*rhs[15];
+	ret[14] = lhs[ 2]*rhs[12] + lhs[ 6]*rhs[13] + lhs[10]*rhs[14] + lhs[14]*rhs[15];
+	ret[15] = lhs[ 3]*rhs[12] + lhs[ 7]*rhs[13] + lhs[11]*rhs[14] + lhs[15]*rhs[15];
+	return m;
+}
+// - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
 class grid;
 // - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -
 class glob{
@@ -595,7 +605,7 @@ public:
 		matrix_model_world.load_translate(ginfo.p);
 		matrix_model_world.append_rotation_about_z_axis(ginfo.a.z);
 		matrix_model_world.append_scaling(ginfo.s);
-		glUniformMatrix4fv(gl::umtx_mw,1,false,matrix_model_world.array());
+		glUniformMatrix4fv(gl::umtx_mw,1,false,matrix_model_world.c);
 		gl->render();
 	}
 	void update(){
@@ -674,12 +684,14 @@ public:
 		glClearColor(floato{.5},0,floato{.5},1);
 		glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 
-		m4 wvp,wv,p;
+		m4 wv,p;
 		wv.load_translate(-phy.p);
 		wv.append_rotation_about_z_axis(-phy.a.z);
+
 		const float aspect_ratio=floato(screen_height)/floato(screen_width);
 		p.load_ortho_projection(-1,1,aspect_ratio,-aspect_ratio,0,1);
-		mtxMultiply(wvp.c, p.c, wv.c);
+
+		m4 wvp=p*wv;
 
 		glUniformMatrix4fv(GLint(gl::umtx_wvp),1,false,wvp.c);
 	}
@@ -869,7 +881,7 @@ public:
 		m4 m;
 		m.load_translate(po);
 		m.append_scaling(p3{s,s,s});
-		glUniformMatrix4fv(GLint(gl::umtx_mw),1,false,m.array());
+		glUniformMatrix4fv(GLint(gl::umtx_mw),1,false,m.c);
 		glo_grid::instance.render();
 	}
 //	void coldet(){
@@ -931,15 +943,15 @@ private:
 		if(nrec==0)
 			return false;
 		const float ns=s/2;
-		grds[0]=new grid(ns,po+p3(-ns,ns,-ns));//?
-		grds[1]=new grid(ns,po+p3( ns,ns,-ns));
-		grds[2]=new grid(ns,po+p3(-ns,ns, ns));
-		grds[3]=new grid(ns,po+p3( ns,ns, ns));
+		grds[0]=new grid(ns,po+p3{-ns,ns,-ns});//?
+		grds[1]=new grid(ns,po+p3{ ns,ns,-ns});
+		grds[2]=new grid(ns,po+p3{-ns,ns, ns});
+		grds[3]=new grid(ns,po+p3{ ns,ns, ns});
 
-		grds[4]=new grid(ns,po+p3(-ns,-ns,-ns));
-		grds[5]=new grid(ns,po+p3( ns,-ns,-ns));
-		grds[6]=new grid(ns,po+p3(-ns,-ns, ns));
-		grds[7]=new grid(ns,po+p3( ns,-ns, ns));
+		grds[4]=new grid(ns,po+p3{-ns,-ns,-ns});
+		grds[5]=new grid(ns,po+p3{ ns,-ns,-ns});
+		grds[6]=new grid(ns,po+p3{-ns,-ns, ns});
+		grds[7]=new grid(ns,po+p3{ ns,-ns, ns});
 
 		for(auto o:ls)
 			o->grid_that_updates_this_glob=nullptr;
