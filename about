@@ -4,17 +4,6 @@
 #	osx
 #	ios	
 
-#cd src&&g++ -o ../gleso -std=c++0x -O0 -g3 -Wall -Wextra -pedantic -Wfatal-errors -fmessage-length=0 -Wfatal-errors main.c gleso.cpp -lGL -lglfw -lGLEW
-
-g++ -std=c++0x -O0 -g3 -Wall -c -fmessage-length=0 -Wfatal-errors -MMD -MP -MF"src/gleso.d" -MT"src/gleso.d" -o "src/gleso.o" "../src/gleso.cpp"
-../src/gleso.cpp:476:1: warning: multi-line comment [-Wcomment]
- //             /||\
- ^
-../src/gleso.cpp:480:1: warning: multi-line comment [-Wcomment]
- //  //||\|\\
- ^
-Finished building: ../src/gleso.cpp
- 
-Building file: ../src/main.c
-Invoking: GCC C Compiler
-gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/main.d" -MT"src/main.d" -o "src/main.o" "../src/main.c"
+g++ src/main.cpp src/gleso/gleso.cpp -lGL -lglfw -lGLEW -std=c++17 -o gleso -O3 -Wall -Wextra -pedantic -Wfatal-errors -fmessage-length=0 -Wfatal-errors
+#g++ -std=c++0x -O0 -g3 -Wall -c -fmessage-length=0 -Wfatal-errors -MMD -MP -MF"src/gleso.d" -MT"src/gleso.d" -o "src/gleso.o" "../src/gleso.cpp"
+#gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/main.d" -MT"src/main.d" -o "src/main.o" "../src/main.c"

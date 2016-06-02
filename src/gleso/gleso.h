@@ -1,13 +1,19 @@
-// cross platform interface
-#ifndef GLESO_H
-#define GLESO_H
-#include "gles.h"
+#pragma once
+#include "../gleso-platform-adapter.h"
+////
+// cross-platform
 typedef GLfloat floato;
 typedef GLint into;
 typedef long long longo;
+
+#include<cmath>
+#include<cstdlib>
+inline floato rnd(floato min,floato max){return min+(floato(rand())/RAND_MAX)*(max-min);}
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 //	int gleso_argc;
 //	char**gleso_argv;
 	void gleso_init();// called when opengl context needs reload
@@ -17,11 +23,8 @@ extern "C" {
 	//action 0:press   2:drag   1:release
 	void gleso_touch(const floato x,const floato y,const int action);// called on touch/pointer event
 	void gleso_cleanup();
+
 #ifdef __cplusplus
 }
 #endif
 
-#include<cmath>
-#include<cstdlib>
-inline floato rnd(floato min,floato max){return min+(floato(rand())/RAND_MAX)*(max-min);}
-#endif
