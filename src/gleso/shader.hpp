@@ -9,12 +9,12 @@ class shader{
 	GLint utex{0};
 public:
 	shader(){
-		p("new shader %p\n",this);
+//		p("new shader %p\n",this);
 		metrics::nshaders++;
 	}
 
 	virtual~shader(){
-		p("delete shader %p\n",(void*)this);
+//		p("delete shader %p\n",(void*)this);
 		metrics::nshaders--;
 		metrics::print();
 //		if(glid_program){glDeleteProgram(glid_program);glid_program=0;}
@@ -69,7 +69,7 @@ public:
 	}
 	void use_program(){
 		if(gl::active_program==glid_program)return;
-		p(" activating program  %d\n",glid_program);
+//		p(" activating program  %d\n",glid_program);
 		glUseProgram(glid_program);
 		prepare_gl_for_render();
 		gl::active_program=glid_program;
@@ -79,7 +79,7 @@ private:
 	void load_program(const char*vertex_shader_source,const char*fragment_shader_source){
 		glid_program=glCreateProgram();
 		if(!glid_program)throw"cannot create program";
-		p("    program glid=%d\n",glid_program);
+//		p("    program glid=%d\n",glid_program);
 		glAttachShader(glid_program,load_shader(GL_VERTEX_SHADER,vertex_shader_source));
 		glAttachShader(glid_program,load_shader(GL_FRAGMENT_SHADER,fragment_shader_source));
 		glLinkProgram(glid_program);
@@ -98,7 +98,7 @@ private:
 	}
 	static GLuint load_shader(const GLenum shader_type,const char*source){
 		const GLuint shader=glCreateShader(shader_type);
-		p("    %s shader glid=%d\n",get_shader_name_for_type(shader_type),shader);
+//		p("    %s shader glid=%d\n",get_shader_name_for_type(shader_type),shader);
 		glShaderSource(shader,1,&source,NULL);
 		glCompileShader(shader);
 		GLint compiled{0};

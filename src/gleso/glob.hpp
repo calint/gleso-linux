@@ -5,14 +5,14 @@ class glob{public:
 	glo*gl{nullptr};// ref to gl renderable
 	octgrid*grid_that_updates_this_glob{nullptr};//managed by grid
 	inline glob(){
-		p("new glob %p\n",(void*)this);
+//		p("new glob %p\n",(void*)this);
 		metrics::nglobs++;
 		phy.r=.1;
 		phy.s={phy.r,phy.r,phy.r};
 	}
 	inline glob(glo*g):glob(){gl=g;}
 	inline virtual~glob(){
-		p("delete glob %p\n",(void*)this);
+//		p("delete glob %p\n",(void*)this);
 		metrics::nglobs--;
 	}
 	inline void render(){

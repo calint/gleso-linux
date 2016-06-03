@@ -14,7 +14,7 @@ static void init(){
 	glos.push_back(&glo_circle_xy::instance);
 	glos.push_back(&glo_grid::instance);
 	glos.push_back(&glo_ball::instance);
-	const int instances=16;
+	const int instances=1024*8;
 	for(int n=0;n<instances;n++)
 		globs.push_back(new a_ball());
 }

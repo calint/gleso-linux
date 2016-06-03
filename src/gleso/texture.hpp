@@ -2,17 +2,17 @@
 class texture{
 public:
 	texture(){
-		p("new texture %p\n",this);
+//		p("new texture %p\n",this);
 		metrics::ntextures++;
 	}
 	~texture(){
-		p("delete texture %p\n",this);
+//		p("delete texture %p\n",this);
 //		glDeleteTextures(1,&glid_texture);
 		metrics::ntextures--;
 	}
 	void load(){
 		glGenTextures(1,&glid_texture);
-		p("    texture  glid=%d\n",glid_texture);
+//		p("    texture  glid=%d\n",glid_texture);
 		refresh_from_data();
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);

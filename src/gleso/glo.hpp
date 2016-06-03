@@ -12,11 +12,11 @@ class glo{
 #endif
 public:
 	inline glo(){
-		p("new glo %p\n",(void*)this);
+//		p("new glo %p\n",(void*)this);
 		metrics::nglos++;
 	}
 	inline virtual~glo(){
-		p("delete glo %p\n",this);
+//		p("delete glo %p\n",this);
 		metrics::nglos--;
 	}
 	inline glo&set_texture(texture*t){tex=t;return*this;}
@@ -30,7 +30,7 @@ public:
 #else
 		const vector<GLfloat>v1=make_vertices();
 		glGenBuffers(1,&glid_buffer_vertices);
-		p("    vertices buffer glid=%d\n",glid_buffer_vertices);
+//		p("    vertices buffer glid=%d\n",glid_buffer_vertices);
 		glBindBuffer(GL_ARRAY_BUFFER,glid_buffer_vertices);
 		glBufferData(GL_ARRAY_BUFFER,GLsizeiptr(v1.size()*sizeof(GLfloat)),v1.data(),GL_STATIC_DRAW);
 		shader::check_gl_error("load vertices");
@@ -38,7 +38,7 @@ public:
 		const vector<GLfloat>v2=make_texture_coords();
 		if(!v2.empty()){
 			glGenBuffers(1,&glid_buffer_texture_coords);
-			p("    texture coords buffer glid=%d\n",glid_buffer_texture_coords);
+//			p("    texture coords buffer glid=%d\n",glid_buffer_texture_coords);
 			glBindBuffer(GL_ARRAY_BUFFER,glid_buffer_texture_coords);
 			glBufferData(GL_ARRAY_BUFFER,GLsizeiptr(v2.size()*sizeof(GLfloat)),v2.data(),GL_STATIC_DRAW);
 			shader::check_gl_error("load texture coords");
@@ -47,7 +47,7 @@ public:
 		const vector<GLfloat>v3=make_colors();
 		if(!v3.empty()){
 			glGenBuffers(1,&glid_buffer_colors);
-			p("    colors buffer glid=%d\n",glid_buffer_colors);
+//			p("    colors buffer glid=%d\n",glid_buffer_colors);
 			glBindBuffer(GL_ARRAY_BUFFER,glid_buffer_colors);
 			glBufferData(GL_ARRAY_BUFFER,GLsizeiptr(v3.size()*sizeof(GLfloat)),v3.data(),GL_STATIC_DRAW);
 			shader::check_gl_error("load colors");

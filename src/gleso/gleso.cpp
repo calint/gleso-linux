@@ -10,23 +10,15 @@
 #include"glob.hpp"
 #include"a_camera.hpp"
 #include"glo_grid.hpp"
-#include<signal.h>
-
 #include"gleso.h"
-
 #include "../app/init.hpp"
 #include "octgrid.hpp"
-//#include<execinfo.h>
+
 static void mainsig(const int i){
 	p(" ••• terminated with signal %d\n",i);
-//	const int nva=10;
-//	void*va[nva];
-//	int n=backtrace(va,nva);
-//	backtrace_symbols_fd(va,n,1);
 	exit(i);
 }
-#include<typeinfo>
-
+#include<signal.h>
 void gleso_init(){
 	p("* gleso\n");
 	for(int i=0;i<32;i++)signal(i,mainsig);//?
@@ -64,15 +56,15 @@ void gleso_init(){
 	gl::active_program=0;
 	p("* load\n");
 	foreach(gl::shaders,[](shader*o){
-		p(" shader %p   %s\n",(void*)o,typeid(*o).name());
+//		p(" shader %p   %s\n",(void*)o,typeid(*o).name());
 		o->load();
 	});
 	foreach(gl::textures,[](texture*o){
-		p(" texture %p   %s\n",(void*)o,typeid(*o).name());
+//		p(" texture %p   %s\n",(void*)o,typeid(*o).name());
 		o->load();
 	});
 	foreach(gl::glos,[](glo*o){
-		p(" glo %p   %s\n",(void*)o,typeid(*o).name());
+//		p(" glo %p   %s\n",(void*)o,typeid(*o).name());
 		o->load();
 	});
 }
