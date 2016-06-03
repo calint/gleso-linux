@@ -6,6 +6,10 @@ typedef GLfloat floato;
 typedef GLint into;
 typedef long long longo;
 
+
+typedef floato weight_kg;
+typedef floato radius_m;
+
 #include<cstdlib>
 inline floato rnd(floato min,floato max){return min+(floato(random())/RAND_MAX)*(max-min);}
 
@@ -39,8 +43,10 @@ namespace gleso{
 #include"texture.hpp"
 #include"glo.hpp"
 #include"p3.hpp"
+typedef p3 scale;
+typedef p3 angle;
+typedef p3 position;
 #include"physics.hpp"
-#include"glinfo.hpp"
 #include"m4.hpp"
 #include"glob.hpp"
 #include"glo_grid.hpp"

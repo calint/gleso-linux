@@ -1,6 +1,12 @@
 #pragma once
 class octgrid;
-class glob{public:
+class glob{
+	struct glinfo{
+		position p{0,0,0};
+		angle a{0,0,0};
+		scale s{0,0,0};
+	};
+public:
 	physics phy;// current physics state
 	glo*gl{nullptr};// ref to gl renderable
 	octgrid*grid_that_updates_this_glob{nullptr};//managed by grid
