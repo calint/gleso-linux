@@ -76,7 +76,7 @@ void gleso_viewport(int width,int height){
 }
 
 static bool render_globs=true;
-static bool render_grid_outline=false;
+static bool render_grid_outline=true;
 static bool use_grid=true;
 void gleso_step(){
 	metrics::before_render();
