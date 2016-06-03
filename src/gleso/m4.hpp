@@ -1,4 +1,6 @@
 #pragma once
+#include<cmath>
+
 ////
 // mtx funcs lifted from apple examples
 // - - - -------- - - - - - - -    - - --- - - - - - --- -- - - - - -

@@ -1,4 +1,5 @@
 #pragma once
+#include"glo_ball.hpp"
 class a_ball:public glob{public:
 	inline a_ball(){
 		gl=&glo_ball::instance;

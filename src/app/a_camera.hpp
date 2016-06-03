@@ -1,9 +1,11 @@
 #pragma once
-#include"glo_circle_xy.hpp"
-class a_camera:public glob{public:
-//	m4 mtx_wvp;// world->view->projection
+class a_camera:public glob{
 	int screen_width{320},screen_height{240};
-	inline a_camera():glob(&glo_circle_xy::instance){}
+public:
+//	m4 mtx_wvp;// world->view->projection
+//	inline a_camera():glob(&glo_circle_xy::instance){}
+	inline a_camera():glob(&glo_grid::instance){}
+	inline void viewport(int w,int h){screen_width=w;screen_height=h;}
 	void pre_render(){
 		gl::active_shader->use_program();
 		glClearColor(floato{.5},0,floato{.5},1);

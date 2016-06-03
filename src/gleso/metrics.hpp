@@ -1,6 +1,7 @@
 #pragma once
-#include"gleso.h"
 #include<sys/time.h>
+
+#include "init.hpp"
 namespace metrics{
 	int nshaders;
 	int ngrids;

@@ -1,11 +1,6 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<errno.h>
-#include<math.h>
-#include<string.h>
-#include<GL/glew.h>
+#include"app/init.hpp"
 #include<GLFW/glfw3.h>
-#include"gleso/gleso.h"
+#include<GL/glew.h>
 static void key_callback(GLFWwindow*window,int key,int scancode,int action,int mods){
 	if(window==0)return;//? unused param warning workaround
 	gleso_key(key,scancode,action,mods);
@@ -20,7 +15,7 @@ static void cursorpos_position_callback(GLFWwindow*window,double xpos,double ypo
 		gleso_touch(pointer_x,pointer_y,2);
 	}
 }
-void mousebutton_callback(GLFWwindow*window,int button,int action,int mods){
+static void mousebutton_callback(GLFWwindow*window,int button,int action,int mods){
 	if(window==0)return;//? unused param warning workaround
 	if(mods!=0)return;
 	if(button!=GLFW_MOUSE_BUTTON_LEFT)
