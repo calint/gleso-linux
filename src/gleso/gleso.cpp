@@ -76,15 +76,21 @@ void gleso_viewport(int width,int height){
 }
 
 static bool render_globs=true;
-static bool render_grid_outline=true;
+static bool render_grid_outline=false;
+static bool use_grid=true;
 void gleso_step(){
 	metrics::before_render();
-	grd.clear();
-	grd.addall(gl::globs);
-	grd.update_globs();//? thread
 	gl::active_camera->pre_render();
-	if(render_globs)grd.render_globs();//? thread
-	if(render_grid_outline)grd.render_outline();
+	if(use_grid){
+		grd.clear();
+		grd.addall(gl::globs);
+		grd.update_globs();//? mt
+		if(render_globs)grd.render_globs();//? thread
+		if(render_grid_outline)grd.render_outline();
+	}else{
+		foreach(gl::globs,[](glob*g){g->update();});
+		foreach(gl::globs,[](glob*g){g->render();});
+	}
 	metrics::after_render();
 }
 void gleso_key(int key,int scancode,int action,int mods){
@@ -116,6 +122,12 @@ void gleso_key(int key,int scancode,int action,int mods){
 //			case 0:c->phy.dp.x=0;break;
 			case 1:gl::active_camera->phy.da.z=-180;break;
 			case 0:gl::active_camera->phy.da.z=0;break;
+		}
+		break;
+	case 46://.
+		switch(action){
+			case 1:use_grid=!use_grid;break;
+			case 0:break;
 		}
 		break;
 	}
