@@ -27,7 +27,7 @@
 								<option id="gnu.cpp.compiler.option.dialect.std.216634451" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.warnings.pedantic.521652547" name="Pedantic (-pedantic)" superClass="gnu.cpp.compiler.option.warnings.pedantic" value="true" valueType="boolean"/>
 								<option id="gnu.cpp.compiler.option.warnings.extrawarn.46497952" name="Extra warnings (-Wextra)" superClass="gnu.cpp.compiler.option.warnings.extrawarn" value="true" valueType="boolean"/>
-								<option id="gnu.cpp.compiler.option.dialect.flags.1010679385" superClass="gnu.cpp.compiler.option.dialect.flags" value="-std=c++17" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.dialect.flags.1010679385" name="Other dialect flags" superClass="gnu.cpp.compiler.option.dialect.flags" value="-std=c++17" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1071738429" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.614637817" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug">
@@ -38,7 +38,7 @@
 								<option id="gnu.c.compiler.option.warnings.pedantic.731977792" name="Pedantic (-pedantic)" superClass="gnu.c.compiler.option.warnings.pedantic" value="true" valueType="boolean"/>
 								<option id="gnu.c.compiler.option.dialect.std.1976913181" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.misc.other.1996820670" name="Other flags" superClass="gnu.c.compiler.option.misc.other" value="-c -fmessage-length=0 -Wfatal-errors" valueType="string"/>
-								<option id="gnu.c.compiler.option.dialect.flags.1104378768" superClass="gnu.c.compiler.option.dialect.flags" value="-std=c++17" valueType="string"/>
+								<option id="gnu.c.compiler.option.dialect.flags.1104378768" name="Other dialect flags" superClass="gnu.c.compiler.option.dialect.flags" value="-std=c++17" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1973215767" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.764661191" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
