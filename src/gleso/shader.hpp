@@ -88,10 +88,9 @@ private:
 		if(linkStatus)return;
 		GLint info_len{0};
 		glGetProgramiv(glid_program,GL_INFO_LOG_LENGTH,&info_len);
-		GLchar*info=new char[info_len];
-		glGetProgramInfoLog(glid_program,info_len,NULL,info);
-		p("!!! could not link program:\n%s\n",info);
-		delete info;
+		unique_ptr<GLchar>info=make_unique<GLchar>(info_len);
+		glGetProgramInfoLog(glid_program,info_len,NULL,info.get());
+		p("!!! could not link program:\n%s\n",info.get());
 		glDeleteProgram(glid_program);
 		glid_program=0;
 		throw"error while linking";
@@ -106,10 +105,9 @@ private:
 		if(compiled)return shader;
 		GLint info_len{0};
 		glGetShaderiv(shader,GL_INFO_LOG_LENGTH,&info_len);
-		GLchar*info_buf=new GLchar[info_len];
-		glGetShaderInfoLog(shader,info_len,NULL,info_buf);
-		p("!!! could not compile %s shader:\n%s\n",get_shader_name_for_type(shader_type),info_buf);
-		delete info_buf;
+		unique_ptr<GLchar>info_buf=make_unique<GLchar>(info_len);
+		glGetShaderInfoLog(shader,info_len,NULL,info_buf.get());
+		p("!!! could not compile %s shader:\n%s\n",get_shader_name_for_type(shader_type),info_buf.get());
 		glDeleteShader(shader);
 		throw"could not compile shader";
 	}
