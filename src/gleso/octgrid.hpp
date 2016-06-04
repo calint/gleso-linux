@@ -4,8 +4,8 @@
 class octgrid{
 	p3 po;
 	float s;
-	vector<glob*>ls;
-	vector<glob*>lsmx;
+	vector<shared_ptr<glob>>ls;
+	vector<shared_ptr<glob>>lsmx;
 	octgrid*grds[8]{nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr};
 	const size_t splitthresh=1;
 	const int subgridlevels=3;
@@ -22,7 +22,7 @@ public:
 				g=nullptr;
 			}
 	}
-	inline void addall(const vector<glob*>&ls){
+	inline void addall(const vector<shared_ptr<glob>>&ls){
 		for(auto g:ls){
 			g->grid_that_updates_this_glob=nullptr;
 			putif(g,g->phy.p,g->phy.r);
@@ -115,7 +115,7 @@ public:
 //				g->culldraw(bv);
 //	}
 private:
-	inline bool putif(glob*g,const p3&p,const floato r){
+	inline bool putif(shared_ptr<glob>g,const p3&p,const floato r){
 		if((p.x+s+r)<po.x)return false;
 		if((p.x-s-r)>po.x)return false;
 		if((p.z+s+r)<po.z)return false;

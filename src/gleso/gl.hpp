@@ -5,7 +5,8 @@ class glo;
 class a_camera;
 class glob;
 #include<vector>
-using std::vector;
+#include<memory>
+using namespace std;
 namespace gl{
 	// - - glsl bindings - - - - - - -
 	GLint apos;// vec2 vertex coords x,y
@@ -20,6 +21,6 @@ namespace gl{
 	vector<shader*>shaders;
 	vector<texture*>textures;
 	vector<glo*>glos;
-	vector<glob*>globs;
-	a_camera*active_camera;
+	vector<shared_ptr<glob>>globs;
+	shared_ptr<a_camera>active_camera;
 }

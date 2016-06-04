@@ -8,6 +8,8 @@
 #include"../gleso/init.hpp"
 #include"a_ball.hpp"
 #include"a_camera.hpp"
+#include<memory>
+using namespace std;
 static void init(){
 	using namespace gl;
 	shaders.push_back(&shader::instance);
@@ -16,8 +18,9 @@ static void init(){
 	glos.push_back(&glo_grid::instance);
 	glos.push_back(&glo_ball::instance);
 	const int instances=1024*8;
-	for(int n=0;n<instances;n++)
-		globs.push_back(new a_ball());
+	for(int n=0;n<instances;n++){
+		globs.push_back(make_unique<a_ball>());
+	}
 }
 
 
@@ -66,7 +69,7 @@ void gleso_init(){
 	if(!gl::active_shader){// init
 		p("* init\n");
 		gl::active_shader=&shader::instance;
-		gl::active_camera=new a_camera();
+		gl::active_camera=make_shared<a_camera>();
 		gl::globs.push_back(gl::active_camera);
 		init();
 	}
@@ -100,8 +103,8 @@ void gleso_step(){
 		if(gleso::render_globs)grd.render_globs();//? thread
 		if(gleso::render_grid_outline)grd.render_outline();
 	}else{
-		foreach(gl::globs,[](glob*g){g->update();});//. async
-		foreach(gl::globs,[](glob*g){g->render();});
+		foreach(gl::globs,[](shared_ptr<glob>g){g->update();});//. async
+		foreach(gl::globs,[](shared_ptr<glob>g){g->render();});
 	}
 	metrics::after_render();
 }
@@ -148,9 +151,10 @@ void gleso_touch(floato x,floato y,int action){
 	p("gleso_touch  x=%.1f   y=%.1f    action=%d\n",x,y,action);
 }
 void gleso_cleanup(){
-	for(auto o:gl::globs){
-		delete o;
-	}
+	p(" *** cleanup");
+//	for(auto o:gl::globs){
+//		delete o;
+//	}
 }
 
 
