@@ -13,7 +13,7 @@ using namespace std;
 static void init(){
 	using namespace gl;
 	shaders.push_back(&shader::instance);
-	textures.push_back(&texture::instance);//?? leak
+	textures.push_back(&texture::instance);
 //	glos.push_back(&glo_circle_xy::instance);
 	glos.push_back(&glo_grid::instance);
 	glos.push_back(&glo_ball::instance);
