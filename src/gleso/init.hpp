@@ -51,5 +51,5 @@ typedef p3 position;
 #include"glob.hpp"
 #include"glo_grid.hpp"
 #include"init.hpp"
-#include"octgrid.hpp"
+#include"grid.hpp"
 #include"init.hpp"

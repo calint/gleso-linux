@@ -1,6 +1,8 @@
 #include"app/init.hpp"
 #include<GLFW/glfw3.h>
 #include<GL/glew.h>
+#include"gleso/wqueue.hpp"
+
 static void key_callback(GLFWwindow*window,int key,int scancode,int action,int mods){
 	if(window==0)return;//? unused param warning workaround
 	gleso_key(key,scancode,action,mods);
@@ -37,7 +39,12 @@ static void windowsize_callback(GLFWwindow*window,int width,int height){
 }
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
+
 int main(int argc,char**argv){
+//	test_threads();
+//	test_wqueue(8);
+//	exit(0);
+
 	while(argc--)puts(*argv++);
 //	atexit([]{gleso_deinit();});
 	puts(glfwGetVersionString());
@@ -59,6 +66,7 @@ int main(int argc,char**argv){
 		if(glewInit()!=GLEW_OK)throw"cannot init glew";
 		gleso_init();
 		gleso_viewport(WINDOW_WIDTH,WINDOW_HEIGHT);
+		glfwSwapInterval(0);
 		p("* running\n");
 		while(!glfwWindowShouldClose(window)){
 			gleso_step();

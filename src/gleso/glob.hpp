@@ -1,5 +1,5 @@
 #pragma once
-class octgrid;
+class grid;
 class glob{
 	struct glinfo{
 		position p{0,0,0};
@@ -9,7 +9,7 @@ class glob{
 public:
 	physics phy;// current physics state
 	glo*gl{nullptr};// ref to gl renderable
-	octgrid*grid_that_updates_this_glob{nullptr};//managed by grid
+	grid*grid_that_updates_this_glob{nullptr};//managed by grid
 	inline glob(){
 //		p("new glob %p\n",(void*)this);
 		metrics::nglobs++;

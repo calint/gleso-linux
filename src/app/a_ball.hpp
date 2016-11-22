@@ -15,7 +15,7 @@ class a_ball:public glob{public:
 	inline void on_update()override{
 //		p("update desk  %f    \n",phy.p.x);
 		const floato d=.1;
-		const floato sq=.5;
+		const floato sq=1;
 		if(phy.p.x>sq-phy.s.x)
 			phy.dp.x=-d;
 		else if(phy.p.x<-sq+phy.s.x)

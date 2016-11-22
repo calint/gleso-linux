@@ -17,10 +17,52 @@ static void init(){
 //	glos.push_back(&glo_circle_xy::instance);
 	glos.push_back(&glo_grid::instance);
 	glos.push_back(&glo_ball::instance);
-	const int instances=1024*8;
+	const int instances=1024*2;
 	for(int n=0;n<instances;n++){
 		globs.push_back(make_unique<a_ball>());
 	}
+}
+
+
+
+
+#include"../gleso/thread.hpp"
+#include"../gleso/wqueue.hpp"
+
+class wque_thread:public thread{
+	wqueue<grid*>&m_queue;
+
+public:
+    wque_thread(wqueue<grid*>&queue):m_queue(queue){
+    	p("wque_thread created\n");
+    }
+    virtual~wque_thread(){
+    	p("wque_thread deleted\n");
+    }
+
+    void*run(){
+    	while(true){
+    		grid*g=(grid*)m_queue.remove();
+    		g->update_globs();
+    	}
+    	return NULL;
+    }
+};
+
+wqueue<grid*>update_grid_queue;
+vector<unique_ptr<wque_thread>>work_queue_threads;
+
+void init_update_grid_threads(int num){
+	for(int i=0;i<num;i++){
+		wque_thread*t=new wque_thread(update_grid_queue);
+		work_queue_threads.push_back(unique_ptr<wque_thread>(t));
+	}
+	for(int i=0;i<num;i++){
+		work_queue_threads[i]->start();
+	}
+//	for(int i=0;i<num;i++){
+//		work_queue_threads[i]->join();
+//	}
 }
 
 
@@ -63,7 +105,7 @@ void gleso_init(){
 	p("%16s %4u B\n","m4",(unsigned int)sizeof(m4));
 	p("%16s %4u B\n","glo",(unsigned int)sizeof(glo));
 	p("%16s %4u B\n","glob",(unsigned int)sizeof(glob));
-	p("%16s %4u B\n","grid",(unsigned int)sizeof(octgrid));
+	p("%16s %4u B\n","grid",(unsigned int)sizeof(grid));
 	p("%16s %4u B\n","physics",(unsigned int)sizeof(physics));
 	srand(1);// generate same random numbers in different instances
 	if(!gl::active_shader){// init
@@ -87,19 +129,23 @@ void gleso_init(){
 //		p(" glo %p   %s\n",(void*)o,typeid(*o).name());
 		o->load();
 	});
+
+	init_update_grid_threads(4);
 }
 void gleso_viewport(int width,int height){
 	p("* viewport  %d x %d\n",width,height);
 	if(gl::active_shader)gl::active_shader->viewport(width,height);
 	gl::active_camera->viewport(width,height);
 }
+
 void gleso_step(){
 	metrics::before_render();
 	gl::active_camera->pre_render();
 	if(gleso::use_grid){
 		grd.clear();
 		grd.addall(gl::globs);
-		grd.update_globs();//? mt
+//		grd.update_globs();//? mt
+		update_grid_queue.add(&grd);
 		if(gleso::render_globs)grd.render_globs();//? thread
 		if(gleso::render_grid_outline)grd.render_outline();
 	}else{
@@ -108,6 +154,7 @@ void gleso_step(){
 	}
 	metrics::after_render();
 }
+
 void gleso_key(int key,int scancode,int action,int mods){
 	p("gleso_key  key=%d   scancode=%d    action=%d   mods=%d\n",key,scancode,action,mods);
 	switch(key){
