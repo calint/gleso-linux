@@ -2,6 +2,7 @@
 #include<sys/time.h>
 #include<atomic>
 #include "init.hpp"
+std::atomic_int globs_updated;
 namespace metrics{
 	int nshaders;
 	int ngrids;
@@ -21,8 +22,12 @@ namespace metrics{
 		frame++;
 		updated_globs=0;
 		rendered_globs=0;
+		globs_updated=0;
 	}
-	void print(){p("fps:%03.0f – dt:%5f – shaders:%01d – textures:%01d – glos:%02d – globs:%05d – updated:%02d – rendered:%02d – grids:%02d – threads:%02d\n",fps,metrics::dt,nshaders,ntextures,nglos,nglobs,updated_globs,rendered_globs,ngrids,threads);}
+	void print(){
+		int gu=globs_updated;
+		p("fps:%03.0f – dt:%5f – shaders:%01d – textures:%01d – glos:%02d – globs:%05d – updated:%02d – rendered:%02d – grids:%02d – threads:%02d\n",fps,metrics::dt,nshaders,ntextures,nglos,nglobs,gu,rendered_globs,ngrids,threads);
+	}
 	static void after_render(){
 		struct timeval tv;
 		gettimeofday(&tv,NULL);

@@ -87,18 +87,25 @@ public:
 	}
 };
 
+atomic_int threads_running_count;
 class wque_thread:public thread{
 	wqueue<wque_thread_work*>&queue_;
 
 public:
-	wque_thread(wqueue<wque_thread_work*>&queue):queue_(queue){metrics::threads++;}
+	wque_thread(wqueue<wque_thread_work*>&queue):queue_(queue){
+		metrics::threads++;
+	}
 
-	virtual~wque_thread(){metrics::threads--;}
+	~wque_thread(){
+		metrics::threads--;
+	}
 
 	void*run(){
 		while(true){
 			wque_thread_work*wrk=queue_.remove();
+			threads_running_count++;
 			wrk->exec();
+			threads_running_count--;
 			delete wrk;
 		}
 	}
@@ -119,9 +126,9 @@ class grid{
 public:
 
 //	inline grid(const int nthreads=1,const int rows=1,const int cols=1,const floato cell_size=2,const p3&p=p3{})
-	inline grid(const int nthreads=2,const int rows=2,const int cols=2,const floato cell_size=1,const p3&p=p3{})
+//	inline grid(const int nthreads=2,const int rows=2,const int cols=2,const floato cell_size=1,const p3&p=p3{})
 //	inline grid(const int nthreads=1,const int rows=4,const int cols=4,const floato cell_size=.5f,const p3&p=p3{})
-//	inline grid(const int nthreads=4,const int rows=4,const int cols=4,const floato cell_size=.5f,const p3&p=p3{})
+	inline grid(const int nthreads=4,const int rows=4,const int cols=4,const floato cell_size=.5f,const p3&p=p3{})
 //		:po_(p),cell_size_(cell_size),cells_(rows*cols),nrows_{rows},ncols_{cols},nthreads_(nthreads)
 		:po_(p),cell_size_(cell_size),nrows_{rows},ncols_{cols},nthreads_(nthreads)
 	{
@@ -187,15 +194,26 @@ public:
 			for(int c=0;c<ncols_;c++){
 				grid_cell*cell=cells_[r*ncols_+c].get();
 				wque_thread_work_update*wrk=new wque_thread_work_update(cell,r==nrows_-1 and c==ncols_-1);
+//				if(r==nrows_-1 and c==ncols_-1)
+//					break;
 				update_grid_queue_.add(wrk);
 			}
 		}
 //		pthread_mutex_lock(&mutex_work_done);
+////		grid_cell*cell=cells_[(nrows_-1)*ncols_+ncols_-1].get();
+////		wque_thread_work_update*wrk=new wque_thread_work_update(cell,true);
 //		pthread_cond_wait(&cond_work_done,&mutex_work_done);
 //		pthread_mutex_unlock(&mutex_work_done);
-		while(update_grid_queue_.size()!=0 and threads_.size()!=4)
-			p(".");
-		p("\n");
+
+		int busy_wait=0;
+		while(threads_running_count){
+			int n=threads_running_count;
+//			p(" threads: %d\n",n);
+			busy_wait++;
+		}
+//		if(busy_wait)
+//			p("busy wait: %d\n",busy_wait);
+
 	}
 
 	inline void render_globs(){

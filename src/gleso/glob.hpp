@@ -45,6 +45,7 @@ public:
 	}
 	inline void update(){
 		metrics::updated_globs++;
+		globs_updated++;
 		time_stamp_update=gl::time_stamp;
 		phy.update();
 		on_update();
