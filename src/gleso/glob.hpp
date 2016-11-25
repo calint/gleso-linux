@@ -1,15 +1,20 @@
 #pragma once
-class grid;
+class grid_cell;
 class glob{
 	struct glinfo{
 		position p{0,0,0};
 		angle a{0,0,0};
 		scale s{0,0,0};
 	};
+	longo time_stamp_render{0};
+	longo time_stamp_update{0};
 public:
 	physics phy;// current physics state
 	glo*gl{nullptr};// ref to gl renderable
-	grid*grid_that_updates_this_glob{nullptr};//managed by grid
+
+
+	grid_cell*grid_cell_ref{nullptr};//managed by grid
+
 	inline glob(){
 //		p("new glob %p\n",(void*)this);
 		metrics::nglobs++;
@@ -21,8 +26,12 @@ public:
 //		p("delete glob %p\n",(void*)this);
 		metrics::nglobs--;
 	}
+	inline bool should_render(){
+		return time_stamp_render!=gl::time_stamp;
+	}
 	inline void render(){
 		metrics::rendered_globs++;
+		time_stamp_render=gl::time_stamp;
 		if(!gl)return;
 		ginfo=ginfo_nxt;
 		matrix_model_world.load_translate(ginfo.p);
@@ -31,8 +40,12 @@ public:
 		glUniformMatrix4fv(gl::umtx_mw,1,false,matrix_model_world.c);
 		gl->render();
 	}
+	inline bool should_update()const{
+		return time_stamp_update!=gl::time_stamp;
+	}
 	inline void update(){
 		metrics::updated_globs++;
+		time_stamp_update=gl::time_stamp;
 		phy.update();
 		on_update();
 		ginfo_nxt.p=phy.p;

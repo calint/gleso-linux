@@ -17,54 +17,13 @@ static void init(){
 //	glos.push_back(&glo_circle_xy::instance);
 	glos.push_back(&glo_grid::instance);
 	glos.push_back(&glo_ball::instance);
-	const int instances=1024*2;
+
+
+	const int instances=1024*1;
 	for(int n=0;n<instances;n++){
-		globs.push_back(make_unique<a_ball>());
+		globs.push_back(new a_ball());
 	}
 }
-
-
-
-
-#include"../gleso/thread.hpp"
-#include"../gleso/wqueue.hpp"
-
-class wque_thread:public thread{
-	wqueue<grid*>&m_queue;
-
-public:
-    wque_thread(wqueue<grid*>&queue):m_queue(queue){
-    	p("wque_thread created\n");
-    }
-    virtual~wque_thread(){
-    	p("wque_thread deleted\n");
-    }
-
-    void*run(){
-    	while(true){
-    		grid*g=(grid*)m_queue.remove();
-    		g->update_globs();
-    	}
-    	return NULL;
-    }
-};
-
-wqueue<grid*>update_grid_queue;
-vector<unique_ptr<wque_thread>>work_queue_threads;
-
-void init_update_grid_threads(int num){
-	for(int i=0;i<num;i++){
-		wque_thread*t=new wque_thread(update_grid_queue);
-		work_queue_threads.push_back(unique_ptr<wque_thread>(t));
-	}
-	for(int i=0;i<num;i++){
-		work_queue_threads[i]->start();
-	}
-//	for(int i=0;i<num;i++){
-//		work_queue_threads[i]->join();
-//	}
-}
-
 
 /*-----------------------------
      __    _       __     __
@@ -111,7 +70,7 @@ void gleso_init(){
 	if(!gl::active_shader){// init
 		p("* init\n");
 		gl::active_shader=&shader::instance;
-		gl::active_camera=make_shared<a_camera>();
+		gl::active_camera=new a_camera();
 		gl::globs.push_back(gl::active_camera);
 		init();
 	}
@@ -129,8 +88,6 @@ void gleso_init(){
 //		p(" glo %p   %s\n",(void*)o,typeid(*o).name());
 		o->load();
 	});
-
-	init_update_grid_threads(4);
 }
 void gleso_viewport(int width,int height){
 	p("* viewport  %d x %d\n",width,height);
@@ -139,18 +96,17 @@ void gleso_viewport(int width,int height){
 }
 
 void gleso_step(){
+	gl::time_stamp++;
 	metrics::before_render();
 	gl::active_camera->pre_render();
-	if(gleso::use_grid){
-		grd.clear();
-		grd.addall(gl::globs);
+	grd.clear();
+	grd.addall(gl::globs);
 //		grd.update_globs();//? mt
-		update_grid_queue.add(&grd);
+	grd.update_globs();
+//	p(" updated globs   %d\n",metrics::updated_globs);
+	if(gleso::use_grid){
 		if(gleso::render_globs)grd.render_globs();//? thread
 		if(gleso::render_grid_outline)grd.render_outline();
-	}else{
-		foreach(gl::globs,[](shared_ptr<glob>g){g->update();});//. async
-		foreach(gl::globs,[](shared_ptr<glob>g){g->render();});
 	}
 	metrics::after_render();
 }
@@ -158,19 +114,19 @@ void gleso_step(){
 void gleso_key(int key,int scancode,int action,int mods){
 	p("gleso_key  key=%d   scancode=%d    action=%d   mods=%d\n",key,scancode,action,mods);
 	switch(key){
-	case 87://w
+	case 87://w - forward
 		switch(action){
 			case 1:gl::active_camera->phy.dp.y=1;break;
 			case 0:gl::active_camera->phy.dp.y=0;break;
 		}
 		break;
-	case 83://s
+	case 83://s - backward
 		switch(action){
 			case 1:gl::active_camera->phy.dp.y=-1;break;
 			case 0:gl::active_camera->phy.dp.y=0;break;
 		}
 		break;
-	case 65://a
+	case 68://d - turn right
 		switch(action){
 //			case 1:c->phy.dp.x=-1;break;
 //			case 0:c->phy.dp.x=0;break;
@@ -178,7 +134,7 @@ void gleso_key(int key,int scancode,int action,int mods){
 			case 0:gl::active_camera->phy.da.z=0;break;
 		}
 		break;
-	case 68://d
+	case 65://a - turn left
 		switch(action){
 //			case 1:c->phy.dp.x=1;break;
 //			case 0:c->phy.dp.x=0;break;
@@ -199,9 +155,9 @@ void gleso_touch(floato x,floato y,int action){
 }
 void gleso_cleanup(){
 	p(" *** cleanup");
-//	for(auto o:gl::globs){
-//		delete o;
-//	}
+	for(auto o:gl::globs){
+		delete o;
+	}
 }
 
 

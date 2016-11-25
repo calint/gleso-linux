@@ -1,6 +1,6 @@
 #pragma once
 #include<sys/time.h>
-
+#include<atomic>
 #include "init.hpp"
 namespace metrics{
 	int nshaders;
@@ -10,6 +10,7 @@ namespace metrics{
 	int ntextures;
 	int updated_globs;
 	int rendered_globs;
+	int threads;
 
 	floato dt{1./60};
 	longo frame;//?? rollover issues when used in comparisons
@@ -21,7 +22,7 @@ namespace metrics{
 		updated_globs=0;
 		rendered_globs=0;
 	}
-	void print(){p("fps:%03.0f – shaders:%01d – textures:%01d – glos:%02d – globs:%05d – updated:%02d – rendered:%02d – grids:%02d \n",fps,nshaders,ntextures,nglos,nglobs,updated_globs,rendered_globs,ngrids);}
+	void print(){p("fps:%03.0f – dt:%5f – shaders:%01d – textures:%01d – glos:%02d – globs:%05d – updated:%02d – rendered:%02d – grids:%02d – threads:%02d\n",fps,metrics::dt,nshaders,ntextures,nglos,nglobs,updated_globs,rendered_globs,ngrids,threads);}
 	static void after_render(){
 		struct timeval tv;
 		gettimeofday(&tv,NULL);

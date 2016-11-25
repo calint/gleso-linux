@@ -104,7 +104,7 @@ protected:
 	}
 	virtual vector<GLfloat>make_texture_coords()const{return vector<GLfloat>();}
 	virtual vector<GLfloat>make_colors()const{return vector<GLfloat>();}
-	inline virtual void gldraw()const{glDrawArrays(GL_TRIANGLES,0,3);}
+	virtual void gldraw()const{glDrawArrays(GL_TRIANGLES,0,3);}
 public:
 	static glo instance;
 };

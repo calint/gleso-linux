@@ -37,9 +37,10 @@ static void windowsize_callback(GLFWwindow*window,int width,int height){
 	if(window==0)return;//? unused param warning workaround
 	gleso_viewport(width,height);
 }
-#define WINDOW_WIDTH 640
-#define WINDOW_HEIGHT 480
+#define WINDOW_WIDTH 512
+#define WINDOW_HEIGHT 512
 
+#include"gleso/timer.hpp"
 int main(int argc,char**argv){
 //	test_threads();
 //	test_wqueue(8);
@@ -69,7 +70,10 @@ int main(int argc,char**argv){
 		glfwSwapInterval(0);
 		p("* running\n");
 		while(!glfwWindowShouldClose(window)){
+			timer tmr;
 			gleso_step();
+			const floato dt=tmr.dt();
+			metrics::dt=dt;
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 		}

@@ -4,7 +4,12 @@ class a_camera:public glob{
 public:
 //	m4 mtx_wvp;// world->view->projection
 //	inline a_camera():glob(&glo_circle_xy::instance){}
-	inline a_camera():glob(&glo_grid::instance){}
+	inline a_camera():glob(&glo_grid::instance){
+		gl=&glo_grid::instance;
+		const floato s=.1f;
+		phy.r=sqrt(s*s+s*s);
+		phy.s=p3{s,s,s};
+	}
 	inline void viewport(int w,int h){screen_width=w;screen_height=h;}
 	void pre_render(){
 		gl::active_shader->use_program();
@@ -17,6 +22,7 @@ public:
 
 		const float aspect_ratio=floato(screen_height)/floato(screen_width);
 		p.load_ortho_projection(-1,1,aspect_ratio,-aspect_ratio,0,1);
+//		p.load_ortho_projection(-1,1,-1,1,0,1);
 
 		m4 wvp=p*wv;
 

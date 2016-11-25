@@ -21,6 +21,8 @@ namespace gl{
 	vector<shader*>shaders;
 	vector<texture*>textures;
 	vector<glo*>glos;
-	vector<shared_ptr<glob>>globs;
-	shared_ptr<a_camera>active_camera;
+	vector<glob*>globs;
+	vector<a_camera*>cameras;
+	a_camera*active_camera;
+	longo time_stamp;
 }
