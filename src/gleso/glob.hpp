@@ -33,7 +33,7 @@ public:
 		metrics::rendered_globs++;
 		time_stamp_render=gl::time_stamp;
 		if(!gl)return;
-		ginfo=ginfo_nxt;
+//		ginfo=ginfo_nxt;
 		matrix_model_world.load_translate(ginfo.p);
 		matrix_model_world.append_rotation_about_z_axis(ginfo.a.z);
 		matrix_model_world.append_scaling(ginfo.s);
@@ -49,9 +49,12 @@ public:
 		time_stamp_update=gl::time_stamp;
 		phy.update();
 		on_update();
-		ginfo_nxt.p=phy.p;
-		ginfo_nxt.a=phy.a;
-		ginfo_nxt.s=phy.s;
+		copy_phy_to_rend();
+	}
+	inline void copy_phy_to_rend(){
+		ginfo.p=phy.p;
+		ginfo.a=phy.a;
+		ginfo.s=phy.s;
 	}
 	inline virtual void on_update(){}
 private:
