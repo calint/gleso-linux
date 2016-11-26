@@ -194,26 +194,30 @@ public:
 			for(int c=0;c<ncols_;c++){
 				grid_cell*cell=cells_[r*ncols_+c].get();
 				wque_thread_work_update*wrk=new wque_thread_work_update(cell,r==nrows_-1 and c==ncols_-1);
-//				if(r==nrows_-1 and c==ncols_-1)
-//					break;
+				if(r==nrows_-1 and c==ncols_-1){
+					pthread_mutex_lock(&mutex_work_done);
+					update_grid_queue_.add(wrk);//? deadlock    pthread_cond_wait(&cond_work_done,&mutex_work_done,[](){update_grid_queue_.add(wrk);});
+					pthread_cond_wait(&cond_work_done,&mutex_work_done);
+					pthread_mutex_unlock(&mutex_work_done);
+					break;
+				}
 				update_grid_queue_.add(wrk);
 			}
+//? deadlocks
+//			pthread_mutex_lock(&mutex_work_done);
+//			pthread_cond_wait(&cond_work_done,&mutex_work_done);
+//			pthread_mutex_unlock(&mutex_work_done);
 		}
-//		pthread_mutex_lock(&mutex_work_done);
-////		grid_cell*cell=cells_[(nrows_-1)*ncols_+ncols_-1].get();
-////		wque_thread_work_update*wrk=new wque_thread_work_update(cell,true);
-//		pthread_cond_wait(&cond_work_done,&mutex_work_done);
-//		pthread_mutex_unlock(&mutex_work_done);
+	}
 
-		int busy_wait=0;
-		while(threads_running_count){
-			int n=threads_running_count;
-//			p(" threads: %d\n",n);
-			busy_wait++;
+	inline void update_globs2(){
+//		p("  update_globs\n");
+		for(int r=0;r<nrows_;r++){
+			for(int c=0;c<ncols_;c++){
+				grid_cell*cell=cells_[r*ncols_+c].get();
+				cell->update_globs();
+			}
 		}
-//		if(busy_wait)
-//			p("busy wait: %d\n",busy_wait);
-
 	}
 
 	inline void render_globs(){

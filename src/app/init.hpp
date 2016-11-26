@@ -95,15 +95,19 @@ void gleso_viewport(int width,int height){
 	gl::active_camera->viewport(width,height);
 }
 
+const bool update_blobs_multithreaded=true;
 void gleso_step(){
 	gl::time_stamp++;
 	metrics::before_render();
 	gl::active_camera->pre_render();
 	grd.clear();
 	grd.addall(gl::globs);
-//		grd.update_globs();//? mt
-	grd.update_globs();
-//	p(" updated globs   %d\n",metrics::updated_globs);
+	if(update_blobs_multithreaded){// ? fasteron4cores
+		grd.update_globs();
+	}else{
+		grd.update_globs2();
+	}
+	//	p(" updated globs   %d\n",metrics::updated_globs);
 	if(gleso::use_grid){
 		if(gleso::render_globs)grd.render_globs();//? thread
 		if(gleso::render_grid_outline)grd.render_outline();
