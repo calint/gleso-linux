@@ -19,7 +19,7 @@ static void init(){
 	glos.push_back(&glo_ball::instance);
 
 
-	const int instances=1024*1;
+	const int instances=1024*32;
 	for(int n=0;n<instances;n++){
 		globs.push_back(new a_ball());
 	}
@@ -95,14 +95,14 @@ void gleso_viewport(int width,int height){
 	gl::active_camera->viewport(width,height);
 }
 
-const bool update_blobs_multithreaded=true;
 void gleso_step(){
 	gl::time_stamp++;
 	metrics::before_render();
 	gl::active_camera->pre_render();
 	grd.clear();
 	grd.addall(gl::globs);
-	if(update_blobs_multithreaded){// ? fasteron4cores
+	globs_updated=0;
+	if(gleso::update_blobs_multithreaded){// ? fasteron4cores
 		grd.update_globs();
 	}else{
 		grd.update_globs2();
@@ -150,6 +150,12 @@ void gleso_key(int key,int scancode,int action,int mods){
 		switch(action){
 			case 1:if(gleso::use_grid)grd.clear();gleso::use_grid=!gleso::use_grid;break;
 			case 0:break;
+		}
+		break;
+	case 44://,
+		switch(action){
+			case 1:break;
+			case 0:gleso::update_blobs_multithreaded=!gleso::update_blobs_multithreaded;break;
 		}
 		break;
 	}

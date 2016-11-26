@@ -196,19 +196,13 @@ public:
 				wque_thread_work_update*wrk=new wque_thread_work_update(cell,r==nrows_-1 and c==ncols_-1);
 				if(r==nrows_-1 and c==ncols_-1){
 					pthread_mutex_lock(&mutex_work_done);
-					{//? racing    pthread_cond_wait(&cond_work_done,&mutex_work_done,[](){update_grid_queue_.add(wrk);});
-						update_grid_queue_.add(wrk);
-						pthread_cond_wait(&cond_work_done,&mutex_work_done);
-					}
+					update_grid_queue_.add(wrk);
+					pthread_cond_wait(&cond_work_done,&mutex_work_done);
 					pthread_mutex_unlock(&mutex_work_done);
 					break;
 				}
 				update_grid_queue_.add(wrk);
 			}
-//? deadlocks
-//			pthread_mutex_lock(&mutex_work_done);
-//			pthread_cond_wait(&cond_work_done,&mutex_work_done);
-//			pthread_mutex_unlock(&mutex_work_done);
 		}
 	}
 
