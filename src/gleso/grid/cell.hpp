@@ -28,20 +28,16 @@ namespace grid{
 		}
 
 		inline void update_globs(){
-	//		p(" globs in cell %p = %d\n",this,globs.size());
 			for(auto g:globs){
-				if(g->grid_cell_ref!=this){
-	//				p(" glob %p not in %p\n",this);
+				if(g->grid_cell_ref!=this)
 					continue;
-				}
 				g->update();
 			}
 		}
 
 		inline void render_globs(){
 			for(auto g:globs){
-				if(g->should_render())
-					g->render();
+				g->render();
 			}
 		}
 

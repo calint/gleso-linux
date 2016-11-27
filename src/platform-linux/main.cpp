@@ -74,8 +74,6 @@ int main(int argc,char**argv){
 		gleso_init();
 		gleso_viewport(WINDOW_WIDTH,WINDOW_HEIGHT);
 		glfwSwapInterval(0);
-
-		grid::update_render_sync::work_to_do_count::init();
 		p("* running\n");
 		while(!glfwWindowShouldClose(window)){
 			timer tmr;
@@ -85,8 +83,6 @@ int main(int argc,char**argv){
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 		}
-		grid::update_render_sync::work_to_do_count::deinit();
-
 	}catch(const char*s){
 		p("!!! exception: %s\n",s);
 	}

@@ -19,7 +19,7 @@ static void init(){
 	glos.push_back(&glo_ball::instance);
 
 
-	const int instances=1024*4;
+	const int instances=1024*8;
 	p(" > instances: %d\n",instances);
 	for(int n=0;n<instances;n++){
 		globs.push_back(new a_ball());
@@ -41,6 +41,7 @@ static void mainsig(const int i){
 	exit(i);
 }
 #include<signal.h>
+#include<thread>
 void gleso_init(){
 	p("* gleso\n");
 	for(int i=0;i<32;i++)signal(i,mainsig);//?
@@ -124,7 +125,7 @@ void gleso_step(){
 }
 
 void gleso_key(int key,int scancode,int action,int mods){
-	p("gleso_key  key=%d   scancode=%d    action=%d   mods=%d\n",key,scancode,action,mods);
+	p(" ** gleso_key  key=%d   scancode=%d    action=%d   mods=%d\n",key,scancode,action,mods);
 	switch(key){
 	case 87://w - forward
 		switch(action){
@@ -168,14 +169,13 @@ void gleso_key(int key,int scancode,int action,int mods){
 		break;
 	}
 }
+
 void gleso_touch(floato x,floato y,int action){
-	p("gleso_touch  x=%.1f   y=%.1f    action=%d\n",x,y,action);
+	p(" ** gleso_touch  x=%.1f   y=%.1f    action=%d\n",x,y,action);
 }
+
 void gleso_cleanup(){
 	p(" *** cleanup");
-//	for(auto o:gl::globs){
-//		delete o;
-//	}
 }
 
 

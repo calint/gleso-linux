@@ -15,6 +15,7 @@ namespace grid{
 		int nthreads_;
 
 	public:
+		update_render_sync update_render_sync_;
 
 	//	inline grid(const int nthreads=1,const int rows=1,const int cols=1,const floato cell_size=2,const p3&p=p3{})
 	//	inline grid(const int nthreads=2,const int rows=2,const int cols=2,const floato cell_size=1,const p3&p=p3{})
@@ -84,16 +85,16 @@ namespace grid{
 		inline void update_globs(){
 	//		p("  update_globs\n");
 			globs_updated=0;
-			update_render_sync::work_to_do_count::set(nrows_*ncols_);
+			update_render_sync_.set(nrows_*ncols_);
 			for(int r=0;r<nrows_;r++){
 				for(int c=0;c<ncols_;c++){
 					cell*cell=cells_[r*ncols_+c].get();
-					wque_work_update_cell*wrk=new wque_work_update_cell(cell);
+					wque_work_update_cell*wrk=new wque_work_update_cell(update_render_sync_,cell);
 					update_grid_queue_.add(wrk);
 				}
 			}
 
-			update_render_sync::work_to_do_count::wait_until_count_is_zero();
+			update_render_sync_.wait_until_count_is_zero();
 		}
 
 		inline void update_globs2(){
