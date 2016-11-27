@@ -6,54 +6,54 @@ static void*thread_run(void*arg);
 
 class thread{
 public:
-	thread():m_tid(0),m_running(0),m_detached(0){}
+	thread():id_(0),running_(0),detached_(0){}
 
 	virtual~thread(){
-		if(m_running==1 and m_detached==0)
-			pthread_detach(m_tid);
+		if(running_==1 and detached_==0)
+			pthread_detach(id_);
 
-		if(m_running==1)
-			pthread_cancel(m_tid);
+		if(running_==1)
+			pthread_cancel(id_);
 	}
 
 	int start(){
-		int result=pthread_create(&m_tid,NULL,thread_run,this);
+		int result=pthread_create(&id_,NULL,thread_run,this);
 
 		if(result==0)
-			m_running=1;
+			running_=true;
 
 		return result;
 	}
 
 	int join(){
 		int result=-1;
-		if(m_running==1){
-			result=pthread_join(m_tid,NULL);
+		if(running_){
+			result=pthread_join(id_,NULL);
 			if(result==0)
-				m_detached=1;
+				detached_=true;
 		}
 		return result;
 	}
 
 	int detach(){
 		int result=-1;
-		if(m_running==1 and m_detached==0){
-			result=pthread_detach(m_tid);
+		if(running_ and not detached_){
+			result=pthread_detach(id_);
 			if(result==0){
-				m_detached=1;
+				detached_=true;
 			}
 		}
 		return result;
 	}
 
-	pthread_t self(){return m_tid;}
+	pthread_t self(){return id_;}
 
 	virtual void*run()=0;
 
 private:
-	pthread_t  m_tid;
-	int m_running;
-	int m_detached;
+	pthread_t  id_;
+	bool running_;
+	bool detached_;
 };
 
 static void*thread_run(void*arg){return((thread*)arg)->run();}
