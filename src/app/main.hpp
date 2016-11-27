@@ -173,9 +173,9 @@ void gleso_touch(floato x,floato y,int action){
 }
 void gleso_cleanup(){
 	p(" *** cleanup");
-	for(auto o:gl::globs){
-		delete o;
-	}
+//	for(auto o:gl::globs){
+//		delete o;
+//	}
 }
 
 

@@ -10,7 +10,7 @@ namespace grid{
 
 	public:
 		wque_thread(wqueue<wque_work*>&queue):queue_(queue){metrics::threads++;}
-		~wque_thread(){metrics::threads--;}
+		virtual~wque_thread(){metrics::threads--;}
 
 		void*run(){
 			while(true){
