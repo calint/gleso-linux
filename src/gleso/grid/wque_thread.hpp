@@ -1,16 +1,16 @@
 #pragma once
 #include"thread.hpp"
-#include"wqueue.hpp"
 #include"wque_work.hpp"
 #include<atomic>
+#include "wque.hpp"
 
 namespace grid{
 	class wque_thread:public thread{
-		wqueue<wque_work*>&queue_;
+		wque<wque_work*>&queue_;
 
 	public:
 
-		inline wque_thread(wqueue<wque_work*>&queue):
+		inline wque_thread(wque<wque_work*>&queue):
 			queue_(queue)
 		{
 			metrics::threads++;

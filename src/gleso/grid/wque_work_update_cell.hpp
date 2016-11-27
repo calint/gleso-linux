@@ -8,13 +8,15 @@ namespace grid{
 	class wque_work_update_cell:public wque_work{
 		cell&cell_;
 		update_render_sync&urs_;
+
 	public:
+
 		inline wque_work_update_cell(update_render_sync&urs,cell&c):cell_{c},urs_{urs}{}
 
 		virtual void exec()final{
 			cell_.update_globs();
 			urs_.decrease_and_notify_if_zero();
 		}
-	};
 
+	};
 }

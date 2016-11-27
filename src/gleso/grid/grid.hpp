@@ -1,6 +1,6 @@
 #pragma once
-#include"wque_thread.hpp"
 #include"update_render_sync.hpp"
+#include "wque_thread.hpp"
 #include"wque_work_update_cell.hpp"
 
 namespace grid{
@@ -10,7 +10,7 @@ namespace grid{
 		vector<cell>cells_;
 		int nrows_;
 		int ncols_;
-		wqueue<wque_work*>update_grid_queue_;
+		wque<wque_work*>update_grid_queue_;
 		vector<wque_thread>threads_;
 		int nthreads_;
 
@@ -32,7 +32,6 @@ namespace grid{
 			threads_.reserve(nthreads);
 			for(int i=0;i<nthreads;i++)
 				threads_.emplace_back(update_grid_queue_);
-//				threads_.push_back(wque_thread(update_grid_queue_));
 
 			for(auto&t:threads_)
 				t.start();
@@ -45,7 +44,7 @@ namespace grid{
 
 		inline static int clamp(floato v,int min,int max){
 			if(v<min)return min;
-			if(v>=max)return max-1;
+			if(v>=max)return max;
 			return int(v);
 		}
 
@@ -64,10 +63,10 @@ namespace grid{
 				const floato cell_max_x=(max_x+bias_x)/size;
 				const floato cell_max_y=(max_y+bias_y)/size;
 
-				const int cell_min_x_int=clamp(cell_min_x,0,ncols_);
-				const int cell_min_y_int=clamp(cell_min_y,0,nrows_);
-				const int cell_max_x_int=clamp(cell_max_x,0,ncols_);
-				const int cell_max_y_int=clamp(cell_max_y,0,nrows_);
+				const int cell_min_x_int=clamp(cell_min_x,0,ncols_-1);
+				const int cell_min_y_int=clamp(cell_min_y,0,nrows_-1);
+				const int cell_max_x_int=clamp(cell_max_x,0,ncols_-1);
+				const int cell_max_y_int=clamp(cell_max_y,0,nrows_-1);
 
 				if(cell_min_x==cell_max_x_int and cell_min_y_int==cell_max_y_int){// no overlap
 					int cell_index=cell_min_y_int*ncols_+cell_min_x_int;

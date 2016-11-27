@@ -1,20 +1,19 @@
-// from: https://vichargrave.github.io/articles/2013-01/multithreaded-work-queue-in-cpp
 #pragma once
 #include<pthread.h>
 #include<list>
 
 using namespace std;
 
-template<typename T>class wqueue{
+template<typename T>class wque{
 	list<T>queue_;
 	pthread_mutex_t mutex_;
 	pthread_cond_t cond_;
 public:
-	wqueue(){
+	wque(){
 		pthread_mutex_init(&mutex_,NULL);
 		pthread_cond_init(&cond_,NULL);
 	}
-	~wqueue(){
+	~wque(){
         pthread_mutex_destroy(&mutex_);
         pthread_cond_destroy(&cond_);
 	}
@@ -41,3 +40,5 @@ public:
 		return size;
 	}
 };
+
+// lifted and modified from https://vichargrave.github.io/articles/2013-01/multithreaded-work-queue-in-cpp
