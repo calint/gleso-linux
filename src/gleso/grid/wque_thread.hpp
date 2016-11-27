@@ -1,7 +1,7 @@
 #pragma once
-#include"../thread.hpp"
-#include"../wqueue.hpp"
-#include "wque_work.hpp"
+#include"thread.hpp"
+#include"wqueue.hpp"
+#include"wque_work.hpp"
 #include<atomic>
 
 namespace grid{

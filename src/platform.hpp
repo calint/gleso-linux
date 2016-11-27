@@ -1,3 +1,1 @@
-#include "platform-linux/init.hpp"
-using namespace std;
-
+#include "platform-linux/platform.hpp"

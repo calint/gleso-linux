@@ -1,9 +1,10 @@
-#include "app/main.hpp"
+#include "../app/main.hpp"
 
 #include<GLFW/glfw3.h>
 #include<GL/glew.h>
-#include"gleso/timer.hpp"
-#include"gleso/grid/update_render_sync.hpp"
+
+#include"../gleso/timer.hpp"
+#include"../gleso/grid/update_render_sync.hpp"
 
 #define WINDOW_WIDTH 512
 #define WINDOW_HEIGHT 512

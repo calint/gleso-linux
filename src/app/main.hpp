@@ -8,8 +8,8 @@
 #include"../gleso/init.hpp"
 #include"a_ball.hpp"
 #include"a_camera.hpp"
-#include<memory>
-using namespace std;
+//#include<memory>
+
 static void init(){
 	using namespace gl;
 	shaders.push_back(&shader::instance);
