@@ -1,4 +1,5 @@
 #pragma once
+
 class glo_grid:public glo{
 	vector<GLfloat>make_vertices()const override{
 		return vector<GLfloat>{

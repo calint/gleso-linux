@@ -1,5 +1,6 @@
 #pragma once
 #include"../../platform.hpp"
+#include<vector>
 
 namespace grid{
 	class cell{

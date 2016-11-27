@@ -1,4 +1,4 @@
-// from: https://vichargrave.github.io/articles/2012-12/java-style-thread-class-in-cpp
+// lifted and modified from: https://vichargrave.github.io/articles/2012-12/java-style-thread-class-in-cpp
 #pragma once
 #include<pthread.h>
 

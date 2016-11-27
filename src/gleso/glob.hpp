@@ -1,6 +1,7 @@
 #pragma once
-#include"../platform.hpp"
+
 namespace grid{class cell;}
+
 class glob{
 public:
 	physics phy;// current physics state
