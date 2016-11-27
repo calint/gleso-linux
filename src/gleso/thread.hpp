@@ -1,6 +1,6 @@
 // from: https://vichargrave.github.io/articles/2012-12/java-style-thread-class-in-cpp
 #pragma once
-#include <pthread.h>
+#include<pthread.h>
 
 static void*thread_run(void*arg);
 

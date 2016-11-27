@@ -1,4 +1,6 @@
 #pragma once
+#include"../platform.hpp"
+
 class glo{
 	class texture*tex{nullptr};
 #ifdef GLESO_EMBEDDED

@@ -1,7 +1,8 @@
 #pragma once
+#include"../platform.hpp"
+#include"init.hpp"
 #include<sys/time.h>
 #include<atomic>
-#include "init.hpp"
 std::atomic_int globs_updated;
 namespace metrics{
 	int nshaders;

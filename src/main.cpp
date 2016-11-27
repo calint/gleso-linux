@@ -1,12 +1,18 @@
-#include"app/init.hpp"
+#include "app/main.hpp"
+
 #include<GLFW/glfw3.h>
 #include<GL/glew.h>
-#include"gleso/wqueue.hpp"
+#include"gleso/timer.hpp"
+#include"gleso/grid/update_render_sync.hpp"
+
+#define WINDOW_WIDTH 512
+#define WINDOW_HEIGHT 512
 
 static void key_callback(GLFWwindow*window,int key,int scancode,int action,int mods){
 	if(window==0)return;//? unused param warning workaround
 	gleso_key(key,scancode,action,mods);
 }
+
 static float pointer_x=0,pointer_y=0;
 static int pointer_button_action=1;
 static void cursorpos_position_callback(GLFWwindow*window,double xpos,double ypos){
@@ -17,6 +23,7 @@ static void cursorpos_position_callback(GLFWwindow*window,double xpos,double ypo
 		gleso_touch(pointer_x,pointer_y,2);
 	}
 }
+
 static void mousebutton_callback(GLFWwindow*window,int button,int action,int mods){
 	if(window==0)return;//? unused param warning workaround
 	if(mods!=0)return;
@@ -33,14 +40,12 @@ static void mousebutton_callback(GLFWwindow*window,int button,int action,int mod
 		break;
 	}
 }
+
 static void windowsize_callback(GLFWwindow*window,int width,int height){
 	if(window==0)return;//? unused param warning workaround
 	gleso_viewport(width,height);
 }
-#define WINDOW_WIDTH 512
-#define WINDOW_HEIGHT 512
 
-#include"gleso/timer.hpp"
 int main(int argc,char**argv){
 //	test_threads();
 //	test_wqueue(8);
@@ -68,6 +73,8 @@ int main(int argc,char**argv){
 		gleso_init();
 		gleso_viewport(WINDOW_WIDTH,WINDOW_HEIGHT);
 		glfwSwapInterval(0);
+
+		grid::update_render_sync::work_to_do_count::init();
 		p("* running\n");
 		while(!glfwWindowShouldClose(window)){
 			timer tmr;
@@ -77,6 +84,8 @@ int main(int argc,char**argv){
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 		}
+		grid::update_render_sync::work_to_do_count::deinit();
+
 	}catch(const char*s){
 		p("!!! exception: %s\n",s);
 	}

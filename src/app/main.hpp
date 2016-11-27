@@ -19,7 +19,8 @@ static void init(){
 	glos.push_back(&glo_ball::instance);
 
 
-	const int instances=1024*32;
+	const int instances=1024*4;
+	p(" > instances: %d\n",instances);
 	for(int n=0;n<instances;n++){
 		globs.push_back(new a_ball());
 	}
@@ -64,7 +65,7 @@ void gleso_init(){
 	p("%16s %4u B\n","m4",(unsigned int)sizeof(m4));
 	p("%16s %4u B\n","glo",(unsigned int)sizeof(glo));
 	p("%16s %4u B\n","glob",(unsigned int)sizeof(glob));
-	p("%16s %4u B\n","grid",(unsigned int)sizeof(grid));
+	p("%16s %4u B\n","grid",(unsigned int)sizeof(grid::grid));
 	p("%16s %4u B\n","physics",(unsigned int)sizeof(physics));
 	srand(1);// generate same random numbers in different instances
 	if(!gl::active_shader){// init
@@ -95,6 +96,8 @@ void gleso_viewport(int width,int height){
 	gl::active_camera->viewport(width,height);
 }
 
+
+static grid::grid grd;
 void gleso_step(){
 	gl::time_stamp++;
 

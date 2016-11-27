@@ -1,6 +1,6 @@
 #pragma once
 
-class timer{
+class timer{//? platform dependent
 	double t0;
 public:
 	timer():t0(glfwGetTime()){}

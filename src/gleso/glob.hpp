@@ -1,5 +1,6 @@
 #pragma once
-class grid_cell;
+#include"../platform.hpp"
+namespace grid{class cell;}
 class glob{
 	struct glinfo{
 		position p{0,0,0};
@@ -13,7 +14,7 @@ public:
 	glo*gl{nullptr};// ref to gl renderable
 
 
-	grid_cell*grid_cell_ref{nullptr};//managed by grid
+	grid::cell*grid_cell_ref{nullptr};//managed by grid
 
 	inline glob(){
 //		p("new glob %p\n",(void*)this);
