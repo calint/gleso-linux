@@ -6,13 +6,13 @@
 namespace grid{
 
 	class wque_work_update_cell:public wque_work{
-		cell*cell_;
+		cell&cell_;
 		update_render_sync&urs_;
 	public:
-		wque_work_update_cell(update_render_sync&urs,cell*c):cell_{c},urs_{urs}{}
+	wque_work_update_cell(update_render_sync& urs, cell& c);
 
 		virtual void exec()final{
-			cell_->update_globs();
+			cell_.update_globs();
 			urs_.decrease_and_notify_if_zero();
 		}
 	};

@@ -7,7 +7,9 @@ namespace grid{
 		vector<glob*>globs;
 
 	public:
-		cell(){metrics::ngrids++;}
+		cell(){
+			metrics::ngrids++;
+		}
 
 		~cell(){
 			metrics::ngrids--;

@@ -7,7 +7,7 @@ namespace grid{
 	class grid{
 		p3 po_;// location of center of square
 		floato cell_size_;// side of the square
-		vector<unique_ptr<cell>>cells_;
+		vector<cell>cells_;
 		int nrows_;
 		int ncols_;
 		wqueue<wque_work*>update_grid_queue_;
@@ -25,20 +25,20 @@ namespace grid{
 			:po_(p),cell_size_(cell_size),nrows_{rows},ncols_{cols},nthreads_{nthreads}
 		{
 
-			for(int i=0;i<nthreads;i++){
-				threads_.push_back(make_unique<wque_thread>(update_grid_queue_));
-			}
 			const int n=rows*cols;
-			for(int k=0;k<n;k++){
-				cells_.push_back(make_unique<cell>());
-			}
+			for(int k=0;k<n;k++)
+				cells_.push_back(cell());
+
+			for(int i=0;i<nthreads;i++)
+				threads_.push_back(make_unique<wque_thread>(update_grid_queue_));
+
 			for(auto&t:threads_)
 				t->start();
 		}
 
 		inline void clear(){
 			for(auto&c:cells_)
-				c->clear();
+				c.clear();
 		}
 
 		inline static int clamp(floato v,int min,int max){
@@ -69,14 +69,14 @@ namespace grid{
 
 				if(cell_min_x==cell_max_x_int and cell_min_y_int==cell_max_y_int){// no overlap
 					int cell_index=cell_min_y_int*ncols_+cell_min_x_int;
-					cells_[cell_index]->add(g);
+					cells_[cell_index].add(g);
 					continue;
 				}
 
 				for(int y=cell_min_y_int;y<=cell_max_y_int;y++){
 					for(int x=cell_min_x_int;x<=cell_max_x_int;x++){
 						int cell_index=y*ncols_+x;
-						cells_[cell_index]->add(g);
+						cells_[cell_index].add(g);
 					}
 				}
 			}
@@ -88,8 +88,7 @@ namespace grid{
 			update_render_sync_.set(nrows_*ncols_);
 			for(int r=0;r<nrows_;r++){
 				for(int c=0;c<ncols_;c++){
-					cell*cell=cells_[r*ncols_+c].get();
-					wque_work_update_cell*wrk=new wque_work_update_cell(update_render_sync_,cell);
+					wque_work_update_cell*wrk=new wque_work_update_cell(update_render_sync_,cells_[r*ncols_+c]);
 					update_grid_queue_.add(wrk);
 				}
 			}
@@ -101,15 +100,14 @@ namespace grid{
 	//		p("  update_globs2\n");
 			for(int r=0;r<nrows_;r++){
 				for(int c=0;c<ncols_;c++){
-					cell*cell=cells_[r*ncols_+c].get();
-					cell->update_globs();
+					cells_[r*ncols_+c].update_globs();
 				}
 			}
 		}
 
 		inline void render_globs(){
 			for(auto&c:cells_){
-				c->render_globs();
+				c.render_globs();
 			}
 		}
 
@@ -117,7 +115,7 @@ namespace grid{
 			p3 p{po_.x-cell_size_*ncols_/2+cell_size_/2,po_.y-cell_size_*nrows_/2+cell_size_/2,0};
 			for(int r=0;r<nrows_;r++){
 				for(int c=0;c<ncols_;c++){
-					cells_[r*ncols_+c]->render_outline(p,cell_size_/2);
+					cells_[r*ncols_+c].render_outline(p,cell_size_/2);
 					p.x+=cell_size_;
 				}
 				p.x=po_.x-cell_size_*ncols_/2+cell_size_/2;
