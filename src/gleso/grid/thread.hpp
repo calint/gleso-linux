@@ -8,6 +8,10 @@ class thread{
 public:
 	thread():id_(0),running_(0),detached_(0){}
 
+//	thread(const thread&&other):id_(other.id_),running_(other.running_),detached_(other.detached_){
+//
+//	}
+
 	virtual~thread(){
 		if(running_==1 and detached_==0)
 			pthread_detach(id_);

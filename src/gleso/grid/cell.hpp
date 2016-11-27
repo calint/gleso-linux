@@ -10,6 +10,10 @@ namespace grid{
 			metrics::ngrids++;
 		}
 
+//		cell(const cell&&c):
+//			globs{move(c.globs)}
+//		{}
+
 		~cell(){
 			metrics::ngrids--;
 			for(auto g:globs){

@@ -11,7 +11,7 @@ namespace grid{
 		int nrows_;
 		int ncols_;
 		wqueue<wque_work*>update_grid_queue_;
-		vector<unique_ptr<wque_thread>>threads_;
+		vector<wque_thread>threads_;
 		int nthreads_;
 
 	public:
@@ -24,16 +24,18 @@ namespace grid{
 	//		:po_(p),cell_size_(cell_size),cells_(rows*cols),nrows_{rows},ncols_{cols},nthreads_(nthreads)
 			:po_(p),cell_size_(cell_size),nrows_{rows},ncols_{cols},nthreads_{nthreads}
 		{
-
 			const int n=rows*cols;
+			cells_.reserve(n);
 			for(int k=0;k<n;k++)
-				cells_.push_back(cell());
+				cells_.emplace_back();
 
+			threads_.reserve(nthreads);
 			for(int i=0;i<nthreads;i++)
-				threads_.push_back(make_unique<wque_thread>(update_grid_queue_));
+				threads_.emplace_back(update_grid_queue_);
+//				threads_.push_back(wque_thread(update_grid_queue_));
 
 			for(auto&t:threads_)
-				t->start();
+				t.start();
 		}
 
 		inline void clear(){

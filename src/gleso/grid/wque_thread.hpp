@@ -9,10 +9,18 @@ namespace grid{
 		wqueue<wque_work*>&queue_;
 
 	public:
-		wque_thread(wqueue<wque_work*>&queue):queue_(queue){metrics::threads++;}
-		virtual~wque_thread(){metrics::threads--;}
 
-		void*run(){
+		inline wque_thread(wqueue<wque_work*>&queue):
+			queue_(queue)
+		{
+			metrics::threads++;
+		}
+
+		inline virtual~wque_thread(){
+			metrics::threads--;
+		}
+
+		inline void*run(){
 			while(true){
 				wque_work*wrk=queue_.remove();
 				threads_running_count++;
