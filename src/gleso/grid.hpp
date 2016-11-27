@@ -3,9 +3,28 @@
 #include<vector>
 #include"../platform.hpp"
 #include"glo_grid.hpp"
-
 using namespace std;
-#define foreach(c,f)std::for_each(c.begin(),c.end(),f)
+
+namespace update_render_sync{
+	namespace work_to_do_count{
+		bool _initiated=false;
+		pthread_mutex_t mutex;
+		//atomic<int>count;
+		int count;
+		pthread_cond_t cond;
+		void init(){
+			if(_initiated)
+				return;
+			pthread_mutex_init(&mutex,NULL);
+			pthread_cond_init(&cond,NULL);
+			_initiated=true;
+		}
+		void deinit(){
+	        pthread_mutex_destroy(&mutex);
+	        pthread_cond_destroy(&cond);
+		}
+	}
+}
 
 class grid_cell{
 	vector<glob*>globs;
@@ -59,35 +78,31 @@ public:
 #include"../gleso/thread.hpp"
 #include"../gleso/wqueue.hpp"
 
-
-
-pthread_mutex_t mutex_work_done;
-pthread_cond_t cond_work_done;
-
 class wque_thread_work{
-	bool notify_when_done_;
 public:
-	wque_thread_work(bool notify_when_done):notify_when_done_(notify_when_done){}
 	virtual~wque_thread_work(){}
 	virtual void exec()=0;
-	inline bool is_notify_when_done(){return notify_when_done_;}
 };
 
 class wque_thread_work_update:public wque_thread_work{
 	grid_cell*cell_;
 public:
-	wque_thread_work_update(grid_cell*cell,bool notify_when_done):wque_thread_work(notify_when_done),cell_{cell}{}
+	wque_thread_work_update(grid_cell*c):cell_{c}{}
+
 	virtual void exec()final{
 		cell_->update_globs();
-		if(is_notify_when_done()){
-			pthread_mutex_lock(&mutex_work_done);
-			pthread_cond_signal(&cond_work_done);
-			pthread_mutex_unlock(&mutex_work_done);
+		pthread_mutex_lock(&update_render_sync::work_to_do_count::mutex);
+		update_render_sync::work_to_do_count::count--;
+		if(update_render_sync::work_to_do_count::count==0){
+			pthread_cond_signal(&update_render_sync::work_to_do_count::cond);
 		}
+		pthread_mutex_unlock(&update_render_sync::work_to_do_count::mutex);
+
 	}
 };
 
 atomic_int threads_running_count;
+
 class wque_thread:public thread{
 	wqueue<wque_thread_work*>&queue_;
 
@@ -130,8 +145,9 @@ public:
 //	inline grid(const int nthreads=1,const int rows=4,const int cols=4,const floato cell_size=.5f,const p3&p=p3{})
 	inline grid(const int nthreads=4,const int rows=4,const int cols=4,const floato cell_size=.5f,const p3&p=p3{})
 //		:po_(p),cell_size_(cell_size),cells_(rows*cols),nrows_{rows},ncols_{cols},nthreads_(nthreads)
-		:po_(p),cell_size_(cell_size),nrows_{rows},ncols_{cols},nthreads_(nthreads)
+		:po_(p),cell_size_(cell_size),nrows_{rows},ncols_{cols},nthreads_{nthreads}
 	{
+
 		for(int i=0;i<nthreads;i++){
 			threads_.push_back(make_unique<wque_thread>(update_grid_queue_));
 		}
@@ -190,21 +206,41 @@ public:
 
 	inline void update_globs(){
 //		p("  update_globs\n");
+		globs_updated=0;
+		{
+			pthread_mutex_lock(&update_render_sync::work_to_do_count::mutex);
+			update_render_sync::work_to_do_count::count=nrows_*ncols_;
+			pthread_mutex_unlock(&update_render_sync::work_to_do_count::mutex);
+		}
 		for(int r=0;r<nrows_;r++){
 			for(int c=0;c<ncols_;c++){
 				grid_cell*cell=cells_[r*ncols_+c].get();
-				wque_thread_work_update*wrk=new wque_thread_work_update(cell,r==nrows_-1 and c==ncols_-1);
-				if(r==nrows_-1 and c==ncols_-1){
-					pthread_mutex_lock(&mutex_work_done);
-					update_grid_queue_.add(wrk);
-					pthread_cond_wait(&cond_work_done,&mutex_work_done);
-					pthread_mutex_unlock(&mutex_work_done);
-					break;
-				}
+				wque_thread_work_update*wrk=new wque_thread_work_update(cell);
 				update_grid_queue_.add(wrk);
 			}
 		}
+		pthread_mutex_lock(&update_render_sync::work_to_do_count::mutex);
+		while(update_render_sync::work_to_do_count::count!=0){
+			pthread_cond_wait(&update_render_sync::work_to_do_count::cond,&update_render_sync::work_to_do_count::mutex);
+//			p(" work_to_do_count_after_notify: %d\n",update_render_sync::work_to_do_count::count);
+		}
+		pthread_mutex_unlock(&update_render_sync::work_to_do_count::mutex);
+//		int gu=globs_updated;
+//		p(" %d ",gu);
 	}
+
+//	inline void update_globs(){
+//		pthread_mutex_lock(&mutex_work_done);
+////		p("  update_globs\n");
+//		for(int r=0;r<nrows_;r++){
+//			for(int c=0;c<ncols_;c++){
+//				grid_cell*cell=cells_[r*ncols_+c].get();
+//				wque_thread_work_update*wrk=new wque_thread_work_update(cell,r==nrows_-1 and c==ncols_-1);
+//				update_grid_queue_.add(wrk);
+//			}
+//		}
+//		pthread_mutex_unlock(&mutex_work_done);
+//	}
 
 	inline void update_globs2(){
 //		p("  update_globs\n");

@@ -54,3 +54,5 @@ typedef p3 position;
 #include"init.hpp"
 #include"grid.hpp"
 #include"init.hpp"
+
+#define foreach(c,f)std::for_each(c.begin(),c.end(),f);

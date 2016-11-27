@@ -22,7 +22,6 @@ namespace metrics{
 		frame++;
 		updated_globs=0;
 		rendered_globs=0;
-		//globs_updated=0;
 	}
 	void print(){
 		int gu=globs_updated;

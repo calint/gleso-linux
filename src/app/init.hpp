@@ -97,21 +97,26 @@ void gleso_viewport(int width,int height){
 
 void gleso_step(){
 	gl::time_stamp++;
+
 	metrics::before_render();
-	gl::active_camera->pre_render();
+
 	grd.clear();
+
 	grd.addall(gl::globs);
-	globs_updated=0;
-	if(gleso::update_blobs_multithreaded){// ? fasteron4cores
+
+	if(gleso::update_blobs_multithreaded){
 		grd.update_globs();
 	}else{
 		grd.update_globs2();
 	}
+
 	//	p(" updated globs   %d\n",metrics::updated_globs);
 	if(gleso::use_grid){
+		gl::active_camera->pre_render();
 		if(gleso::render_globs)grd.render_globs();//? thread
 		if(gleso::render_grid_outline)grd.render_outline();
 	}
+
 	metrics::after_render();
 }
 
