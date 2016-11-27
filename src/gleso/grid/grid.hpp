@@ -1,7 +1,7 @@
 #pragma once
 #include"wque_thread.hpp"
 #include"update_render_sync.hpp"
-#include "wque_work_update_cell.hpp"
+#include"wque_work_update_cell.hpp"
 
 namespace grid{
 	class grid{

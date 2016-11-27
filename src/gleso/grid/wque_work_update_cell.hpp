@@ -1,7 +1,7 @@
 #pragma once
 #include"cell.hpp"
 #include"update_render_sync.hpp"
-#include "wque_work.hpp"
+#include"wque_work.hpp"
 
 namespace grid{
 
@@ -9,7 +9,7 @@ namespace grid{
 		cell&cell_;
 		update_render_sync&urs_;
 	public:
-	wque_work_update_cell(update_render_sync& urs, cell& c);
+		inline wque_work_update_cell(update_render_sync&urs,cell&c):cell_{c},urs_{urs}{}
 
 		virtual void exec()final{
 			cell_.update_globs();

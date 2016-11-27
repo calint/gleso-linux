@@ -1,6 +1,5 @@
 #pragma once
 #include"../../platform.hpp"
-#include"../glo_grid.hpp"
 
 namespace grid{
 	class cell{

@@ -1,6 +1,4 @@
 #pragma once
-#include"cell.hpp"
-#include"update_render_sync.hpp"
 
 namespace grid{
 	class wque_work{
