@@ -1,14 +1,14 @@
 #pragma once
 #include"glo_ball.hpp"
 class a_ball:public glob{
-	floato sq_,d_;
+	floato constraint_,velocity_;
 public:
-	inline a_ball(const floato radius=.025f,const floato random_position_scale=1,const floato velocity=.1f)
-		:sq_(random_position_scale),d_(velocity)
+	inline a_ball(const floato radius=.025f,const floato velocity=.1f,const floato constraint=1)
+		:constraint_{constraint},velocity_{velocity}
 	{
 		gl=&glo_ball::instance;
-		phy.p.x=rnd(-random_position_scale,random_position_scale);
-		phy.p.y=rnd(-random_position_scale,random_position_scale);
+		phy.p.x=rnd(-constraint,constraint);
+		phy.p.y=rnd(-constraint,constraint);
 		phy.r=radius;
 		phy.s=p3{radius,radius,radius};
 		phy.dp.x=rnd(-velocity,velocity);
@@ -17,13 +17,13 @@ public:
 	}
 	inline void on_update()override{
 //		p("update desk  %f    \n",phy.p.x);
-		if(phy.p.x>sq_-phy.s.x)
-			phy.dp.x=-d_;
-		else if(phy.p.x<-sq_+phy.s.x)
-			phy.dp.x=d_;
-		if(phy.p.y>sq_-phy.s.y)
-			phy.dp.y=-d_;
-		else if(phy.p.y<-sq_+phy.s.y)
-			phy.dp.y=d_;
+		if(phy.p.x>constraint_-phy.s.x)
+			phy.dp.x=-velocity_;
+		else if(phy.p.x<-constraint_+phy.s.x)
+			phy.dp.x=velocity_;
+		if(phy.p.y>constraint_-phy.s.y)
+			phy.dp.y=-velocity_;
+		else if(phy.p.y<-constraint_+phy.s.y)
+			phy.dp.y=velocity_;
 	}
 };

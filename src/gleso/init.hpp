@@ -47,6 +47,8 @@ namespace gleso{
 typedef p3 scale;
 typedef p3 angle;
 typedef p3 position;
+typedef p3 velocity_vector;
+typedef longo frame_count;
 #include"physics.hpp"
 #include"m4.hpp"
 #include"glob.hpp"

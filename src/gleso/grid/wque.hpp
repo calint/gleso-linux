@@ -14,8 +14,8 @@ public:
 		pthread_cond_init(&cond_,NULL);
 	}
 	~wque(){
-        pthread_mutex_destroy(&mutex_);
-        pthread_cond_destroy(&cond_);
+		pthread_mutex_destroy(&mutex_);
+		pthread_cond_destroy(&cond_);
 	}
 	void add(T item){
 		pthread_mutex_lock(&mutex_);

@@ -5,26 +5,12 @@
   ///// /////   \\\/  /////   /////
 */
 #pragma once
+#include"../platform.hpp"
 #include"../gleso/init.hpp"
 #include"a_ball.hpp"
 #include"a_camera.hpp"
 //#include<memory>
-
-static void init(){
-	using namespace gl;
-	shaders.push_back(&shader::instance);
-	textures.push_back(&texture::instance);
-//	glos.push_back(&glo_circle_xy::instance);
-	glos.push_back(&glo_grid::instance);
-	glos.push_back(&glo_ball::instance);
-
-
-	const int instances=1024*8;
-	p(" > instances: %d\n",instances);
-	for(int n=0;n<instances;n++){
-		globs.push_back(new a_ball());
-	}
-}
+#include"init.hpp"
 
 /*-----------------------------
      __    _       __     __
@@ -120,6 +106,11 @@ void gleso_step(){
 		if(gleso::render_globs)grd.render_globs();//? thread
 		if(gleso::render_grid_outline)grd.render_outline();
 	}
+
+//	p(" timestamp:  %u   \n",gl::time_stamp);
+//	for(auto g:gl::globs){
+//		p(" %s %p overlapping grid cell collision checked size  %u \n",typeid(g).name(),g,g->collision_checked_this_frame.size());
+//	}
 
 	metrics::after_render();
 }

@@ -2,7 +2,7 @@
 #include"thread.hpp"
 #include"wque_work.hpp"
 #include<atomic>
-#include "wque.hpp"
+#include"wque.hpp"
 
 namespace grid{
 	class wque_thread:public thread{

@@ -1,6 +1,6 @@
 #pragma once
 #include"update_render_sync.hpp"
-#include "wque_thread.hpp"
+#include"wque_thread.hpp"
 #include"wque_work_update_cell.hpp"
 
 namespace grid{
@@ -20,7 +20,7 @@ namespace grid{
 	//	inline grid(const int nthreads=1,const int rows=1,const int cols=1,const floato cell_size=2,const p3&p=p3{})
 	//	inline grid(const int nthreads=2,const int rows=2,const int cols=2,const floato cell_size=1,const p3&p=p3{})
 	//	inline grid(const int nthreads=1,const int rows=4,const int cols=4,const floato cell_size=.5f,const p3&p=p3{})
-		inline grid(const int nthreads=4,const int rows=4,const int cols=4,const floato cell_size=.5f,const p3&p=p3{})
+		inline grid(const int nthreads=1,const int rows=4,const int cols=4,const floato cell_size=.5f,const p3&p=p3{})
 	//		:po_(p),cell_size_(cell_size),cells_(rows*cols),nrows_{rows},ncols_{cols},nthreads_(nthreads)
 			:po_(p),cell_size_(cell_size),nrows_{rows},ncols_{cols},nthreads_{nthreads}
 		{
@@ -68,8 +68,9 @@ namespace grid{
 				const int cell_max_x_int=clamp(cell_max_x,0,ncols_-1);
 				const int cell_max_y_int=clamp(cell_max_y,0,nrows_-1);
 
-				if(cell_min_x==cell_max_x_int and cell_min_y_int==cell_max_y_int){// no overlap
+				if(cell_min_x_int==cell_max_x_int and cell_min_y_int==cell_max_y_int){// no overlap
 					int cell_index=cell_min_y_int*ncols_+cell_min_x_int;
+					g->overlaps_cells=false;
 					cells_[cell_index].add(g);
 					continue;
 				}
@@ -77,6 +78,7 @@ namespace grid{
 				for(int y=cell_min_y_int;y<=cell_max_y_int;y++){
 					for(int x=cell_min_x_int;x<=cell_max_x_int;x++){
 						int cell_index=y*ncols_+x;
+						g->overlaps_cells=true;
 						cells_[cell_index].add(g);
 					}
 				}
@@ -89,7 +91,7 @@ namespace grid{
 			update_render_sync_.set(nrows_*ncols_);
 			for(int r=0;r<nrows_;r++){
 				for(int c=0;c<ncols_;c++){
-					wque_work_update_cell*wrk=new wque_work_update_cell(update_render_sync_,cells_[r*ncols_+c]);
+					wque_work*wrk=new wque_work_update_cell(update_render_sync_,cells_[r*ncols_+c]);
 					update_grid_queue_.add(wrk);
 				}
 			}
