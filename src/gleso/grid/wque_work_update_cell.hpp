@@ -72,20 +72,20 @@ namespace grid{
 						if(found){
 							pthread_mutex_unlock(&g2->mutex_for_collision_checked_this_frame);
 							continue;
-						}
-						if(not found){
+							//
+						}else{
 							g2->collision_checked_this_frame.push_back(g1);
 						}
 						pthread_mutex_unlock(&g2->mutex_for_collision_checked_this_frame);
 					}
 					const bool b=problems::are_spheres_in_collision(*g1,*g2);
 					if(b){
-//						pthread_mutex_lock(&g1->mutex_for_collision_checked_this_frame);
-//						pthread_mutex_lock(&g2->mutex_for_collision_checked_this_frame);
+						pthread_mutex_lock(&g1->mutex_for_collision_checked_this_frame);
+						pthread_mutex_lock(&g2->mutex_for_collision_checked_this_frame);
 						g1->handle_collision_with(g2);
 						g2->handle_collision_with(g1);
-//						pthread_mutex_unlock(&g2->mutex_for_collision_checked_this_frame);
-//						pthread_mutex_unlock(&g1->mutex_for_collision_checked_this_frame);
+						pthread_mutex_unlock(&g2->mutex_for_collision_checked_this_frame);
+						pthread_mutex_unlock(&g1->mutex_for_collision_checked_this_frame);
 					}
 				}
 			}
