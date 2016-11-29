@@ -20,7 +20,7 @@ namespace grid{
 	//	inline grid(const int nthreads=1,const int rows=1,const int cols=1,const floato cell_size=2,const p3&p=p3{})
 	//	inline grid(const int nthreads=2,const int rows=2,const int cols=2,const floato cell_size=1,const p3&p=p3{})
 	//	inline grid(const int nthreads=1,const int rows=4,const int cols=4,const floato cell_size=.5f,const p3&p=p3{})
-		inline grid(const int nthreads=1,const int rows=4,const int cols=4,const floato cell_size=.5f,const p3&p=p3{})
+		inline grid(const int nthreads=4,const int rows=4,const int cols=4,const floato cell_size=.5f,const p3&p=p3{})
 	//		:po_(p),cell_size_(cell_size),cells_(rows*cols),nrows_{rows},ncols_{cols},nthreads_(nthreads)
 			:po_(p),cell_size_(cell_size),nrows_{rows},ncols_{cols},nthreads_{nthreads}
 		{
@@ -87,30 +87,44 @@ namespace grid{
 			}
 		}
 
+		float globs_per_cell{0};
+
 		inline void update_globs(){
 	//		p("  update_globs\n");
 			globs_updated=0;
-			update_render_sync_.set(nrows_*ncols_);
+			globs_mutex_locks=0;
+			const int ncells=nrows_*ncols_;
+			update_render_sync_.set(ncells);
+			int number_of_globs_in_grid{0};
 			for(int r=0;r<nrows_;r++){
 				for(int c=0;c<ncols_;c++){
-					wque_work*wrk=new wque_work_update_cell(update_render_sync_,cells_[r*ncols_+c]);
+					cell&cc=cells_[r*ncols_+c];
+					number_of_globs_in_grid+=cc.globs.size();
+					wque_work*wrk=new wque_work_update_cell(update_render_sync_,cc);
 					update_grid_queue_.add(wrk);
 				}
 			}
 
+			metrics::globs_per_cell=number_of_globs_in_grid/ncells;
+
 			update_render_sync_.wait_until_count_is_zero();
 		}
 
-		inline void update_globs2(){
+		inline void update_globs_single_thread(){
 	//		p("  update_globs2\n");
+			globs_updated=0;
+			globs_mutex_locks=0;
 			for(int r=0;r<nrows_;r++){
 				for(int c=0;c<ncols_;c++){
-					cells_[r*ncols_+c].update_globs();
+					cell&cc=cells_[r*ncols_+c];
+					cc.update_globs();
+					cc.handle_collisions();
 				}
 			}
 		}
 
 		inline void render_globs(){
+			globs_rendered=0;
 			for(auto&c:cells_){
 				c.render_globs();
 			}

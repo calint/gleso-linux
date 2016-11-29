@@ -4,7 +4,7 @@
 class a_static_sphere:public glob{
 public:
 	inline a_static_sphere(position p_={},floato r_=.1){
-		gl=&glo_ball::instance;
+		set_glo(&glo_ball::instance);
 		phy.r=r_;
 		phy.s={r_,r_,r_};
 		phy.p=p_;

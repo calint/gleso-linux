@@ -98,10 +98,9 @@ void gleso_step(){
 	if(gleso::update_blobs_multithreaded){
 		grd.update_globs();
 	}else{
-		grd.update_globs2();
+		grd.update_globs_single_thread();
 	}
 
-	//	p(" updated globs   %d\n",metrics::updated_globs);
 	if(gleso::use_grid){
 		gl::active_camera->pre_render();
 		if(gleso::render_globs)grd.render_globs();//? thread
@@ -109,44 +108,39 @@ void gleso_step(){
 	}
 
 //	usleep(100000);
-//	p(" timestamp:  %u   \n",gl::time_stamp);
-//	for(auto g:gl::globs){
-//		p(" %s %p overlapping grid cell collision checked size  %u \n",typeid(g).name(),g,g->collision_checked_this_frame.size());
-//	}
-
 
 	metrics::after_render();
 }
 
 void gleso_key(int key,int scancode,int action,int mods){
+	if(action==GLFW_REPEAT)
+		return;
+
 	p(" ** gleso_key  key=%d   scancode=%d    action=%d   mods=%d\n",key,scancode,action,mods);
+	using namespace gl;
 	switch(key){
 	case 87://w - forward
 		switch(action){
-			case 1:gl::active_camera->phy.dp.y=1;break;
-			case 0:gl::active_camera->phy.dp.y=0;break;
+			case 1:active_camera->vehicle_forward(4);break;
+			case 0:active_camera->vehicle_forward(0);break;
 		}
 		break;
 	case 83://s - backward
 		switch(action){
-			case 1:gl::active_camera->phy.dp.y=-1;break;
-			case 0:gl::active_camera->phy.dp.y=0;break;
+		case 1:active_camera->vehicle_backward(4);break;
+		case 0:active_camera->vehicle_backward(0);break;
 		}
 		break;
 	case 68://d - turn right
 		switch(action){
-//			case 1:c->phy.dp.x=-1;break;
-//			case 0:c->phy.dp.x=0;break;
-			case 1:gl::active_camera->phy.da.z=180;break;
-			case 0:gl::active_camera->phy.da.z=0;break;
+			case 1:active_camera->vehicle_turn_right(1);break;
+			case 0:active_camera->vehicle_turn_right(0);break;
 		}
 		break;
 	case 65://a - turn left
 		switch(action){
-//			case 1:c->phy.dp.x=1;break;
-//			case 0:c->phy.dp.x=0;break;
-			case 1:gl::active_camera->phy.da.z=-180;break;
-			case 0:gl::active_camera->phy.da.z=0;break;
+			case 1:active_camera->vehicle_turn_left(1);break;
+			case 0:active_camera->vehicle_turn_left(0);break;
 		}
 		break;
 	case 46://.

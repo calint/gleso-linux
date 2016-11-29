@@ -16,6 +16,27 @@ class m4{public:
 		c[14]=p.z;
 		return*this;
 	}
+	m4&set_translation(const p3&p){
+		// [ 0 4  8  x ]
+		// [ 1 5  9  y ]
+		// [ 2 6 10  z ]
+		// [ 3 7 11 15 ]
+		c[12]=p.x;
+		c[13]=p.y;
+		c[14]=p.z;
+		return*this;
+	}
+	m4&load_identity(){
+		// [ 0 4  8 12 ]
+		// [ 1 5  9 13 ]
+		// [ 2 6 10 14 ]
+		// [ 3 7 11 15 ]
+		c[ 1]=c[ 2]=c[ 3]=c[ 4]=
+		c[ 6]=c[ 7]=c[ 8]=c[ 9]=
+		c[11]=0;
+		c[ 0]=c[ 5]=c[10]=c[15]=1;
+		return*this;
+	}
 	m4&append_rotation_about_z_axis(const floato degrees){
 		// [ 0 4  8 12 ]   [ cos -sin 0  0 ]
 		// [ 1 5  9 13 ] x [ sin cos  0  0 ]
@@ -87,6 +108,13 @@ class m4{public:
 		c[15]=1;
 		return*this;
 	}
+//	inline p3 x_axis()const{return p3{c[0],c[4],c[8]};}
+
+	//	inline p3 y_axis()const{return p3{c[1],c[5],c[9]};}
+	inline p3 y_axis()const{return p3{c[4],c[5],c[6]};}
+
+//	inline p3 z_axis()const{return p3{c[2],c[6],c[10]};}
+//	inline p3 w_axis()const{return p3{c[3],c[7],c[11]};}
 };
 m4 operator*(const m4&lh,const m4&rh){
 	// [ 0 4  8 12 ]   [ 0 4  8 12 ]

@@ -2,6 +2,7 @@
 
 #include<GL/glew.h>
 #include<stdio.h>
+#include<GLFW/glfw3.h>
 
 #define GLESO_EMBEDDED
 //#undef GLESO_EMBEDDED

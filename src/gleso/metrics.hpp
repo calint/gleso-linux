@@ -3,7 +3,9 @@
 #include"init.hpp"
 #include<sys/time.h>
 #include<atomic>
-std::atomic_int globs_updated;
+atomic_int globs_updated;
+atomic_int globs_mutex_locks;
+atomic_int globs_rendered;
 namespace metrics{
 	int nshaders;
 	int ngrids;
@@ -13,20 +15,26 @@ namespace metrics{
 	int updated_globs;
 	int rendered_globs;
 	int threads;
+	int globs_per_cell;
 
 	floato dt{1./60};
-	longo frame;//?? rollover issues when used in comparisons
+	longo frame;//? rollover issues when used in comparisons
 	floato fps;
 	static struct timeval fps_time_prev;
 	static floato fps_frame_prev;
+	void print_header_row(){
+		p("%5s %5s %6s %5s %5s %5s %5s\n","fps","dt","globs","upd","rend","lcks","g/c");
+
+	}
 	static void before_render(){
+		if(frame==0)
+			print_header_row();
 		frame++;
 		updated_globs=0;
 		rendered_globs=0;
 	}
 	void print(){
-		int gu=globs_updated;
-		p("fps:%03.0f – dt:%5f – shaders:%01d – textures:%01d – glos:%02d – globs:%05d – updated:%02d – rendered:%02d – grids:%02d – threads:%02d\n",fps,metrics::dt,nshaders,ntextures,nglos,nglobs,gu,rendered_globs,ngrids,threads);
+		p("%5.0f %5d %6d %5d %5d %5d %5d\n",fps,int(dt*1000000),nglobs,int(globs_updated),int(globs_rendered),int(globs_mutex_locks),globs_per_cell);
 	}
 	static void after_render(){
 		struct timeval tv;

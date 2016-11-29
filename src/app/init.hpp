@@ -54,12 +54,21 @@ static void test9(){
 	globs.push_back(new a_static_sphere{.5,.05});
 }
 
+static void test10(){
+	for(int i=0;i<1024*2;i++)
+		globs.push_back(new a_ball);
+}
+
+static void test11(){
+}
+
 static void init(){
 	shaders.push_back(&shader::instance);
 	textures.push_back(&texture::instance);
 //	glos.push_back(&glo_circle_xy::instance);
 	glos.push_back(&glo_grid::instance);
 	glos.push_back(&glo_ball::instance);
+	glos.push_back(&glo::instance);
 
 //	test0();
 //	test1();
@@ -71,4 +80,6 @@ static void init(){
 //	test7();
 //	test8();
 	test9();
+//	test10();
+//	test11();
 }

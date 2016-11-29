@@ -10,14 +10,12 @@
 #define WINDOW_HEIGHT 512
 
 static void key_callback(GLFWwindow*window,int key,int scancode,int action,int mods){
-	if(window==0)return;//? unused param warning workaround
 	gleso_key(key,scancode,action,mods);
 }
 
 static float pointer_x=0,pointer_y=0;
 static int pointer_button_action=1;
 static void cursorpos_position_callback(GLFWwindow*window,double xpos,double ypos){
-	if(window==0)return;//? unused param warning workaround
 	pointer_x=(float)xpos;
 	pointer_y=(float)ypos;
 	if(pointer_button_action==0){// if button clicked, send drag event
@@ -26,7 +24,6 @@ static void cursorpos_position_callback(GLFWwindow*window,double xpos,double ypo
 }
 
 static void mousebutton_callback(GLFWwindow*window,int button,int action,int mods){
-	if(window==0)return;//? unused param warning workaround
 	if(mods!=0)return;
 	if(button!=GLFW_MOUSE_BUTTON_LEFT)
 		return;
@@ -43,7 +40,6 @@ static void mousebutton_callback(GLFWwindow*window,int button,int action,int mod
 }
 
 static void windowsize_callback(GLFWwindow*window,int width,int height){
-	if(window==0)return;//? unused param warning workaround
 	gleso_viewport(width,height);
 }
 
