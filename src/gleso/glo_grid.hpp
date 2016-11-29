@@ -23,4 +23,4 @@ class glo_grid:public glo{
 public:
 	static glo_grid instance;
 };
-glo_grid glo_grid::instance=glo_grid();
+glo_grid glo_grid::instance=glo_grid{};

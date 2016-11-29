@@ -4,9 +4,10 @@
 
 namespace grid{
 	class cell{
+	public:
 		vector<glob*>globs;
 
-	public:
+
 		cell(){
 			metrics::ngrids++;
 		}
@@ -29,7 +30,6 @@ namespace grid{
 		}
 
 		inline void add(glob*g){
-			g->grid_cell_ref=this;
 			globs.push_back(g);
 		}
 

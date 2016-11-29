@@ -83,6 +83,7 @@ void gleso_viewport(int width,int height){
 	gl::active_camera->viewport(width,height);
 }
 
+#include<unistd.h>
 
 static grid::grid grd;
 void gleso_step(){
@@ -107,10 +108,12 @@ void gleso_step(){
 		if(gleso::render_grid_outline)grd.render_outline();
 	}
 
+//	usleep(100000);
 //	p(" timestamp:  %u   \n",gl::time_stamp);
 //	for(auto g:gl::globs){
 //		p(" %s %p overlapping grid cell collision checked size  %u \n",typeid(g).name(),g,g->collision_checked_this_frame.size());
 //	}
+
 
 	metrics::after_render();
 }

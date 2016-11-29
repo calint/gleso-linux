@@ -24,8 +24,10 @@ public:
 			phy.dp.y=0;
 	}
 	inline virtual void on_collision(glob*g){
-		p(" [ %p ] collided with %p\n",this,g);
+		p("frame[%u]   in [%s %p] collision with [%s %p]\n",gl::time_stamp,typeid(*this).name(),this,typeid(*g).name(),g);
+		phy=phy_prv;
 		phy.dp=-phy.dp;
+//		phy.dp={};
 	}
 
 };

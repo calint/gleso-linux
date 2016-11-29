@@ -71,7 +71,8 @@ namespace grid{
 				if(cell_min_x_int==cell_max_x_int and cell_min_y_int==cell_max_y_int){// no overlap
 					int cell_index=cell_min_y_int*ncols_+cell_min_x_int;
 					g->overlaps_cells=false;
-					cells_[cell_index].add(g);
+					g->grid_cell_ref=&cells_[cell_index];
+					g->grid_cell_ref->add(g);
 					continue;
 				}
 
@@ -79,7 +80,8 @@ namespace grid{
 					for(int x=cell_min_x_int;x<=cell_max_x_int;x++){
 						int cell_index=y*ncols_+x;
 						g->overlaps_cells=true;
-						cells_[cell_index].add(g);
+						g->grid_cell_ref=&cells_[cell_index];
+						g->grid_cell_ref->add(g);
 					}
 				}
 			}

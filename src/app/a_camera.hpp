@@ -5,9 +5,9 @@ public:
 //	m4 mtx_wvp;// world->view->projection
 //	inline a_camera():glob(&glo_circle_xy::instance){}
 	inline a_camera():glob(&glo_grid::instance){
-		gl=&glo_grid::instance;
+		gl=&glo_ball::instance;
 		const floato s=.1f;
-		phy.r=sqrt(s*s+s*s);
+		phy.r=s;
 		phy.s=p3{s,s,s};
 	}
 	inline void viewport(int w,int h){screen_width=w;screen_height=h;}
@@ -35,4 +35,7 @@ public:
 //			phy.dp.x=1;
 //	}
 //	inline const m4&matrix_world_view_projection()const{return mtx_wvp;}
+	inline virtual void on_collision(glob*g){
+		p("frame[%u]   in [%s %p] collision with [%s %p]\n",gl::time_stamp,typeid(*this).name(),this,typeid(*g).name(),g);
+	}
 };

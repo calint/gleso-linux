@@ -1,7 +1,8 @@
 #pragma once
 #include"../platform.hpp"
 #include"a_sphere.hpp"
-	using namespace gl;
+#include"a_static_sphere.hpp"
+using namespace gl;
 
 static void test0(){
 	const int instances=1024*8;
@@ -31,8 +32,26 @@ static void test4(){
 }
 
 static void test5(){
-	globs.push_back(new a_sphere{{.2},.05,{ .05}});
-	globs.push_back(new a_sphere{{.4},.05,{-.05}});
+	globs.push_back(new a_sphere{{.2,.3},.05,{ .1}});
+	globs.push_back(new a_sphere{{.4,.3},.05,{-.1}});
+}
+
+static void test6(){
+	globs.push_back(new a_sphere{{.2},.05,{ .1}});
+	globs.push_back(new a_sphere{{.4},.05,{-.1}});
+}
+
+static void test7(){
+	globs.push_back(new a_sphere{{0,-.3},.05,{0,.1}});
+}
+
+static void test8(){
+	globs.push_back(new a_sphere{{},.05});
+}
+
+static void test9(){
+	globs.push_back(new a_sphere{.2,.05,.1});
+	globs.push_back(new a_static_sphere{.5,.05});
 }
 
 static void init(){
@@ -47,9 +66,9 @@ static void init(){
 //	test2();
 //	test3();
 //	test4();
-	test5();
+//	test5();
 //	test6();
 //	test7();
 //	test8();
-//	test9();
+	test9();
 }

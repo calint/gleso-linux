@@ -6,28 +6,20 @@ namespace grid{class cell;}
 class glob{
 public:
 	physics phy;// current physics state
+	physics phy_prv;// previous physics state
 	glo*gl{nullptr};// ref to gl renderable
-
-	// grid_cell accessed
-	grid::cell*grid_cell_ref{nullptr};//managed by grid
-	bool overlaps_cells{false};
-
-	vector<glob*>collision_checked_this_frame;
-	pthread_mutex_t mutex_for_collision_checked_this_frame;
-	atomic<longo>time_stamp_for_collision_check{0};
-	string type_name="glob";
 
 	inline glob(){
 //		p("new glob %p\n",(void*)this);
 		metrics::nglobs++;
 		phy.r=.1;
 		phy.s={phy.r,phy.r,phy.r};
-		pthread_mutex_init(&mutex_for_collision_checked_this_frame,NULL);//? lazyinit
+		pthread_mutex_init(&handled_collisions_mutex,NULL);//? lazyinit
 	}
 
 	inline glob(glo*g):glob(){
 		gl=g;
-		pthread_mutex_destroy(&mutex_for_collision_checked_this_frame);
+		pthread_mutex_destroy(&handled_collisions_mutex);
 	}
 
 	inline virtual~glob(){
@@ -35,11 +27,11 @@ public:
 		metrics::nglobs--;
 	}
 
-	inline const string&get_type_name(){return type_name;}
-
 	inline void render(){
-		if(not should_render())
+		// check if already rendered this render frame, i.e. from a different grid
+		if(time_stamp_render==gl::time_stamp)
 			return;
+
 		metrics::rendered_globs++;
 		time_stamp_render=gl::time_stamp;
 		if(!gl)return;
@@ -52,17 +44,28 @@ public:
 	}
 
 	inline void update(){
-		if(not should_update())
+		if(time_stamp_update==gl::time_stamp)
 			return;
+
 		metrics::updated_globs++;
+
 		globs_updated++;
+
 		time_stamp_update=gl::time_stamp;
+
+		phy_prv=phy;
+
 		phy.update();
+
 		on_update();
+
 		copy_phy_to_rend();
+
+		handled_collisions.clear(); //? lazy invocation using timestamp
+
 	}
 
-	inline void handle_collision_with(glob*g){
+	inline void handle_collision(glob*g){
 		on_collision(g);
 	}
 
@@ -72,13 +75,45 @@ public:
 		ginfo.s=phy.s;
 	}
 
+
+
+
+	void handle_overlapped_collision(glob*g){
+		pthread_mutex_lock(&handled_collisions_mutex);
+		for(auto gg:handled_collisions){
+			if(gg==g)// collision already handled
+				return;
+		}
+		handled_collisions.push_back(g);
+		pthread_mutex_unlock(&handled_collisions_mutex);
+		on_collision(g);
+	}
+
+
+
+
+
+
+
+
+
+
+
 	inline virtual void on_update(){}
 	inline virtual void on_collision(glob*g){}
 
-private:
-	inline bool should_update()const{return time_stamp_update!=gl::time_stamp;}
-	inline bool should_render(){return time_stamp_render!=gl::time_stamp;}
 
+
+
+	// grid_cell accessed
+	grid::cell*grid_cell_ref{nullptr};//managed by grid
+	bool overlaps_cells{false};
+
+
+	longo time_stamp_update{0};
+private:
+	vector<glob*>handled_collisions;
+	pthread_mutex_t handled_collisions_mutex;
 
 	struct glinfo{
 		position p{0,0,0};
@@ -87,7 +122,6 @@ private:
 	};
 
 	longo time_stamp_render{0};
-	longo time_stamp_update{0};
 	m4 matrix_model_world;
 	glinfo ginfo;// info for opengl rendering
 };
