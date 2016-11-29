@@ -8,7 +8,7 @@
 #include"../platform.hpp"
 #include"../gleso/init.hpp"
 #include"a_ball.hpp"
-#include"a_camera.hpp"
+#include"../gleso/gl/a_camera.hpp"
 //#include<memory>
 #include"init.hpp"
 
@@ -58,7 +58,7 @@ void gleso_init(){
 	if(!gl::active_shader){// init
 		p("* init\n");
 		gl::active_shader=&shader::instance;
-		gl::active_camera=new a_camera();
+		gl::active_camera=new a_camera;
 		gl::globs.push_back(gl::active_camera);
 		init();
 	}

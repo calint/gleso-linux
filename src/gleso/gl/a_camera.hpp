@@ -1,7 +1,7 @@
 #pragma once
-#include"../gleso/gl/glo.hpp"
+#include"glo.hpp"
 
-namespace a_camera{
+namespace gl{
 	class a_camera:public glob{
 		int screen_width{320},screen_height{240};
 	public:
