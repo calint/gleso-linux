@@ -3,9 +3,6 @@
 #include"../gleso/init.hpp"
 #include"../gleso/gl/a_camera.hpp"
 #include"a_ball.hpp"
-using namespace gl;
-
-
 
 
 /*
