@@ -1,5 +1,5 @@
 #pragma once
-#include"../platform.hpp"
+#include"../../platform.hpp"
 
 class shader{
 	GLint glid_program{0};

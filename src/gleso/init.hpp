@@ -39,10 +39,10 @@ namespace gleso{
 }
 
 #include"metrics.hpp"
-#include"gl.hpp"
-#include"shader.hpp"
-#include"texture.hpp"
-#include"glo.hpp"
+#include"gl/gl.hpp"
+#include"gl/shader.hpp"
+#include"gl/texture.hpp"
+#include"gl/glo.hpp"
 #include"p3.hpp"
 typedef p3 scale;
 typedef p3 angle;
@@ -52,7 +52,7 @@ typedef longo frame_count;
 #include"physics.hpp"
 #include"m4.hpp"
 #include"glob.hpp"
-#include"glo_grid.hpp"
+#include"grid/glo_grid.hpp"
 #include"grid/grid.hpp"
 #include<algorithm>
 
