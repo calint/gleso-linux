@@ -1,16 +1,26 @@
+#pragma once
+#include"../platform.hpp"
+#include"../gleso/init.hpp"
+#include"../gleso/gl/a_camera.hpp"
+#include"a_ball.hpp"
+using namespace gl;
+
+
+
+
 /*
      /////  ///\   ///// ///// /////////
      ///   ///\\\  ///   ///  // /// //
     ///   ///  \\\///   ///     ///
   ///// /////   \\\/  /////   /////
-*/
-#pragma once
-#include"../platform.hpp"
-#include"../gleso/init.hpp"
-#include"a_ball.hpp"
-#include"../gleso/gl/a_camera.hpp"
-//#include<memory>
+                                         */
+
 #include"init.hpp"
+
+
+
+
+
 
 /*-----------------------------
      __    _       __     __
