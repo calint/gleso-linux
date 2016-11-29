@@ -1,6 +1,5 @@
 #pragma once
 class a_camera;
-class texture;
 class glob;
 #include<vector>
 #include<memory>
@@ -8,6 +7,7 @@ using namespace std;
 namespace gl{
 	class shader;
 	class glo;
+	class texture;
 
 	// - - glsl bindings - - - - - - -
 	GLint apos;// vec2 vertex coords x,y
