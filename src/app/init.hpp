@@ -2,6 +2,8 @@
 #include"../platform.hpp"
 #include"a_sphere.hpp"
 #include"a_static_sphere.hpp"
+#include"../gleso/grid/glo_grid.hpp"
+#include"glo_ball.hpp"
 using namespace gl;
 
 static void test0(){

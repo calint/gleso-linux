@@ -1,6 +1,8 @@
 #pragma once
 #include"../platform.hpp"
 #include"gl/glo.hpp"
+#include"physics.hpp"
+#include"m4.hpp"
 using namespace gl;
 
 namespace grid{class grid;class cell;}

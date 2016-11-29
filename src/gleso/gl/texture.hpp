@@ -1,5 +1,8 @@
 #pragma once
 #include"../../platform.hpp"
+#include"gl.hpp"
+#include"shader.hpp"
+
 namespace gl{
 	class texture{
 	public:

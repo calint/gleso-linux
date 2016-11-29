@@ -1,6 +1,5 @@
 #pragma once
 #include"../platform.hpp"
-#include"../gleso/init.hpp"
 #include"../gleso/gl/a_camera.hpp"
 #include"a_ball.hpp"
 
@@ -14,6 +13,7 @@
 
 #include"init.hpp"
 
+#include"../gleso/grid/grid.hpp"
 
 
 
@@ -71,15 +71,15 @@ void gleso_init(){
 	}
 	gl::active_program=0;
 	p("* load\n");
-	foreach(gl::shaders,[](shader*o){
+	for_each(gl::shaders.begin(),gl::shaders.end(),[](shader*o){
 //		p(" shader %p   %s\n",(void*)o,typeid(*o).name());
 		o->load();
 	});
-	foreach(gl::textures,[](texture*o){
+	for_each(gl::textures.begin(),gl::textures.end(),[](texture*o){
 //		p(" texture %p   %s\n",(void*)o,typeid(*o).name());
 		o->load();
 	});
-	foreach(gl::glos,[](glo*o){
+	for_each(gl::glos.begin(),gl::glos.end(),[](glo*o){
 //		p(" glo %p   %s\n",(void*)o,typeid(*o).name());
 		o->load();
 	});

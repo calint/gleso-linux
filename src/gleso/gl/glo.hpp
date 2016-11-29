@@ -1,5 +1,8 @@
 #pragma once
 #include"../../platform.hpp"
+#include"../metrics.hpp"
+#include"gl.hpp"
+#include"texture.hpp"
 
 namespace gl{
 	class glo{

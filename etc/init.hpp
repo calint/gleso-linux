@@ -31,13 +31,7 @@ extern "C" {
 }
 #endif
 
-namespace gleso{
-	bool render_globs=true;
-	bool render_grid_outline=true;
-	bool use_grid=true;
-	bool update_blobs_multithreaded=true;
-}
-
+#include"gleso.hpp"
 #include"metrics.hpp"
 #include"gl/gl.hpp"
 #include"gl/shader.hpp"

@@ -1,6 +1,5 @@
 #pragma once
 #include"../platform.hpp"
-#include"init.hpp"
 #include<sys/time.h>
 #include<atomic>
 atomic_int globs_updated;

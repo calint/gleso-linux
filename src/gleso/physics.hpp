@@ -1,4 +1,7 @@
 #pragma once
+#include"../platform.hpp"
+#include"p3.hpp"
+
 class physics{
 public:
 	position p{0,0,0},dp{0,0,0},ddp{0,0,0};

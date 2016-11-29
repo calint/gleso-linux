@@ -1,7 +1,7 @@
 #pragma once
-#include"glo_ball.hpp"
+#include"../platform.hpp"
 #include"../gleso/glob.hpp"
-
+#include"glo_ball.hpp"
 using namespace gl;
 
 class a_ball:public glob{

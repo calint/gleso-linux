@@ -1,12 +1,12 @@
 #pragma once
 #include"glo.hpp"
+#include"../glob.hpp"
 
 namespace gl{
 	class a_camera:public glob{
 		int screen_width{320},screen_height{240};
 	public:
 		inline a_camera():glob(&glo::instance){
-			set_glo(&glo::instance);
 			const floato s=.1f;
 			phy.r=s;
 			phy.s=p3{s,s,s};
