@@ -1,8 +1,4 @@
-#include "../app/main.hpp"
-
-#include<GLFW/glfw3.h>
-#include<GL/glew.h>
-
+#include"../app/main.hpp"
 #include"../gleso/timer.hpp"
 #include"../gleso/grid/update_render_sync.hpp"
 
