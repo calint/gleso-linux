@@ -7,7 +7,7 @@ public:
 	radius_m r{0};
 	weight_kg w{0};
 
-	void update(){
+	inline void update(){
 		using namespace metrics;
 		dp.add(ddp,dt);
 		p.add(dp,dt);

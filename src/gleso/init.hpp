@@ -53,9 +53,7 @@ typedef longo frame_count;
 #include"m4.hpp"
 #include"glob.hpp"
 #include"glo_grid.hpp"
-#include"init.hpp"
 #include"grid/grid.hpp"
-#include"init.hpp"
 #include<algorithm>
 
 #define foreach(c,f)std::for_each(c.begin(),c.end(),f);

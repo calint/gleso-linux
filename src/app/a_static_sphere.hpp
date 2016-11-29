@@ -10,7 +10,7 @@ public:
 		phy.p=p_;
 	}
 	inline virtual void on_collision(glob*g){
-		p("frame[%u]   in [%s %p] collision with [%s %p]\n",gl::time_stamp,typeid(*this).name(),this,typeid(*g).name(),g);
+		p("frame[%lld]   in [%s %p] collision with [%s %p]\n",gl::time_stamp,typeid(*this).name(),(void*)this,typeid(*g).name(),(void*)g);
 	}
 
 };

@@ -3,7 +3,7 @@
 class timer{//? platform dependent
 	double t0;
 public:
-	timer():t0(glfwGetTime()){}
+	inline timer():t0(glfwGetTime()){}
 
 	inline double dt(){
 		const double t1=glfwGetTime();

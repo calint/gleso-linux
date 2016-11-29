@@ -4,7 +4,7 @@ class glo_ball:public glo{
 public:
 	inline glo_ball():nvertices(1+12+1){}
 protected:
-	vector<GLfloat>make_vertices()const override{
+	inline vector<GLfloat>make_vertices()const override{
 		vector<GLfloat>v;
 		v.push_back(0);//x
 		v.push_back(0);//y
@@ -19,7 +19,7 @@ protected:
 		}
 		return v;
 	}
-	vector<GLfloat>make_colors()const override{
+	inline vector<GLfloat>make_colors()const override{
 		vector<GLfloat>v;
 		const int n=nvertices*4;
 		for(int k=0;k<n;k++){

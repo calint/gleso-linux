@@ -11,7 +11,7 @@ public:
 
 	inline void viewport(int w,int h){screen_width=w;screen_height=h;}
 
-	void pre_render(){
+	inline void pre_render(){
 		gl::active_shader->use_program();
 		glClearColor(floato{.5},0,floato{.5},1);
 		glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);

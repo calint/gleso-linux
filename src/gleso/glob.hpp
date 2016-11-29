@@ -50,7 +50,7 @@ public:
 		gl->render();
 	}
 
-	const m4&local_to_world_matrix(){
+	inline const m4&local_to_world_matrix(){
 		update_model_to_world_matrix();
 		return model_to_world_matrix_;
 	}
@@ -63,19 +63,19 @@ public:
 	//------------------------------ vehicle
 
 
-	void vehicle_turn_left(floato s){
+	inline void vehicle_turn_left(floato s){
 		phy.da.z=180*s;
 	}
 
-	void vehicle_turn_right(floato s){
+	inline void vehicle_turn_right(floato s){
 		phy.da.z=-180*s;
 	}
 
-	void vehicle_forward(floato s){
+	inline void vehicle_forward(floato s){
 		phy.dp=local_to_world_matrix().y_axis().scale(s);
 	}
 
-	void vehicle_backward(floato s){
+	inline void vehicle_backward(floato s){
 		phy.dp=local_to_world_matrix().y_axis().scale(s).negate();
 	}
 
