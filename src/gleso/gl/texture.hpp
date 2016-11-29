@@ -16,7 +16,7 @@ public:
 		refresh_from_data();
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-		shader::check_gl_error();
+		gl::shader::check_gl_error();
 	}
 	void enable_for_gl_draw(){
 		glActiveTexture(GL_TEXTURE0);

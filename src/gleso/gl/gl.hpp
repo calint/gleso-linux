@@ -1,13 +1,14 @@
 #pragma once
-class shader;
+class a_camera;
 class texture;
 class glo;
-class a_camera;
 class glob;
 #include<vector>
 #include<memory>
 using namespace std;
 namespace gl{
+	class shader;
+
 	// - - glsl bindings - - - - - - -
 	GLint apos;// vec2 vertex coords x,y
 	GLint auv;// vec2 texture coords x,y

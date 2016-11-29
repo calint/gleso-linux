@@ -1,8 +1,10 @@
 #pragma once
+#include"../gleso/gl/glo.hpp"
+
 class a_camera:public glob{
 	int screen_width{320},screen_height{240};
 public:
-	inline a_camera():glob(&glo_grid::instance){
+	inline a_camera():glob(&glo::instance){
 		set_glo(&glo::instance);
 		const floato s=.1f;
 		phy.r=s;
