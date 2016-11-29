@@ -22,12 +22,13 @@ public:
 
 	inline glob(glo*g):glob(){
 		gl=g;
-		pthread_mutex_destroy(&handled_collisions_mutex);
+		pthread_mutex_init(&handled_collisions_mutex,NULL);//? lazyinit
 	}
 
 	inline virtual~glob(){
 //		p("delete glob %p\n",(void*)this);
 		metrics::nglobs--;
+		pthread_mutex_destroy(&handled_collisions_mutex);
 	}
 
 	inline void set_glo(glo*gl){

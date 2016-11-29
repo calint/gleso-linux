@@ -1,12 +1,16 @@
 #pragma once
 #include"glo_ball.hpp"
+#include"../gleso/glob.hpp"
+
+using namespace gl;
+
 class a_ball:public glob{
 	floato constraint_,velocity_;
 public:
 	inline a_ball(const floato radius=.025f,const floato velocity=.1f,const floato constraint=1)
-		:constraint_{constraint},velocity_{velocity}
+		:glob(&glo_ball::instance),constraint_{constraint},velocity_{velocity}
 	{
-		set_glo(&glo_ball::instance);
+//		set_glo(&glo_ball::instance);
 //		gl=&glo_ball::instance;
 		phy.p.x=rnd(-constraint,constraint);
 		phy.p.y=rnd(-constraint,constraint);

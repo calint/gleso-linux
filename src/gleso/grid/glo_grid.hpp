@@ -1,4 +1,6 @@
 #pragma once
+#include"../../platform.hpp"
+using namespace gl;
 
 class glo_grid:public glo{
 	vector<GLfloat>make_vertices()const override{
