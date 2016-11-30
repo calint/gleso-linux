@@ -26,7 +26,9 @@ namespace gleso{namespace grid{
 		floato metric_globs_per_cell{0};
 
 
-		inline grid(const int nthreads=4,const int rows=4,const int cols=4,const floato cell_size=.5f,const p3&p=p3{}):
+//		inline grid(const int nthreads=4,const int rows=16,const int cols=16,const floato cell_size=.125f,const p3&p=p3{}):
+		inline grid(const int nthreads=4,const int rows=8,const int cols=8,const floato cell_size=.25f,const p3&p=p3{}):
+//		inline grid(const int nthreads=4,const int rows=4,const int cols=4,const floato cell_size=.5f,const p3&p=p3{}):
 			po_(p),cell_size_(cell_size),nrows_{rows},ncols_{cols}
 		{
 			const auto ncells=rows*cols;

@@ -1,38 +1,47 @@
 #pragma once
 #include"../include.hpp"
 #include"../gleso/glob.hpp"
-#include "../program16/glo_ball.hpp"
+#include"glo_bullet.hpp"
 
 namespace program16{
 
-	class a_sphere:public glob{
+	class a_bullet:public glob{
 		floato constraint_;
 
 	public:
 
-		inline a_sphere(position p_={},floato r_=.1,velocity_vector v_={},floato constraint=1):constraint_{constraint}{
+		inline a_bullet(position p_={},floato r_=.1,velocity_vector v_={},floato constraint=1):
+			glob{&glo_bullet::instance},constraint_{constraint}
+		{
 			phy.r=r_;
 			phy.s={r_,r_,r_};
 			phy.p=p_;
 			phy.dp=v_;
-			set_glo(&glo_ball::instance);
 		}
 
 		inline void on_update(const time_s dt)override{
 			if(phy.p.x>constraint_-phy.s.x)
-				phy.dp.x=0;
+				stop();
 			else if(phy.p.x<-constraint_+phy.s.x)
-				phy.dp.x=0;
+				stop();
 			if(phy.p.y>constraint_-phy.s.y)
-				phy.dp.y=0;
+				stop();
 			else if(phy.p.y<-constraint_+phy.s.y)
-				phy.dp.y=0;
+				stop();
 		}
 
-		inline virtual void on_collision(glob*g){
+		inline void on_collision(glob*g){
 //			p("frame[%lld]   in [%s %p] collision with [%s %p]\n",metric.frame,typeid(*this).name(),(void*)this,typeid(*g).name(),(void*)g);
-			restore_previous_physics_state();
-			phy.dp=-phy.dp;
+//			restore_previous_physics_state();
+//			phy.dp={};
+//			phy.da={};
+			stop();
+		}
+
+	private:
+		void stop(){
+			phy.dp={};
+			phy.da={};
 		}
 
 	};

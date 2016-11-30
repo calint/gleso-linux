@@ -70,13 +70,14 @@ namespace gleso{
 
 		//------------------------------ vehicle
 
+		floato turn_rate_per_second=90;
 
 		inline void vehicle_turn_left(floato s){
-			phy.da.z=180*s;
+			phy.da.z=turn_rate_per_second*s;
 		}
 
 		inline void vehicle_turn_right(floato s){
-			phy.da.z=-180*s;
+			phy.da.z=-turn_rate_per_second*s;
 		}
 
 		inline void vehicle_forward(floato s){
@@ -111,13 +112,15 @@ namespace gleso{
 			on_collision(g);
 		}
 		inline void update(const time_s dt){
-			if(time_stamp_update==metric.frame)
+			//? ----- racing
+			if(last_frame_update==metric.frame)
 				return;
 
+			last_frame_update=metric.frame;
+			//? -----
+
+//			metric.globs_updated.fetch_add(1,memory_order_relaxed);
 			metric.globs_updated++;
-
-			time_stamp_update=metric.frame;
-
 
 			const position p=phy.p;
 			const angle a=phy.a;
@@ -176,7 +179,7 @@ namespace gleso{
 
 		longo prev_rendered_frame{0};
 
-		longo time_stamp_update{0};
+		longo last_frame_update{0};
 
 		m4 model_to_world_matrix_;
 

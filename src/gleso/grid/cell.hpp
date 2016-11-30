@@ -44,9 +44,9 @@ namespace gleso{namespace grid{
 					auto g2=globs[j];
 
 					// if globs at different frames then in different cells because update is done in this cell
-					if(g1->time_stamp_update!=g2->time_stamp_update){
+					if(g1->last_frame_update!=g2->last_frame_update){
 						// update the glob in the other cell
-						if(g1->time_stamp_update>g2->time_stamp_update){
+						if(g1->last_frame_update>g2->last_frame_update){
 							g2->update(dt);
 						}else{
 							g1->update(dt);

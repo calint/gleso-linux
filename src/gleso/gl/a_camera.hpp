@@ -1,13 +1,13 @@
 #pragma once
-#include"glo.hpp"
 #include"../glob.hpp"
+#include"glo_camera.hpp"
 
 namespace gleso{namespace gl{
 
 	class a_camera:public glob{
 		int screen_width{320},screen_height{240};
 	public:
-		inline a_camera():glob(&glo::instance){
+		inline a_camera():glob(&glo_camera::instance){
 			const floato s=.1f;
 			phy.r=s;
 			phy.s=p3{s,s,s};
@@ -33,6 +33,10 @@ namespace gleso{namespace gl{
 			m4 wvp=p*vw;
 
 			glUniformMatrix4fv(s.umtx_wvp,1,false,wvp.c);
+		}
+
+		inline virtual void on_collision(glob*g){
+//			restore_previous_physics_state();
 		}
 	};
 

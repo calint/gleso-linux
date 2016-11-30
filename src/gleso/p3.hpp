@@ -29,4 +29,8 @@ namespace gleso{
 	inline bool operator!=(const p3&a,const p3&b){
 		return not operator==(a,b);
 	}
+
+	inline p3 operator*(const p3&a,const floato s){
+		return p3{a.x*s,a.y*s,a.z*s};
+	}
 }

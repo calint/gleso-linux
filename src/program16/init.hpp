@@ -1,9 +1,10 @@
 #pragma once
 #include"../include.hpp"
 #include"../gleso/grid/glo_grid.hpp"
-#include "../program16/a_ball.hpp"
-#include "../program16/a_sphere.hpp"
-#include "../program16/a_static_sphere.hpp"
+#include"a_ball.hpp"
+#include"a_sphere.hpp"
+#include"a_static_sphere.hpp"
+#include"a_bullet.hpp"
 using namespace grid;
 using namespace program16;
 
@@ -63,6 +64,44 @@ static void test10(){
 }
 
 static void test11(){
+	const floato constraint=1;
+	const floato velocity=.1;
+	for(int i=0;i<1024;i++){
+		p3 po;
+		po.x=rnd(-constraint,constraint);
+		po.y=rnd(-constraint,constraint);
+		const floato r=.01;
+		velocity_vector v;
+		v.x=rnd(-velocity,velocity);
+		v.y=rnd(-velocity,velocity);
+
+		globs.push_back(new a_sphere(po,r,v,constraint));
+	}
+}
+
+static void test12(){
+	const floato constraint=1;
+	const floato velocity=.05;
+	const int count=1024*2;
+//	gleso::render_globs=false;
+//	gleso::render_grid_outline=false;
+
+	const floato r=.005;
+	for(int i=0;i<count;i++){
+		p3 po{rnd(-constraint,constraint),rnd(-constraint,constraint)};
+		velocity_vector v{rnd(-velocity,velocity),rnd(-velocity,velocity)};
+		globs.push_back(new a_sphere(po,r,v,constraint));
+	}
+}
+
+static void test13(){
+	const floato constraint=1;
+	const int count=8;
+	for(int i=0;i<count;i++){
+		p3 po{rnd(-constraint,constraint),rnd(-constraint,constraint)};
+		const floato r=.05+rnd(0,.2);
+		globs.push_back(new a_static_sphere(po,r));
+	}
 }
 
 static void init(){
@@ -72,6 +111,8 @@ static void init(){
 	glos.push_back(&glo_grid::instance);
 	glos.push_back(&glo_ball::instance);
 	glos.push_back(&glo::instance);
+	glos.push_back(&glo_camera::instance);
+	glos.push_back(&glo_bullet::instance);
 
 //	test0();
 //	test1();
@@ -83,7 +124,9 @@ static void init(){
 //	test7();
 //	test8();
 //	test9();
-	test10();
+//	test10();
 //	test11();
+//	test12();
+	test13();
 }
 

@@ -27,11 +27,11 @@ namespace gleso{
 		inline~metrics(){print();}
 
 		inline void print_header_row(){
-			p("%6s %6s %5s %6s %5s %5s %5s %4s %4s %5s %4s %4s\n","frame","dt","fps","globs","upd","rend","lcks","g/c","glos","gca","gch","gco");
+			p("%7s %6s %5s %7s %7s %7s %5s %6s %3s %6s %4s %4s\n","frame","dt","fps","globs","upd","rend","lcks","g/c","glo","gca","gch","gco");
 
 		}
 		inline void print(){
-			p("%6lld %0.4f %5d %6d %5d %5d %5d %0.1f %4d %5d %4d %4d\n",
+			p("%7lld %0.4f %5d %7d %7d %7d %5d %6.1f %3d %6d %4d %4d\n",
 					frame,
 					dt,
 					int(fps),

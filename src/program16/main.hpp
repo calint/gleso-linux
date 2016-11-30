@@ -151,6 +151,17 @@ void gleso_key(int key,int scancode,int action,int mods){
 			case 0:gleso::update_grid_cells_in_parallell=!gleso::update_grid_cells_in_parallell;break;
 		}
 		break;
+	case 257:// [return]
+		switch(action){
+			case 1:
+				const p3 vector_pointing_forward=active_camera->local_to_world_matrix().y_axis();
+				const p3 velocity=active_camera->phy.dp;
+				const p3 inital_velocity=vector_pointing_forward*15+velocity;
+				globs.push_back(new a_bullet(active_camera->phy.p+vector_pointing_forward*1.1,.01,inital_velocity));
+				break;
+//			case 0:break;
+		}
+		break;
 	}
 }
 
