@@ -24,11 +24,15 @@ namespace gleso{
 			phy.r=.1;
 			phy.s={phy.r,phy.r,phy.r};
 			pthread_mutex_init(&handled_collisions_mutex,NULL);//? lazyinit
+			pthread_mutex_init(&needs_update_mutex,NULL);//? lazyinit
 		}
 
-		inline glob(glo*g):glob(){
-			gl=g;
+		inline glob(glo*g):gl{g}{
+			metric.glob_count++;
+			phy.r=.1;
+			phy.s={phy.r,phy.r,phy.r};
 			pthread_mutex_init(&handled_collisions_mutex,NULL);//? lazyinit
+			pthread_mutex_init(&needs_update_mutex,NULL);//? lazyinit
 		}
 
 		inline virtual~glob(){
@@ -111,14 +115,50 @@ namespace gleso{
 			pthread_mutex_unlock(&handled_collisions_mutex);
 			on_collision(g);
 		}
-		inline void update(const time_s dt){
+
+
+		// no locks
+		inline bool check_needs_update1(){
 			//? ----- racing
 			if(last_frame_update==metric.frame)
-				return;
+				return false;
 
 			last_frame_update=metric.frame;
+			return true;
 			//? -----
+		}
 
+		// atomic lock
+		atomic_flag lock=ATOMIC_FLAG_INIT;
+		inline bool check_needs_update2(){
+			int busy_waits{0};
+			while(lock.test_and_set()){busy_waits++;}
+			if(last_frame_update==metric.frame){
+				lock.clear();
+				if(busy_waits)p(" busy wait  %d\n",busy_waits);
+				return false;
+			}
+			last_frame_update=metric.frame;
+			lock.clear();
+			if(busy_waits)p(" busy wait  %d\n",busy_waits);
+			return true;
+		}
+
+		// mutex
+		inline bool check_needs_update3(){
+			pthread_mutex_lock(&needs_update_mutex);
+			if(last_frame_update==metric.frame){
+				pthread_mutex_unlock(&needs_update_mutex);
+				return false;
+			}
+			last_frame_update=metric.frame;
+			pthread_mutex_unlock(&needs_update_mutex);
+			return true;
+		}
+
+		inline void update(const time_s dt){
+			if(not check_needs_update2())
+				return;
 //			metric.globs_updated.fetch_add(1,memory_order_relaxed);
 			metric.globs_updated++;
 
@@ -186,6 +226,9 @@ namespace gleso{
 		bool model_to_world_matrix_needs_update{true};
 
 		glinfo ginfo;
+
+		pthread_mutex_t needs_update_mutex;
+
 
 	};
 }

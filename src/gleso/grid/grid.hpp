@@ -113,6 +113,8 @@ namespace gleso{namespace grid{
 			metric.globs_per_cell=number_of_globs_in_grid/ncells;
 
 			update_render_sync_.wait_until_count_is_zero();
+			if(unsigned(metric.globs_updated)!=gleso::globs.size())
+				throw"updated globs not same as number of globs";
 		}
 
 		inline void update_globs_single_thread(time_s dt){

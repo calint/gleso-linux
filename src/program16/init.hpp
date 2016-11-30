@@ -82,7 +82,7 @@ static void test11(){
 static void test12(){
 	const floato constraint=1;
 	const floato velocity=.05;
-	const int count=1024*2;
+	const int count=1024*8;
 //	gleso::render_globs=false;
 //	gleso::render_grid_outline=false;
 
@@ -126,7 +126,7 @@ static void init(){
 //	test9();
 //	test10();
 //	test11();
-//	test12();
-	test13();
+	test12();
+//	test13();
 }
 
