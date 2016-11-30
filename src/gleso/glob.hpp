@@ -128,7 +128,7 @@ namespace gleso{
 
 
 		// no locks
-		inline bool check_needs_update1(){
+		inline bool check_needs_update__nolocks(){
 			//? ----- racing
 			if(last_frame_update==metric.frame)
 				return false;
@@ -140,7 +140,7 @@ namespace gleso{
 
 		// atomic lock
 		atomic_flag lock=ATOMIC_FLAG_INIT;
-		inline bool check_needs_update2(){
+		inline bool check_needs_update__atomiclock(){
 			int busy_waits{0};
 			while(lock.test_and_set()){busy_waits++;}
 			if(last_frame_update==metric.frame){
@@ -155,7 +155,7 @@ namespace gleso{
 		}
 
 		// mutex
-		inline bool check_needs_update3(){
+		inline bool check_needs_update__mutex(){
 			pthread_mutex_lock(&needs_update_mutex);
 			if(last_frame_update==metric.frame){
 				pthread_mutex_unlock(&needs_update_mutex);
@@ -168,10 +168,10 @@ namespace gleso{
 
 		inline void update(const time_s dt){
 			if(update_grid_cells_in_parallell){
-				if(not check_needs_update2())
+				if(not check_needs_update__atomiclock())
 					return;
 			}else{
-				if(not check_needs_update1())
+				if(not check_needs_update__nolocks())
 					return;
 			}
 //			metric.globs_updated.fetch_add(1,memory_order_relaxed);
