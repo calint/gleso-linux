@@ -3,6 +3,7 @@
 #include"gl/glo.hpp"
 #include"physics.hpp"
 #include"m4.hpp"
+#include"metrics.hpp"
 using namespace gl;
 
 namespace grid{class grid;class cell;}
@@ -12,11 +13,12 @@ class glob{
 	friend class grid::cell;
 
 public:
+
 	physics phy;// current physics state
 
 	inline glob(){
 //		p("new glob %p\n",(void*)this);
-		metrics::nglobs++;
+		glob_count++;
 		phy.r=.1;
 		phy.s={phy.r,phy.r,phy.r};
 		pthread_mutex_init(&handled_collisions_mutex,NULL);//? lazyinit
@@ -29,7 +31,7 @@ public:
 
 	inline virtual~glob(){
 //		p("delete glob %p\n",(void*)this);
-		metrics::nglobs--;
+		glob_count--;
 		pthread_mutex_destroy(&handled_collisions_mutex);
 	}
 

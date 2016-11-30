@@ -17,14 +17,11 @@ namespace gl{
 		GLuint glid_buffer_colors{0};
 	#endif
 	public:
-		inline glo(){
-	//		p("new glo %p\n",(void*)this);
-			metrics::nglos++;
-		}
-		inline virtual~glo(){
-	//		p("delete glo %p\n",this);
-			metrics::nglos--;
-		}
+		static glo instance;
+		static atomic_int glo_count;
+
+		inline glo(){glo_count++;}
+		inline virtual~glo(){glo_count--;}
 		inline glo&set_texture(texture*t){tex=t;return*this;}
 		inline const texture&textureref()const{return*tex;}
 		inline texture&get_texture_for_update()const{return*tex;}
@@ -111,8 +108,7 @@ namespace gl{
 		virtual vector<GLfloat>make_texture_coords()const{return vector<GLfloat>();}
 		virtual vector<GLfloat>make_colors()const{return vector<GLfloat>();}
 		virtual void gldraw()const{glDrawArrays(GL_TRIANGLES,0,3);}
-	public:
-		static glo instance;
 	};
 	glo glo::instance=glo();
+	atomic_int glo::glo_count;
 }

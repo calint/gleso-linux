@@ -40,8 +40,8 @@ namespace grid{
 
 		inline void handle_collisions(){
 			const int n=globs.size();
-			for(int i=0;i<n-1;i++){
-				for(int j=i+1;j<n;j++){
+			for(auto i=0;i<n-1;i++){
+				for(auto j=i+1;j<n;j++){
 					auto g1=globs[i];
 					auto g2=globs[j];
 
@@ -55,23 +55,23 @@ namespace grid{
 						}
 					}
 
-					const bool b=problems::are_spheres_in_collision(*g1,*g2);
-					if(b){
-//						p(" frame: %u    collision [%s %p] and [%s %p]\n",gl::time_stamp,typeid(g1).name(),g1,typeid(*g2).name(),g2);
-						if(g1->grid_cell_ref==g2->grid_cell_ref){// both handled by same cell, no racing
-							if(g1->grid_cell_ref!=this){// ... but buy a different cell
-								continue;
-							}
-							// handled by this cell
-							g1->on_collision(g2);
-							g2->on_collision(g1);
-							continue;
+					if(not problems::are_spheres_in_collision(*g1,*g2))
+						continue;
 
+//						p(" frame: %u    collision [%s %p] and [%s %p]\n",gl::time_stamp,typeid(g1).name(),g1,typeid(*g2).name(),g2);
+					if(g1->grid_cell_ref==g2->grid_cell_ref){// both handled by same cell, no racing
+						if(g1->grid_cell_ref!=this){// ... but buy a different cell
+							continue;
 						}
-						// handled by different cells, may be multiple calls same collision
-						g1->handle_overlapped_collision(g2);
-						g2->handle_overlapped_collision(g1);
+						// handled by this cell
+						g1->on_collision(g2);
+						g2->on_collision(g1);
+						continue;
+
 					}
+					// handled by different cells, may be multiple calls same collision
+					g1->handle_overlapped_collision(g2);
+					g2->handle_overlapped_collision(g1);
 				}
 			}
 		}

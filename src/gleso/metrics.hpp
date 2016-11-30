@@ -2,14 +2,17 @@
 #include"../platform.hpp"
 #include<sys/time.h>
 #include<atomic>
+
+atomic_int glob_count;
 atomic_int globs_updated;
 atomic_int globs_mutex_locks;
 atomic_int globs_rendered;
+
 namespace metrics{
 	int nshaders;
 	int ngrids;
-	int nglos;
-	int nglobs;
+//	int nglos;
+//	int nglobs;
 	int ntextures;
 	int updated_globs;
 	int rendered_globs;
@@ -33,7 +36,7 @@ namespace metrics{
 		rendered_globs=0;
 	}
 	void print(){
-		p("%5.0f %5d %6d %5d %5d %5d %5d\n",fps,int(dt*1000000),nglobs,int(globs_updated),int(globs_rendered),int(globs_mutex_locks),globs_per_cell);
+		p("%5.0f %5d %6d %5d %5d %5d %5d\n",fps,int(dt*1000000),int(glob_count),int(globs_updated),int(globs_rendered),int(globs_mutex_locks),globs_per_cell);
 	}
 	static void after_render(){
 		struct timeval tv;

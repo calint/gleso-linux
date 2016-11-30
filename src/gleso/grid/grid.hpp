@@ -20,20 +20,22 @@ namespace grid{
 		wque_sync update_render_sync_;
 
 	public:
+		floato metric_globs_per_cell{0};
+
 
 		inline grid(const int nthreads=4,const int rows=4,const int cols=4,const floato cell_size=.5f,const p3&p=p3{}):
 			po_(p),cell_size_(cell_size),nrows_{rows},ncols_{cols}
 		{
-			const int ncells=rows*cols;
+			const auto ncells=rows*cols;
 
 			cells_.reserve(ncells);
 
-			for(int i=0;i<ncells;i++)
+			for(auto i=0;i<ncells;i++)
 				cells_.emplace_back();
 
 			t_.reserve(nthreads);
 
-			for(int i=0;i<nthreads;i++)
+			for(auto i=0;i<nthreads;i++)
 				t_.emplace_back(q_);
 		}
 
@@ -49,36 +51,36 @@ namespace grid{
 		}
 
 		inline void addall(const vector<glob*>&ls){
-			const floato size=cell_size_;
-			const floato bias_x=size*ncols_/2;
-			const floato bias_y=size*nrows_/2;
+			const auto size=cell_size_;
+			const auto bias_x=size*ncols_/2;
+			const auto bias_y=size*nrows_/2;
 			for(auto&g:ls){
-				const floato min_x=g->phy.p.x-g->phy.r;
-				const floato max_x=g->phy.p.x+g->phy.r;
-				const floato min_y=g->phy.p.y-g->phy.r;
-				const floato max_y=g->phy.p.y+g->phy.r;
+				const auto min_x=g->phy.p.x-g->phy.r;
+				const auto max_x=g->phy.p.x+g->phy.r;
+				const auto min_y=g->phy.p.y-g->phy.r;
+				const auto max_y=g->phy.p.y+g->phy.r;
 
-				const floato cell_min_x=(min_x+bias_x)/size;
-				const floato cell_min_y=(min_y+bias_y)/size;
-				const floato cell_max_x=(max_x+bias_x)/size;
-				const floato cell_max_y=(max_y+bias_y)/size;
+				const auto cell_min_x=(min_x+bias_x)/size;
+				const auto cell_min_y=(min_y+bias_y)/size;
+				const auto cell_max_x=(max_x+bias_x)/size;
+				const auto cell_max_y=(max_y+bias_y)/size;
 
-				const int cell_min_x_int=clamp(cell_min_x,0,ncols_-1);
-				const int cell_min_y_int=clamp(cell_min_y,0,nrows_-1);
-				const int cell_max_x_int=clamp(cell_max_x,0,ncols_-1);
-				const int cell_max_y_int=clamp(cell_max_y,0,nrows_-1);
+				const auto cell_min_x_int=clamp(cell_min_x,0,ncols_-1);
+				const auto cell_min_y_int=clamp(cell_min_y,0,nrows_-1);
+				const auto cell_max_x_int=clamp(cell_max_x,0,ncols_-1);
+				const auto cell_max_y_int=clamp(cell_max_y,0,nrows_-1);
 
 				if(cell_min_x_int==cell_max_x_int and cell_min_y_int==cell_max_y_int){// no overlap
-					int cell_index=cell_min_y_int*ncols_+cell_min_x_int;
+					auto cell_index=cell_min_y_int*ncols_+cell_min_x_int;
 					g->overlaps_cells=false;
 					g->grid_cell_ref=&cells_[cell_index];
 					g->grid_cell_ref->add(g);
 					continue;
 				}
 
-				for(int y=cell_min_y_int;y<=cell_max_y_int;y++){
-					for(int x=cell_min_x_int;x<=cell_max_x_int;x++){
-						int cell_index=y*ncols_+x;
+				for(auto y=cell_min_y_int;y<=cell_max_y_int;y++){
+					for(auto x=cell_min_x_int;x<=cell_max_x_int;x++){
+						auto cell_index=y*ncols_+x;
 						g->overlaps_cells=true;
 						g->grid_cell_ref=&cells_[cell_index];
 						g->grid_cell_ref->add(g);
@@ -87,8 +89,6 @@ namespace grid{
 			}
 		}
 
-		float globs_per_cell{0};
-
 		inline void update_globs(){
 	//		p("  update_globs\n");
 			globs_updated=0;
@@ -96,9 +96,9 @@ namespace grid{
 			const int ncells=nrows_*ncols_;
 			update_render_sync_.set_work_to_do_count(ncells);
 			int number_of_globs_in_grid{0};
-			for(int r=0;r<nrows_;r++){
-				for(int c=0;c<ncols_;c++){
-					cell&cc=cells_[r*ncols_+c];
+			for(auto r=0;r<nrows_;r++){
+				for(auto c=0;c<ncols_;c++){
+					auto&cc=cells_[r*ncols_+c];
 					number_of_globs_in_grid+=cc.globs.size();
 					wque_work*wrk=new wque_work(update_render_sync_,cc);
 					q_.add(wrk);
@@ -114,9 +114,9 @@ namespace grid{
 	//		p("  update_globs2\n");
 			globs_updated=0;
 			globs_mutex_locks=0;
-			for(int r=0;r<nrows_;r++){
-				for(int c=0;c<ncols_;c++){
-					cell&cc=cells_[r*ncols_+c];
+			for(auto r=0;r<nrows_;r++){
+				for(auto c=0;c<ncols_;c++){
+					auto&cc=cells_[r*ncols_+c];
 					cc.update_globs();
 					cc.handle_collisions();
 				}
@@ -132,8 +132,8 @@ namespace grid{
 
 		inline void render_outline(){
 			p3 p{po_.x-cell_size_*ncols_/2+cell_size_/2,po_.y-cell_size_*nrows_/2+cell_size_/2,0};
-			for(int r=0;r<nrows_;r++){
-				for(int c=0;c<ncols_;c++){
+			for(auto r=0;r<nrows_;r++){
+				for(auto c=0;c<ncols_;c++){
 					cells_[r*ncols_+c].render_outline(p,cell_size_/2);
 					p.x+=cell_size_;
 				}
