@@ -1,5 +1,5 @@
 #pragma once
-#include"../../platform.hpp"
+#include "../../include.hpp"
 #include"../metrics.hpp"
 #include"gl.hpp"
 #include"texture.hpp"

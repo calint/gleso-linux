@@ -1,10 +1,11 @@
 #pragma once
-#include"../platform.hpp"
+#include"../include.hpp"
+#include"../gleso/glob.hpp"
 #include"glo_ball.hpp"
 
 namespace program16{
 
-	class a_sphere:public gleso::glob{
+	class a_sphere:public glob{
 		floato constraint_;
 
 	public:

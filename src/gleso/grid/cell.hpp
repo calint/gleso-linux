@@ -1,5 +1,5 @@
 #pragma once
-#include"../../platform.hpp"
+#include "../../include.hpp"
 #include"glo_grid.hpp"
 #include"problems.hpp"
 

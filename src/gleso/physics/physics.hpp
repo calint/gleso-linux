@@ -1,5 +1,5 @@
 #pragma once
-#include"../../platform.hpp"
+#include"../../include.hpp"
 #include"../p3.hpp"
 using namespace gleso;
 

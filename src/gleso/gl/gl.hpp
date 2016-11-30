@@ -1,5 +1,5 @@
 #pragma once
-#include"../../platform.hpp"
+#include"../../include.hpp"
 
 namespace gleso{
 	class glob;

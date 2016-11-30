@@ -1,5 +1,5 @@
 #pragma once
-#include"../platform.hpp"
+#include"../include.hpp"
 #include<atomic>
 #include<iostream>
 using namespace std;

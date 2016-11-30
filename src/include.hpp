@@ -1,10 +1,12 @@
 #pragma once
-#include"platform-linux/platform.hpp"
+#include "platform-linux/include.hpp"
+
 #include<memory>
 #include<cstdlib>
 #include<vector>
 #include<algorithm>
 #include<chrono>
+#include<cmath>
 
 namespace gleso{
 	bool render_globs{true};
@@ -33,4 +35,3 @@ namespace gleso{
 
 using namespace std;
 using namespace gleso;
-

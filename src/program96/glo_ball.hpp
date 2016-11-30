@@ -1,6 +1,5 @@
 #pragma once
-#include"../platform.hpp"
-using namespace gleso;
+#include"../include.hpp"
 using namespace gl;
 
 namespace program16{

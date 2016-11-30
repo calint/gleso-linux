@@ -1,5 +1,6 @@
 #pragma once
-#include"../../platform.hpp"
+#include"../../include.hpp"
+#include"../gl/glo.hpp"
 using namespace gl;
 
 namespace gleso{namespace grid{
