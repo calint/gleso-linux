@@ -9,12 +9,10 @@ namespace grid{
 	public:
 		vector<glob*>globs;
 
-		inline cell(){
-			metrics::ngrids++;
-		}
+		inline cell(){metrics2.grid_cell_count++;}
 
 		inline~cell(){
-			metrics::ngrids--;
+			metrics2.grid_cell_count--;
 			for(auto g:globs){
 				if(g->grid_cell_ref!=this)
 					continue;

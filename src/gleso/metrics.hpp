@@ -10,11 +10,13 @@ public:
 	atomic_int globs_mutex_locks;
 	atomic_int globs_rendered;
 	int globs_per_cell;
+	int grid_cell_count;
 };
 metrics_data metrics2;
+
 namespace metrics{
 	int nshaders;
-	int ngrids;
+//	int ngrids;
 //	int nglos;
 //	int nglobs;
 	int ntextures;
