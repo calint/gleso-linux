@@ -5,39 +5,41 @@
 
 #include"wque.hpp"
 
-static void*thread_run(void*arg);
-
 namespace grid{
-	class wque_thread{
-		wque<wque_work*>&queue_;
-		pthread_t id_;
-	public:
 
-		inline wque_thread(wque<wque_work*>&queue):
-			queue_(queue)
-		{
-			if(pthread_create(&id_,NULL,thread_run,this))throw"could not create work queue tread";
-			metrics::threads++;
+	class wque_thread{
+		wque<wque_work*>&q_;
+		pthread_t id_;
+		static void*thread_run(void*arg){return((wque_thread*)arg)->run();}
+	public:
+		static atomic_int thread_count;
+
+		inline wque_thread(wque<wque_work*>&q):q_(q){
+			if(pthread_create(&id_,NULL,thread_run,this))
+				throw"could not create work queue tread";
+			thread_count++;
 		}
 
 		inline virtual~wque_thread(){
 			pthread_cancel(id_);
-			metrics::threads--;
+			thread_count--;
 		}
 
 		inline void*run(){
 			while(true){
-				wque_work*wrk=queue_.remove();
-				threads_running_count++;
+				wque_work*wrk=q_.remove();
+
+				thread_count++;
+
 				wrk->exec();
-				threads_running_count--;
+
+				thread_count--;
+
 				delete wrk;
 			}
 		}
 
-		static atomic_int threads_running_count;
 	};
-	atomic_int wque_thread::threads_running_count{0};
+	atomic_int wque_thread::thread_count{0};
 }
 
-static void*thread_run(void*arg){return((grid::wque_thread*)arg)->run();}

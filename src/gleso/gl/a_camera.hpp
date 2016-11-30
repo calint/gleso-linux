@@ -16,7 +16,7 @@ namespace gl{
 
 		inline void pre_render(){
 			gl::active_shader->use_program();
-			glClearColor(floato{.5},0,floato{.5},1);
+			glClearColor(floato{.3},0,floato{.2},1);
 			glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 
 			m4 vw,p;
@@ -33,7 +33,5 @@ namespace gl{
 
 			glUniformMatrix4fv(GLint(gl::umtx_wvp),1,false,wvp.c);
 		}
-	//	virtual void on_update(){
-	//	}
 	};
 }

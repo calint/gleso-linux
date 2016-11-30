@@ -5,6 +5,7 @@
 #include"../gleso/grid/glo_grid.hpp"
 #include"glo_ball.hpp"
 using namespace gl;
+using namespace grid;
 
 static void test0(){
 	const int instances=1024*8;

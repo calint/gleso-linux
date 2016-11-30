@@ -8,16 +8,11 @@ namespace grid{
 	public:
 		vector<glob*>globs;
 
-
-		cell(){
+		inline cell(){
 			metrics::ngrids++;
 		}
 
-//		cell(const cell&&c):
-//			globs{move(c.globs)}
-//		{}
-
-		~cell(){
+		inline~cell(){
 			metrics::ngrids--;
 			for(auto g:globs){
 				if(g->grid_cell_ref!=this)

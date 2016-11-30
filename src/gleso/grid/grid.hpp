@@ -1,7 +1,7 @@
 #pragma once
 #include"update_render_sync.hpp"
 #include"wque_thread.hpp"
-#include"wque_work_update_cell.hpp"
+#include"wque_work.hpp"
 
 namespace grid{
 	class grid{
@@ -97,7 +97,7 @@ namespace grid{
 				for(int c=0;c<ncols_;c++){
 					cell&cc=cells_[r*ncols_+c];
 					number_of_globs_in_grid+=cc.globs.size();
-					wque_work*wrk=new wque_work_update_cell(update_render_sync_,cc);
+					wque_work*wrk=new wque_work(update_render_sync_,cc);
 					update_grid_queue_.add(wrk);
 				}
 			}

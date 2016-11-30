@@ -39,19 +39,19 @@ public:
 
 	inline void render(){
 		// check if already rendered this render frame, i.e. from a different grid
-		if(time_stamp_render==gl::time_stamp)
+		if(time_stamp_render==time_stamp)
 			return;
 
 		metrics::rendered_globs++;
 		globs_rendered++;
-		time_stamp_render=gl::time_stamp;
+		time_stamp_render=time_stamp;
 		if(!gl)return;
 //		ginfo=ginfo_nxt;
 		update_model_to_world_matrix();
 //		matrix_model_world.load_translate(ginfo.p);
 //		matrix_model_world.append_rotation_about_z_axis(ginfo.a.z);
 //		matrix_model_world.append_scaling(ginfo.s);
-		glUniformMatrix4fv(gl::umtx_mw,1,false,model_to_world_matrix_.c);
+		glUniformMatrix4fv(umtx_mw,1,false,model_to_world_matrix_.c);
 		gl->render();
 	}
 
@@ -109,14 +109,14 @@ private:
 		on_collision(g);
 	}
 	inline void update(){
-		if(time_stamp_update==gl::time_stamp)
+		if(time_stamp_update==time_stamp)
 			return;
 
 		metrics::updated_globs++;
 
 		globs_updated++;
 
-		time_stamp_update=gl::time_stamp;
+		time_stamp_update=time_stamp;
 
 
 		const position p=phy.p;
@@ -142,7 +142,6 @@ private:
 	}
 	//----------------------------------------
 
-
 	inline void update_model_to_world_matrix(){
 		if(not model_to_world_matrix_needs_update)
 			return;
@@ -153,6 +152,7 @@ private:
 		model_to_world_matrix_needs_update=false;
 //		p(" [%u]  update_model_to_world_matrix %p\n",gl::time_stamp,this);
 	}
+
 	inline void copy_phy_to_rend(){
 		ginfo.p=phy.p;
 		ginfo.a=phy.a;
@@ -160,20 +160,26 @@ private:
 	}
 
 
-
-	physics phy_prv;// previous physics state
-	glo*gl{nullptr};// ref to gl renderable
-
-	vector<glob*>handled_collisions;
-	pthread_mutex_t handled_collisions_mutex;
-
 	struct glinfo{
 		position p{0,0,0};
 		angle a{0,0,0};
 		scale s{0,0,0};
 	};
+
+	physics phy_prv;// previous physics state
+
+	glo*gl{nullptr};// ref to gl renderable
+
+	vector<glob*>handled_collisions;
+
+	pthread_mutex_t handled_collisions_mutex;
+
 	longo time_stamp_render{0};
+
 	m4 model_to_world_matrix_;
+
 	bool model_to_world_matrix_needs_update{true};
+
 	glinfo ginfo;
+
 };
