@@ -104,6 +104,37 @@ static void test13(){
 	}
 }
 
+static void test14(){
+	const floato constraint=1;
+	const floato velocity=.05;
+	const int count=1024*2;
+//	gleso::render_globs=false;
+//	gleso::render_grid_outline=false;
+
+	const floato r=.01;
+	for(int i=0;i<count;i++){
+		p3 po{rnd(-constraint,constraint),rnd(-constraint,constraint)};
+		velocity_vector v{rnd(-velocity,velocity),rnd(-velocity,velocity)};
+		globs.push_back(new a_sphere(po,r,v,constraint));
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 static void init(){
 	shaders.push_back(&shader::instance);
 	textures.push_back(&texture::instance);
@@ -126,7 +157,8 @@ static void init(){
 //	test9();
 //	test10();
 //	test11();
-	test12();
+//	test12();
 //	test13();
+	test14();
 }
 

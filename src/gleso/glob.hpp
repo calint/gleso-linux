@@ -103,16 +103,26 @@ namespace gleso{
 		bool overlaps_cells{false};
 
 		inline void handle_overlapped_collision(glob*g){
-			pthread_mutex_lock(&handled_collisions_mutex);
-			metric.globs_mutex_locks++;
+			if(update_grid_cells_in_parallell){
+				pthread_mutex_lock(&handled_collisions_mutex);
+				metric.globs_mutex_locks++;
+				for(auto gg:handled_collisions){
+					if(gg==g){// collision already handled
+						pthread_mutex_unlock(&handled_collisions_mutex);
+						return;
+					}
+				}
+				handled_collisions.push_back(g);
+				pthread_mutex_unlock(&handled_collisions_mutex);
+				on_collision(g);
+				return;
+			}
 			for(auto gg:handled_collisions){
 				if(gg==g){// collision already handled
-					pthread_mutex_unlock(&handled_collisions_mutex);
 					return;
 				}
 			}
 			handled_collisions.push_back(g);
-			pthread_mutex_unlock(&handled_collisions_mutex);
 			on_collision(g);
 		}
 
@@ -135,12 +145,12 @@ namespace gleso{
 			while(lock.test_and_set()){busy_waits++;}
 			if(last_frame_update==metric.frame){
 				lock.clear();
-				if(busy_waits)p(" busy wait  %d\n",busy_waits);
+				if(busy_waits>10)p(" busy wait  %d\n",busy_waits);
 				return false;
 			}
 			last_frame_update=metric.frame;
 			lock.clear();
-			if(busy_waits)p(" busy wait  %d\n",busy_waits);
+			if(busy_waits>10)p(" busy wait  %d\n",busy_waits);
 			return true;
 		}
 
@@ -157,8 +167,13 @@ namespace gleso{
 		}
 
 		inline void update(const time_s dt){
-			if(not check_needs_update2())
-				return;
+			if(update_grid_cells_in_parallell){
+				if(not check_needs_update2())
+					return;
+			}else{
+				if(not check_needs_update1())
+					return;
+			}
 //			metric.globs_updated.fetch_add(1,memory_order_relaxed);
 			metric.globs_updated++;
 
