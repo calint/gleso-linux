@@ -28,15 +28,15 @@ namespace gleso{namespace grid{
 			globs.push_back(g);
 		}
 
-		inline void update_globs(){
+		inline void update_globs(const time_s dt){
 			for(auto g:globs){
 				if(g->grid_cell_ref!=this)
 					continue;
-				g->update();
+				g->update(dt);
 			}
 		}
 
-		inline void handle_collisions(){
+		inline void handle_collisions(const time_s dt){
 			const int n=globs.size();
 			for(auto i=0;i<n-1;i++){
 				for(auto j=i+1;j<n;j++){
@@ -47,9 +47,9 @@ namespace gleso{namespace grid{
 					if(g1->time_stamp_update!=g2->time_stamp_update){
 						// update the glob in the other cell
 						if(g1->time_stamp_update>g2->time_stamp_update){
-							g2->update();
+							g2->update(dt);
 						}else{
-							g1->update();
+							g1->update(dt);
 						}
 					}
 

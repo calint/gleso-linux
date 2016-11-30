@@ -21,7 +21,7 @@ public:
 		phy.dp.y=rnd(-velocity,velocity);
 //		phy.p.z=-1;
 	}
-	inline void on_update()override{
+	inline void on_update(const time_s dt)override{
 //		p("update desk  %f    \n",phy.p.x);
 		if(phy.p.x>constraint_-phy.s.x)
 			phy.dp.x=-velocity_;

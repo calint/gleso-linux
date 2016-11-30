@@ -25,8 +25,9 @@ namespace gleso{
 	typedef p3 velocity_vector;
 	typedef floato weight_kg;
 	typedef floato radius_m;
+	typedef floato time_s;
 
 	inline floato rnd(floato min,floato max){return min+(floato(random())/RAND_MAX)*(max-min);}
-	//#define foreach(c,f)std::for_each(c.begin(),c.end(),f);
+	#define foreach(c,f)std::for_each(c.begin(),c.end(),f);
 }
 

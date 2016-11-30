@@ -99,9 +99,9 @@ void gleso_step(){
 	grd.addall(gl::globs);
 
 	if(gleso::update_grid_cells_in_parallell){
-		grd.update_globs();
+		grd.update_globs(metric.dt);
 	}else{
-		grd.update_globs_single_thread();
+		grd.update_globs_single_thread(metric.dt);
 	}
 
 	if(gleso::use_grid){

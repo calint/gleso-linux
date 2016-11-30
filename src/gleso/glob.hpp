@@ -63,7 +63,7 @@ namespace gleso{
 			return model_to_world_matrix_;
 		}
 
-		inline virtual void on_update(){}
+		inline virtual void on_update(const time_s dt){}
 
 		inline virtual void on_collision(glob*g){}
 
@@ -110,7 +110,7 @@ namespace gleso{
 			pthread_mutex_unlock(&handled_collisions_mutex);
 			on_collision(g);
 		}
-		inline void update(){
+		inline void update(const time_s dt){
 			if(time_stamp_update==metric.frame)
 				return;
 
@@ -125,7 +125,7 @@ namespace gleso{
 
 			phy_prv=phy;
 
-			phy.update();
+			phy.update(dt);
 
 			if(not model_to_world_matrix_needs_update){
 				if(p!=phy.p or a!=phy.a or s!=phy.s){
@@ -133,7 +133,7 @@ namespace gleso{
 				}
 			}
 
-			on_update();
+			on_update(dt);
 
 			copy_phy_to_rend();
 

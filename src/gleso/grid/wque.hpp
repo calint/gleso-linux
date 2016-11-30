@@ -63,13 +63,10 @@ namespace gleso{namespace grid{
 		inline wque_work(wque_sync&urs,cell&c):c_{c},s_{urs}{}
 
 		inline void exec(){
-
-			c_.update_globs();
-
-			c_.handle_collisions();
-
+			const time_s dt=metric.dt;
+			c_.update_globs(dt);
+			c_.handle_collisions(dt);
 			s_.decrease_and_notify_if_zero();
-
 		}
 
 	};

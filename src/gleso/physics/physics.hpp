@@ -13,7 +13,7 @@ namespace gleso{namespace physics{
 		radius_m r{0};
 		weight_kg w{0};
 
-		inline void update(){
+		inline void update(time_s dt){
 			dp.add(ddp,metric.dt);
 			p.add(dp,metric.dt);
 			da.add(dda,metric.dt);

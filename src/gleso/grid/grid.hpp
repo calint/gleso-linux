@@ -90,7 +90,7 @@ namespace gleso{namespace grid{
 			}
 		}
 
-		inline void update_globs(){
+		inline void update_globs(time_s dt){
 	//		p("  update_globs\n");
 			metric.globs_updated=0;
 			metric.globs_mutex_locks=0;
@@ -111,15 +111,15 @@ namespace gleso{namespace grid{
 			update_render_sync_.wait_until_count_is_zero();
 		}
 
-		inline void update_globs_single_thread(){
+		inline void update_globs_single_thread(time_s dt){
 	//		p("  update_globs2\n");
 			metric.globs_updated=0;
 			metric.globs_mutex_locks=0;
 			for(auto r=0;r<nrows_;r++){
 				for(auto c=0;c<ncols_;c++){
 					auto&cc=cells_[r*ncols_+c];
-					cc.update_globs();
-					cc.handle_collisions();
+					cc.update_globs(dt);
+					cc.handle_collisions(dt);
 				}
 			}
 		}
