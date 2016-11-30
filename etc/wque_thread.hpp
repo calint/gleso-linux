@@ -5,7 +5,7 @@
 
 #include"wque.hpp"
 
-namespace grid{
+namespace gleso{namespace grid{
 
 	class wque_thread{
 		wque&q_;
@@ -41,5 +41,6 @@ namespace grid{
 
 	};
 	atomic_int wque_thread::thread_count{0};
-}
+
+}}
 

@@ -9,6 +9,7 @@ namespace gleso{namespace gl{
 	class shader{
 	public:
 		GLint program{0};
+
 		// - - glsl bindings - - - - - - -
 		GLint apos{0};// vec2 vertex coords x,y
 		GLint auv{0};// vec2 texture coords x,y

@@ -1,5 +1,7 @@
 #pragma once
 #include"wque.hpp"
+#include"../gl/shader.hpp"
+using namespace gleso::gl;
 
 namespace gleso{namespace grid{
 
@@ -126,9 +128,8 @@ namespace gleso{namespace grid{
 
 		inline void render_globs(const shader&s){
 			metric.globs_rendered=0;
-			for(auto&c:cells_){
+			for(auto&c:cells_)
 				c.render_globs(s);
-			}
 		}
 
 		inline void render_outline(const shader&s){

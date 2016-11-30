@@ -56,24 +56,24 @@ void gleso_init(){
 	p("%16s %4u B\n","grid",(unsigned int)sizeof(grid::grid));
 	p("%16s %4u B\n","physics",(unsigned int)sizeof(physics::physics));
 	srand(1);// generate same random numbers in different instances
-	if(!gl::active_shader){// init
+	if(not active_shader){// init
 		p("* init\n");
-		gl::active_shader=&shader::instance;
-		gl::active_camera=new a_camera;
-		gl::globs.push_back(gl::active_camera);
+		active_shader=&shader::instance;
+		active_camera=new a_camera;
+		globs.push_back(gl::active_camera);
 		init();
 	}
-	gl::active_program=0;
+	active_program=0;
 	p("* load\n");
-	for_each(gl::shaders.begin(),gl::shaders.end(),[](shader*o){
+	for_each(shaders.begin(),shaders.end(),[](shader*o){
 //		p(" shader %p   %s\n",(void*)o,typeid(*o).name());
 		o->load();
 	});
-	for_each(gl::textures.begin(),gl::textures.end(),[](texture*o){
+	for_each(textures.begin(),textures.end(),[](texture*o){
 //		p(" texture %p   %s\n",(void*)o,typeid(*o).name());
 		o->load();
 	});
-	for_each(gl::glos.begin(),gl::glos.end(),[](glo*o){
+	for_each(glos.begin(),glos.end(),[](glo*o){
 //		p(" glo %p   %s\n",(void*)o,typeid(*o).name());
 		o->load();
 	});
@@ -89,7 +89,7 @@ void gleso_step(){
 
 	grd.clear();
 
-	grd.addall(gl::globs);
+	grd.addall(globs);
 
 	if(gleso::update_grid_cells_in_parallell){
 		grd.update_globs(metric.dt);

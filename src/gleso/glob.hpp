@@ -43,11 +43,11 @@ namespace gleso{
 
 		inline void render(const shader&s){
 			// check if already rendered this render frame, i.e. from a different grid
-			if(time_stamp_render==metric.frame)
+			if(prev_rendered_frame==metric.frame)
 				return;
 
 			metric.globs_rendered++;
-			time_stamp_render=metric.frame;
+			prev_rendered_frame=metric.frame;
 			if(!gl)return;
 	//		ginfo=ginfo_nxt;
 			update_model_to_world_matrix();
@@ -174,7 +174,7 @@ namespace gleso{
 
 		pthread_mutex_t handled_collisions_mutex;
 
-		longo time_stamp_render{0};
+		longo prev_rendered_frame{0};
 
 		longo time_stamp_update{0};
 

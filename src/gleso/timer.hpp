@@ -1,4 +1,6 @@
 #pragma once
+#include"../include.hpp"
+using namespace chrono;
 
 namespace gleso{
 	class timer{
