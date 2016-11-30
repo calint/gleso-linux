@@ -1,6 +1,9 @@
 #pragma once
 #include"../platform.hpp"
-namespace gleso{
+using namespace gleso;
+using namespace gl;
+
+namespace program16{
 
 	class a_sphere:public gleso::glob{
 		floato constraint_;

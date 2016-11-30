@@ -5,6 +5,7 @@
 #include<vector>
 #include<algorithm>
 #include<chrono>
+#include<cmath>
 using namespace std;
 
 namespace gleso{

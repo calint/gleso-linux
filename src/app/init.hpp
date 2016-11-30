@@ -4,15 +4,15 @@
 #include"a_static_sphere.hpp"
 #include"../gleso/grid/glo_grid.hpp"
 #include"glo_ball.hpp"
-using namespace gl;
 using namespace gleso;
-using namespace gleso::grid;
+using namespace grid;
+using namespace program16;
 
 static void test0(){
 	const int instances=1024*8;
 	p(" > instances: %d\n",instances);
 	for(int n=0;n<instances;n++){
-		globs.push_back(new a_ball());
+		globs.push_back(new a_ball);
 	}
 }
 
