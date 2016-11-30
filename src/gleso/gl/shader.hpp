@@ -11,15 +11,11 @@ namespace gl{
 		GLint umtx_wvp{0};
 		GLint utex{0};
 	public:
-		shader(){
-	//		p("new shader %p\n",this);
-			metrics::nshaders++;
-		}
+		inline shader(){metrics2.shader_count++;}
 
-		virtual~shader(){
-	//		p("delete shader %p\n",(void*)this);
-			metrics::nshaders--;
-			metrics::print();
+		inline virtual~shader(){
+			metrics2.shader_count--;
+			metrics::print();//?
 	//		if(glid_program){glDeleteProgram(glid_program);glid_program=0;}
 		}
 
@@ -166,5 +162,5 @@ namespace gl{
 	public:
 		static shader instance;
 	};
-	shader shader::instance=shader();
+	shader shader::instance=shader{};
 }

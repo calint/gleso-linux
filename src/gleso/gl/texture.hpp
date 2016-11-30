@@ -6,16 +6,9 @@
 namespace gl{
 	class texture{
 	public:
-		texture(){
-	//		p("new texture %p\n",this);
-			metrics::ntextures++;
-		}
-		~texture(){
-	//		p("delete texture %p\n",this);
-	//		glDeleteTextures(1,&glid_texture);
-			metrics::ntextures--;
-		}
-		void load(){
+		inline texture(){metrics2.texture_count++;}
+		~texture(){metrics2.texture_count--;}
+		inline void load(){
 			glGenTextures(1,&glid_texture);
 	//		p("    texture  glid=%d\n",glid_texture);
 			refresh_from_data();
@@ -23,12 +16,12 @@ namespace gl{
 			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 			gl::shader::check_gl_error();
 		}
-		void enable_for_gl_draw(){
+		inline void enable_for_gl_draw(){
 			glActiveTexture(GL_TEXTURE0);
 			glUniform1i(glid_texture,0);
 			glBindTexture(GL_TEXTURE_2D,glid_texture);
 		}
-		void refresh_from_data(){
+		inline void refresh_from_data(){
 			glBindTexture(GL_TEXTURE_2D,glid_texture);
 			glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,(GLvoid*)texels());
 		}
@@ -50,5 +43,5 @@ namespace gl{
 	public:
 		static texture instance;
 	};
-	texture texture::instance=texture();
+	texture texture::instance=texture{};
 }

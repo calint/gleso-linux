@@ -11,15 +11,17 @@ public:
 	atomic_int globs_rendered;
 	int globs_per_cell;
 	int grid_cell_count;
+	int shader_count;
+	int texture_count;
 };
 metrics_data metrics2;
 
 namespace metrics{
-	int nshaders;
+//	int nshaders;
 //	int ngrids;
 //	int nglos;
 //	int nglobs;
-	int ntextures;
+//	int ntextures;
 	int updated_globs;
 	int rendered_globs;
 	int threads;
