@@ -99,9 +99,9 @@ void gleso_step(){
 	}
 
 	if(gleso::use_grid){
-		gl::active_camera->pre_render();
-		if(gleso::render_globs)grd.render_globs();//? thread
-		if(gleso::render_grid_outline)grd.render_outline();
+		gl::active_camera->pre_render(*active_shader);
+		if(gleso::render_globs)grd.render_globs(*active_shader);//? thread
+		if(gleso::render_grid_outline)grd.render_outline(*active_shader);
 	}
 
 //	usleep(100000);

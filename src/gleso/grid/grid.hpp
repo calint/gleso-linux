@@ -124,18 +124,18 @@ namespace gleso{namespace grid{
 			}
 		}
 
-		inline void render_globs(){
+		inline void render_globs(const shader&s){
 			metric.globs_rendered=0;
 			for(auto&c:cells_){
-				c.render_globs();
+				c.render_globs(s);
 			}
 		}
 
-		inline void render_outline(){
+		inline void render_outline(const shader&s){
 			p3 p{po_.x-cell_size_*ncols_/2+cell_size_/2,po_.y-cell_size_*nrows_/2+cell_size_/2,0};
 			for(auto r=0;r<nrows_;r++){
 				for(auto c=0;c<ncols_;c++){
-					cells_[r*ncols_+c].render_outline(p,cell_size_/2);
+					cells_[r*ncols_+c].render_outline(s,p,cell_size_/2);
 					p.x+=cell_size_;
 				}
 				p.x=po_.x-cell_size_*ncols_/2+cell_size_/2;

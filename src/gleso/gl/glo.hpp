@@ -59,18 +59,18 @@ namespace gleso{namespace gl{
 	#endif
 			return 0;
 		}
-		void render()const{
-			glEnableVertexAttribArray(apos);
+		void render(const shader&s)const{
+			glEnableVertexAttribArray(s.apos);
 	#ifdef GLESO_EMBEDDED
-			glVertexAttribPointer(apos,2,GL_FLOAT,GL_FALSE,0,&vertices[0]);
+			glVertexAttribPointer(s.apos,2,GL_FLOAT,GL_FALSE,0,&vertices[0]);
 	#else
 			glBindBuffer(GL_ARRAY_BUFFER,glid_buffer_vertices);
 			glVertexAttribPointer(gl::apos,2,GL_FLOAT,GL_FALSE,0,0);
 	#endif
 			if(tex){
-				glEnableVertexAttribArray(auv);
+				glEnableVertexAttribArray(s.auv);
 	#ifdef GLESO_EMBEDDED
-				glVertexAttribPointer(auv,2,GL_FLOAT,GL_FALSE,0,&texture_coords[0]);
+				glVertexAttribPointer(s.auv,2,GL_FLOAT,GL_FALSE,0,&texture_coords[0]);
 	#else
 				glBindBuffer(GL_ARRAY_BUFFER,glid_buffer_texture_coords);
 				glVertexAttribPointer(auv,2,GL_FLOAT,GL_FALSE,0,0);
@@ -80,8 +80,8 @@ namespace gleso{namespace gl{
 
 	#ifdef GLESO_EMBEDDED
 			if(!colors.empty()){
-				glEnableVertexAttribArray(argba);
-				glVertexAttribPointer(argba,4,GL_FLOAT,GL_FALSE,0,&colors[0]);
+				glEnableVertexAttribArray(s.argba);
+				glVertexAttribPointer(s.argba,4,GL_FLOAT,GL_FALSE,0,&colors[0]);
 	#else
 			if(glid_buffer_colors){
 				glEnableVertexAttribArray(argba);
@@ -92,10 +92,10 @@ namespace gleso{namespace gl{
 
 			gldraw();
 
-			glDisableVertexAttribArray(apos);
-			if(tex)glDisableVertexAttribArray(auv);
+			glDisableVertexAttribArray(s.apos);
+			if(tex)glDisableVertexAttribArray(s.auv);
 	#ifdef GLESO_EMBEDDED
-			if(not colors.empty())glDisableVertexAttribArray(argba);
+			if(not colors.empty())glDisableVertexAttribArray(s.argba);
 	#else
 			if(argba)glDisableVertexAttribArray(argba);
 	#endif

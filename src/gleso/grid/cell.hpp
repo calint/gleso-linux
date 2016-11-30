@@ -76,18 +76,17 @@ namespace gleso{namespace grid{
 			}
 		}
 
-		inline void render_globs(){
-			for(auto g:globs){
-				g->render();
-			}
+		inline void render_globs(const shader&s){
+			for(auto g:globs)
+				g->render(s);
 		}
 
-		inline void render_outline(const p3&po,const floato scale){
+		inline void render_outline(const shader&s,const p3&po,const floato scale){
 			m4 m;
 			m.load_translate(po);
 			m.append_scaling(p3{scale,scale,scale});
-			glUniformMatrix4fv(GLint(umtx_mw),1,false,m.c);
-			glo_grid::instance.render();
+			glUniformMatrix4fv(s.umtx_mw,1,false,m.c);
+			glo_grid::instance.render(*gl::active_shader);
 		}
 
 	};

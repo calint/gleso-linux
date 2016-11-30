@@ -41,7 +41,7 @@ namespace gleso{
 			this->gl=gl;
 		}
 
-		inline void render(){
+		inline void render(const shader&s){
 			// check if already rendered this render frame, i.e. from a different grid
 			if(time_stamp_render==metric.frame)
 				return;
@@ -54,8 +54,8 @@ namespace gleso{
 	//		matrix_model_world.load_translate(ginfo.p);
 	//		matrix_model_world.append_rotation_about_z_axis(ginfo.a.z);
 	//		matrix_model_world.append_scaling(ginfo.s);
-			glUniformMatrix4fv(umtx_mw,1,false,model_to_world_matrix_.c);
-			gl->render();
+			glUniformMatrix4fv(s.umtx_mw,1,false,model_to_world_matrix_.c);
+			gl->render(*gl::active_shader);
 		}
 
 		inline const m4&local_to_world_matrix(){

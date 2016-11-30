@@ -76,6 +76,8 @@ int main(int argc,char**argv){
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 		}
+	}catch(const string&s){
+		p("!!! exception: %s\n",s.c_str());
 	}catch(const char*s){
 		p("!!! exception: %s\n",s);
 	}

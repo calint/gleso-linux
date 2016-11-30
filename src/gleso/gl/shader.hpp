@@ -1,19 +1,23 @@
 #pragma once
 #include"../../include.hpp"
-#include"gl.hpp"
 #include"../metrics.hpp"
+#include"gl.hpp"
+#include<sstream>
 
 namespace gleso{namespace gl{
 
 	class shader{
-		GLint program{0};
-		GLint apos{0};
-		GLint auv{0};
-		GLint argba{0};
-		GLint umtx_mw{0};
-		GLint umtx_wvp{0};
-		GLint utex{0};
 	public:
+		GLint program{0};
+		// - - glsl bindings - - - - - - -
+		GLint apos{0};// vec2 vertex coords x,y
+		GLint auv{0};// vec2 texture coords x,y
+		GLint argba{0};// vec4 colors
+		GLint umtx_mw{0};// mat4 model->world matrix
+		GLint umtx_wvp{0};// mat4 world->view->projection matrix
+		GLint utex{0};// texture sampler
+		// - - - - - - - - - - - - - - - -
+
 		inline shader(){metric.shader_count++;}
 
 		inline virtual~shader(){
@@ -66,16 +70,20 @@ namespace gleso{namespace gl{
 		}
 		void load(){
 			load_program(vertex_shader_source(),fragment_shader_source());
-			bind();
 		}
 		void viewport(const int wi,const int hi){
 			glViewport(0,0,wi,hi);
 		}
 		void use_program(){
-			if(active_program==program)return;
-	//		p(" activating program  %d\n",glid_program);
+			if(active_program==program)
+				return;
 			glUseProgram(program);
-			prepare_gl_for_render();
+			apos=attribute("apos");
+			argba=attribute("argba");
+			auv=attribute("auv");
+			umtx_mw=uniform("umtx_mw");
+			umtx_wvp=uniform("umtx_wvp");
+			utex=uniform("utex");
 			active_program=program;
 		}
 
@@ -144,31 +152,24 @@ namespace gleso{namespace gl{
 	}
 	)";
 
-		inline GLint get_attribute_location(const char*name){return glGetAttribLocation(program,name);}
-		inline GLint get_uniform_location(const char*name){return glGetUniformLocation(program,name);}
-		#define A(x,y)if((x=get_attribute_location(y))==-1){p("shader: cannot find attribute %s\n",y);throw"error";};
-		#define U(x,y)if((x=get_uniform_location(y))==-1){p("shader: cannot find uniform %s\n",y);throw"error";}
-//
-//		inline int attribute(const char*name){
-//			if((x=get_attribute_location(y))==-1){p("shader: cannot find attribute %s\n",y);throw"error";
-//		}
-
-		inline virtual void bind(){
-			A(apos,"apos");
-			A(auv,"auv");
-			A(argba,"argba");
-			U(umtx_mw,"umtx_mw");
-			U(umtx_wvp,"umtx_wvp");
-			U(utex,"utex");
+		inline GLint attribute(const char*name){
+			const GLint ok=glGetAttribLocation(program,name);
+			if(ok==-1){
+				ostringstream oss;
+				oss<<__FILE__<<" "<<__LINE__<<": "<<"could not find attribute: "<<name;
+				throw oss.str();
+			}
+			return ok;
 		}
 
-		inline virtual void prepare_gl_for_render(){
-			gl::umtx_mw=umtx_mw;
-			gl::umtx_wvp=umtx_wvp;
-			gl::utex=utex;
-			gl::apos=apos;
-			gl::auv=auv;
-			gl::argba=argba;
+		inline GLint uniform(const char*name){
+			const GLint ok=glGetUniformLocation(program,name);
+			if(ok==-1){
+				ostringstream oss;
+				oss<<__FILE__<<" "<<__LINE__<<": "<<"could not find uniform: "<<name;
+				throw oss.str();
+			}
+			return ok;
 		}
 
 	public:
