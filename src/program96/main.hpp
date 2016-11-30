@@ -1,19 +1,11 @@
 #pragma once
 #include"../platform.hpp"
 #include"../gleso/gl/a_camera.hpp"
-#include"a_ball.hpp"
-
-
-/*
-     /////  ///\   ///// ///// /////////
-     ///   ///\\\  ///   ///  // /// //
-    ///   ///  \\\///   ///     ///
-  ///// /////   \\\/  /////   /////
-                                         */
-
 #include"init.hpp"
 
 #include"../gleso/grid/grid.hpp"
+#include "../program96/a_ball.hpp"
+#include "../program96/init.hpp"
 
 static grid::grid grd;
 

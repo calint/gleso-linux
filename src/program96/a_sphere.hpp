@@ -1,7 +1,6 @@
 #pragma once
 #include"../platform.hpp"
-using namespace gleso;
-using namespace gl;
+#include"glo_ball.hpp"
 
 namespace program16{
 

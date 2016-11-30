@@ -5,14 +5,12 @@
 #include<vector>
 #include<algorithm>
 #include<chrono>
-#include<cmath>
-using namespace std;
 
 namespace gleso{
-	bool render_globs=true;
-	bool render_grid_outline=true;
-	bool use_grid=true;
-	bool update_grid_cells_in_parallell=true;
+	bool render_globs{true};
+	bool render_grid_outline{true};
+	bool use_grid{true};
+	bool update_grid_cells_in_parallell{true};
 
 	class p3;
 
@@ -29,6 +27,10 @@ namespace gleso{
 	typedef floato time_s;
 
 	inline floato rnd(floato min,floato max){return min+(floato(random())/RAND_MAX)*(max-min);}
+
 	#define foreach(c,f)std::for_each(c.begin(),c.end(),f);
 }
+
+using namespace std;
+using namespace gleso;
 

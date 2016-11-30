@@ -1,6 +1,5 @@
 #pragma once
 #include"../platform.hpp"
-#include<sys/time.h>
 #include<atomic>
 #include<iostream>
 using namespace std;

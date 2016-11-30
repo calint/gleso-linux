@@ -1,9 +1,9 @@
 #pragma once
 #include"../platform.hpp"
+#include"../gleso/grid/glo_grid.hpp"
 #include"a_sphere.hpp"
 #include"a_static_sphere.hpp"
-#include"../gleso/grid/glo_grid.hpp"
-#include"glo_ball.hpp"
+#include"a_ball.hpp"
 using namespace gleso;
 using namespace grid;
 using namespace program16;
@@ -87,3 +87,4 @@ static void init(){
 //	test10();
 //	test11();
 }
+
