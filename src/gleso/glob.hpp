@@ -18,7 +18,7 @@ public:
 
 	inline glob(){
 //		p("new glob %p\n",(void*)this);
-		glob_count++;
+		metrics2.glob_count++;
 		phy.r=.1;
 		phy.s={phy.r,phy.r,phy.r};
 		pthread_mutex_init(&handled_collisions_mutex,NULL);//? lazyinit
@@ -31,7 +31,7 @@ public:
 
 	inline virtual~glob(){
 //		p("delete glob %p\n",(void*)this);
-		glob_count--;
+		metrics2.glob_count--;
 		pthread_mutex_destroy(&handled_collisions_mutex);
 	}
 
@@ -45,7 +45,7 @@ public:
 			return;
 
 		metrics::rendered_globs++;
-		globs_rendered++;
+		metrics2.globs_rendered++;
 		time_stamp_render=time_stamp;
 		if(!gl)return;
 //		ginfo=ginfo_nxt;
@@ -99,7 +99,7 @@ private:
 
 	inline void handle_overlapped_collision(glob*g){
 		pthread_mutex_lock(&handled_collisions_mutex);
-		globs_mutex_locks++;
+		metrics2.globs_mutex_locks++;
 		for(auto gg:handled_collisions){
 			if(gg==g){// collision already handled
 				pthread_mutex_unlock(&handled_collisions_mutex);
@@ -116,7 +116,7 @@ private:
 
 		metrics::updated_globs++;
 
-		globs_updated++;
+		metrics2.globs_updated++;
 
 		time_stamp_update=time_stamp;
 

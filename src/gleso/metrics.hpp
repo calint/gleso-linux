@@ -3,11 +3,15 @@
 #include<sys/time.h>
 #include<atomic>
 
-atomic_int glob_count;
-atomic_int globs_updated;
-atomic_int globs_mutex_locks;
-atomic_int globs_rendered;
-
+class metrics_data{
+public:
+	atomic_int glob_count;
+	atomic_int globs_updated;
+	atomic_int globs_mutex_locks;
+	atomic_int globs_rendered;
+	int globs_per_cell;
+};
+metrics_data metrics2;
 namespace metrics{
 	int nshaders;
 	int ngrids;
@@ -17,7 +21,6 @@ namespace metrics{
 	int updated_globs;
 	int rendered_globs;
 	int threads;
-	int globs_per_cell;
 
 	floato dt{1./60};
 	longo frame;//? rollover issues when used in comparisons
@@ -36,7 +39,15 @@ namespace metrics{
 		rendered_globs=0;
 	}
 	void print(){
-		p("%5.0f %5d %6d %5d %5d %5d %5d\n",fps,int(dt*1000000),int(glob_count),int(globs_updated),int(globs_rendered),int(globs_mutex_locks),globs_per_cell);
+		p("%5.0f %5d %6d %5d %5d %5d %5d\n",
+				fps,
+				int(dt*1000000),
+				int(metrics2.glob_count),
+				int(metrics2.globs_updated),
+				int(metrics2.globs_rendered),
+				int(metrics2.globs_mutex_locks),
+				metrics2.globs_per_cell
+		);
 	}
 	static void after_render(){
 		struct timeval tv;
