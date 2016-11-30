@@ -3,6 +3,7 @@
 #include"glo_grid.hpp"
 #include"problems.hpp"
 #include<vector>
+using namespace gleso;
 
 namespace grid{
 	class cell{

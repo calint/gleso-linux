@@ -3,7 +3,8 @@
 #include"../p3.hpp"
 using namespace gleso;
 
-namespace physics{
+namespace gleso{namespace physics{
+
 	class physics{
 	public:
 		position p{0,0,0},dp{0,0,0},ddp{0,0,0};
@@ -19,4 +20,5 @@ namespace physics{
 			a.add(da,metric.dt);
 		}
 	};
-}
+
+}}
