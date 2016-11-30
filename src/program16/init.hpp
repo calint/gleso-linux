@@ -58,7 +58,7 @@ static void test9(){
 }
 
 static void test10(){
-	for(int i=0;i<1024*2;i++)
+	for(int i=0;i<1024;i++)
 		globs.push_back(new a_ball);
 }
 
@@ -82,8 +82,8 @@ static void init(){
 //	test6();
 //	test7();
 //	test8();
-	test9();
-//	test10();
+//	test9();
+	test10();
 //	test11();
 }
 

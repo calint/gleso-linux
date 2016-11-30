@@ -14,10 +14,10 @@ namespace gleso{namespace physics{
 		weight_kg w{0};
 
 		inline void update(time_s dt){
-			dp.add(ddp,metric.dt);
-			p.add(dp,metric.dt);
-			da.add(dda,metric.dt);
-			a.add(da,metric.dt);
+			dp.add(ddp,dt);
+			p.add(dp,dt);
+			da.add(dda,dt);
+			a.add(da,dt);
 		}
 	};
 

@@ -53,19 +53,17 @@ namespace gleso{namespace grid{
 
 	//- --- - - - - - -------- --     --- - -- -- - - - -- - -- ----- - -- - - -- - -- -
 	class wque_work{
-
 		cell&c_;
-
 		wque_sync&s_;
+		time_s dt_;
 
 	public:
 
-		inline wque_work(wque_sync&urs,cell&c):c_{c},s_{urs}{}
+		inline wque_work(wque_sync&urs,cell&c,time_s dt):c_{c},s_{urs},dt_{dt}{}
 
 		inline void exec(){
-			const time_s dt=metric.dt;
-			c_.update_globs(dt);
-			c_.handle_collisions(dt);
+			c_.update_globs(dt_);
+			c_.handle_collisions(dt_);
 			s_.decrease_and_notify_if_zero();
 		}
 

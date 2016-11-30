@@ -1,8 +1,5 @@
-#!/bin/sh -x
-# cross platform opengl framework
+# cross platform framework
 #	linux
 #	android
 #	ios	
 #	osx
-
-g++ -std=c++17 src/main.cpp -o gleso -lGL -lglfw -lGLEW -O3 -Wall -Wextra -pedantic -Wfatal-errors

@@ -84,7 +84,7 @@ void gleso_viewport(int width,int height){
 	gl::active_camera->viewport(width,height);
 }
 
-void gleso_step(){
+void gleso_step(const time_s dt){
 	metric.on_frame_start();
 
 	grd.clear();
@@ -92,9 +92,9 @@ void gleso_step(){
 	grd.addall(globs);
 
 	if(gleso::update_grid_cells_in_parallell){
-		grd.update_globs(metric.dt);
+		grd.update_globs(dt);
 	}else{
-		grd.update_globs_single_thread(metric.dt);
+		grd.update_globs_single_thread(dt);
 	}
 
 	if(gleso::use_grid){

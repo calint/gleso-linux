@@ -53,6 +53,7 @@ namespace gleso{namespace grid{
 						}
 					}
 
+					metric.globs_collisions_tried++;
 					if(not problems::are_spheres_in_collision(*g1,*g2))
 						continue;
 

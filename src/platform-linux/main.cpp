@@ -2,6 +2,8 @@
 
 #include"../gleso/timer.hpp"
 #include"../gleso/grid/wque.hpp"
+
+#include<algorithm>
 using namespace grid;
 
 #define WINDOW_WIDTH 512
@@ -71,9 +73,9 @@ int main(int argc,char**argv){
 		p("* running\n");
 		timer tmr;
 		while(!glfwWindowShouldClose(window)){
-			gleso_step();
-			const auto dt=tmr.dt();
-			metric.dt=dt>.1?.1:dt;
+			auto dt=max(min(floato(1),tmr.dt()),floato(.0001));
+			metric.dt=dt;
+			gleso_step(dt);
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 		}

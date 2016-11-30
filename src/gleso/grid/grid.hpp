@@ -103,7 +103,7 @@ namespace gleso{namespace grid{
 				for(auto c=0;c<ncols_;c++){
 					auto&cc=cells_[r*ncols_+c];
 					number_of_globs_in_grid+=cc.globs.size();
-					wque_work*wrk=new wque_work(update_render_sync_,cc);
+					wque_work*wrk=new wque_work(update_render_sync_,cc,dt);
 					q_.add(wrk);
 				}
 			}
