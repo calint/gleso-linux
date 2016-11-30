@@ -108,10 +108,9 @@ static void test14(){
 	const floato constraint=1;
 	const floato velocity=.05;
 	const int count=1024*2;
-//	gleso::render_globs=false;
-//	gleso::render_grid_outline=false;
+//	render_globs=false;
 
-	const floato r=.01;
+	const floato r=.02;
 	for(int i=0;i<count;i++){
 		p3 po{rnd(-constraint,constraint),rnd(-constraint,constraint)};
 		velocity_vector v{rnd(-velocity,velocity),rnd(-velocity,velocity)};

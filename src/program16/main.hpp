@@ -94,12 +94,12 @@ void gleso_step(const time_s dt){
 	if(gleso::update_grid_cells_in_parallell){
 		grd.update_globs(dt);
 	}else{
-		grd.update_globs_single_thread(dt);
+		grd.update_globs_singlethread(dt);
 	}
 
-	if(gleso::use_grid){
+	if(gleso::render_globs){
 		gl::active_camera->pre_render(*active_shader);
-		if(gleso::render_globs)grd.render_globs(*active_shader);//? thread
+		grd.render_globs(*active_shader);//? thread
 		if(gleso::render_grid_outline)grd.render_outline(*active_shader);
 	}
 
@@ -141,7 +141,7 @@ void gleso_key(int key,int scancode,int action,int mods){
 		break;
 	case 46://.
 		switch(action){
-			case 1:if(gleso::use_grid)grd.clear();gleso::use_grid=!gleso::use_grid;break;
+			case 1:render_globs=!render_globs;break;
 			case 0:break;
 		}
 		break;

@@ -45,25 +45,36 @@ namespace gleso{namespace grid{
 		}
 
 		inline void set_work_to_do_count(int n){
-			pthread_mutex_lock(&m_);
+//			pthread_mutex_lock(&m_);
 				count_=n;
-			pthread_mutex_unlock(&m_);
+//			pthread_mutex_unlock(&m_);
 		}
 	};
 
 	//- --- - - - - - -------- --     --- - -- -- - - - -- - -- ----- - -- - - -- - -- -
 	class wque_work{
-		cell&c_;
-		wque_sync&s_;
 		time_s dt_;
+		int from_including_;
+		int to_excluding_;
+		wque_sync&s_;
+		vector<cell>&cells_;
 
 	public:
 
-		inline wque_work(wque_sync&urs,cell&c,time_s dt):c_{c},s_{urs},dt_{dt}{}
+		inline wque_work(wque_sync&urs,vector<cell>&cells,time_s dt,int from_including,int to_excluding):
+			dt_{dt},
+			from_including_{from_including},
+			to_excluding_{to_excluding},
+			s_{urs},
+			cells_{cells}
+		{}
 
 		inline void exec(){
-			c_.update_globs(dt_);
-			c_.handle_collisions(dt_);
+			for(int i=from_including_;i<to_excluding_;i++){
+				cell&c=cells_[i];
+				c.update_globs(dt_);
+				c.handle_collisions(dt_);
+			}
 			s_.decrease_and_notify_if_zero();
 		}
 

@@ -27,18 +27,15 @@ namespace gleso{
 			pthread_mutex_init(&needs_update_mutex,NULL);//? lazyinit
 		}
 
-		inline glob(glo*g):gl{g}{
-			metric.glob_count++;
-			phy.r=.1;
-			phy.s={phy.r,phy.r,phy.r};
-			pthread_mutex_init(&handled_collisions_mutex,NULL);//? lazyinit
-			pthread_mutex_init(&needs_update_mutex,NULL);//? lazyinit
+		inline glob(glo*g):glob{}{
+			gl=g;
 		}
 
 		inline virtual~glob(){
 	//		p("delete glob %p\n",(void*)this);
 			metric.glob_count--;
 			pthread_mutex_destroy(&handled_collisions_mutex);
+			pthread_mutex_destroy(&needs_update_mutex);
 		}
 
 		inline void set_glo(glo*gl){
@@ -117,6 +114,8 @@ namespace gleso{
 				on_collision(g);
 				return;
 			}
+
+			// single thread
 			for(auto gg:handled_collisions){
 				if(gg==g){// collision already handled
 					return;

@@ -98,26 +98,47 @@ namespace gleso{namespace grid{
 	//		p("  update_globs\n");
 			metric.globs_updated=0;
 			metric.globs_mutex_locks=0;
-			const int ncells=nrows_*ncols_;
-			update_render_sync_.set_work_to_do_count(ncells);
 			int number_of_globs_in_grid{0};
-			for(auto r=0;r<nrows_;r++){
-				for(auto c=0;c<ncols_;c++){
-					auto&cc=cells_[r*ncols_+c];
-					number_of_globs_in_grid+=cc.globs.size();
-					wque_work*wrk=new wque_work(update_render_sync_,cc,dt);
+			const int nthreads{4};
+
+			const int ncells=nrows_*ncols_;
+//			update_render_sync.lock();
+			if(nthreads>ncells){
+				update_render_sync_.set_work_to_do_count(ncells);
+				for(int i=0;i<ncells;i++){
+					wque_work*wrk=new wque_work(update_render_sync_,cells_,dt,i,i+1);
+					q_.add(wrk);
+				}
+			}else{
+				const int cells_per_thread=ncells/nthreads;
+				const int rem=ncells-cells_per_thread*nthreads;
+				update_render_sync_.set_work_to_do_count(nthreads+(rem?1:0));
+				int i{0};
+				for(int k=0;k<nthreads;k++){
+					wque_work*wrk=new wque_work(update_render_sync_,cells_,dt,i,i+cells_per_thread);
+					q_.add(wrk);
+					i+=cells_per_thread;
+				}
+				if(i<ncells){
+					wque_work*wrk=new wque_work(update_render_sync_,cells_,dt,i,ncells);
 					q_.add(wrk);
 				}
 			}
+			//? racing, if threads r done before wait for condition
+			update_render_sync_.wait_until_count_is_zero();
 
 			metric.globs_per_cell=number_of_globs_in_grid/ncells;
 
-			update_render_sync_.wait_until_count_is_zero();
-			if(unsigned(metric.globs_updated)!=gleso::globs.size())
+			const int a=globs.size();
+			const int b=metric.globs_updated;
+			if(a!=b){
+//			if(metric.globs_updated!=globs.size()){
+				p(" %d  %ld\n",int(metric.globs_updated),globs.size());
 				throw"updated globs not same as number of globs";
+			}
 		}
 
-		inline void update_globs_single_thread(time_s dt){
+		inline void update_globs_singlethread(time_s dt){
 	//		p("  update_globs2\n");
 			metric.globs_updated=0;
 			metric.globs_mutex_locks=0;
