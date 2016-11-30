@@ -30,8 +30,6 @@ namespace gleso{
 	typedef floato time_s;
 
 	inline floato rnd(floato min,floato max){return min+(floato(random())/RAND_MAX)*(max-min);}
-
-	#define foreach(c,f)std::for_each(c.begin(),c.end(),f);
 }
 
 using namespace std;

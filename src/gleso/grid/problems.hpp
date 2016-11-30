@@ -1,4 +1,6 @@
 #pragma once
+#include"../../include.hpp"
+#include"../glob.hpp"
 
 namespace gleso{namespace grid{
 	class problems{

@@ -1,4 +1,5 @@
-#include"../program96/main.hpp"
+#include "../program16/main.hpp"
+
 #include"../gleso/timer.hpp"
 #include"../gleso/grid/wque.hpp"
 using namespace grid;

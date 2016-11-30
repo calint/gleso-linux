@@ -1,7 +1,7 @@
 #pragma once
 #include"../include.hpp"
 #include"../gleso/glob.hpp"
-#include"glo_ball.hpp"
+#include "../program16/glo_ball.hpp"
 using namespace gleso;
 using namespace gl;
 

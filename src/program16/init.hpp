@@ -1,9 +1,9 @@
 #pragma once
 #include"../include.hpp"
 #include"../gleso/grid/glo_grid.hpp"
-#include"a_sphere.hpp"
-#include"a_static_sphere.hpp"
-#include"a_ball.hpp"
+#include "../program16/a_ball.hpp"
+#include "../program16/a_sphere.hpp"
+#include "../program16/a_static_sphere.hpp"
 using namespace grid;
 using namespace program16;
 
