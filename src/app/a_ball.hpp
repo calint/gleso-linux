@@ -3,6 +3,7 @@
 #include"../gleso/glob.hpp"
 #include"glo_ball.hpp"
 using namespace gl;
+using namespace gleso;
 
 class a_ball:public glob{
 	floato constraint_,velocity_;

@@ -1,7 +1,7 @@
 #pragma once
 #include"../platform.hpp"
 #include"glo_ball.hpp"
-class a_static_sphere:public glob{
+class a_static_sphere:public gleso::glob{
 public:
 	inline a_static_sphere(position p_={},floato r_=.1){
 		set_glo(&glo_ball::instance);

@@ -1,8 +1,13 @@
 #pragma once
-class glob;
 #include<vector>
 #include<memory>
 using namespace std;
+
+namespace gleso{
+	class glob;
+}
+using namespace gleso;
+
 namespace gl{
 	class shader;
 	class glo;

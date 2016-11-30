@@ -1,6 +1,7 @@
 #pragma once
 #include"glo.hpp"
 #include"../glob.hpp"
+using namespace gleso;
 
 namespace gl{
 	class a_camera:public glob{

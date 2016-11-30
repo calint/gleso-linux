@@ -1,6 +1,6 @@
 #pragma once
 
-class a_sphere:public glob{
+class a_sphere:public gleso::glob{
 
 	floato constraint_;
 

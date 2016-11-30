@@ -59,7 +59,7 @@ void gleso_init(){
 	p("%16s %4u B\n","glo",(unsigned int)sizeof(glo));
 	p("%16s %4u B\n","glob",(unsigned int)sizeof(glob));
 	p("%16s %4u B\n","grid",(unsigned int)sizeof(grid::grid));
-	p("%16s %4u B\n","physics",(unsigned int)sizeof(physics));
+	p("%16s %4u B\n","physics",(unsigned int)sizeof(physics::physics));
 	srand(1);// generate same random numbers in different instances
 	if(!gl::active_shader){// init
 		p("* init\n");
