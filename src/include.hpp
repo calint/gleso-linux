@@ -1,5 +1,5 @@
 #pragma once
-#include "platform-linux/include.hpp"
+#include"platform-linux/include.hpp"
 
 #include<memory>
 #include<cstdlib>
@@ -7,6 +7,7 @@
 #include<algorithm>
 #include<chrono>
 #include<cmath>
+#include<atomic>
 
 namespace gleso{
 	bool render_globs{true};

@@ -1,8 +1,6 @@
 #pragma once
 #include"../include.hpp"
 #include"../gleso/grid/glo_grid.hpp"
-
-
 #include"a_sphere.hpp"
 #include"a_static_sphere.hpp"
 #include"a_ball.hpp"

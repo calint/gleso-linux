@@ -1,12 +1,14 @@
 #pragma once
+
+#include"../include.hpp"
 #include"init.hpp"
+
 #include"../gleso/grid/grid.hpp"
 #include"../gleso/gl/a_camera.hpp"
 
 #include<signal.h>
 #include<thread>
 #include<unistd.h>
-#include "../include.hpp"
 
 
 /*-----------------------------

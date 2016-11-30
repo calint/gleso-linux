@@ -1,7 +1,5 @@
 #pragma once
 #include"../include.hpp"
-#include<atomic>
-#include<iostream>
 using namespace std;
 using namespace chrono;
 
