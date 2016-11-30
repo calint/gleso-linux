@@ -1,5 +1,7 @@
 #pragma once
+#include"../../platform.hpp"
 #include"../p3.hpp"
+using namespace gleso;
 
 namespace physics{
 	class physics{

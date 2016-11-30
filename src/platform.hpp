@@ -15,7 +15,11 @@ typedef long long longo;
 typedef floato weight_kg;
 typedef floato radius_m;
 
-class p3;
+namespace gleso{
+	class p3;
+}
+using namespace gleso;
+
 typedef p3 scale;
 typedef p3 angle;
 typedef p3 position;
