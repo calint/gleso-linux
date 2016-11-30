@@ -1,7 +1,5 @@
 #pragma once
-#include<vector>
-#include<memory>
-using namespace std;
+#include"../../platform.hpp"
 
 namespace gleso{
 	class glob;

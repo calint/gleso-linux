@@ -1,11 +1,12 @@
 #pragma once
 #include"../../platform.hpp"
 #include"gl.hpp"
+#include"../metrics.hpp"
 
 namespace gleso{namespace gl{
 
 	class shader{
-		GLint glid_program{0};
+		GLint program{0};
 		GLint apos{0};
 		GLint auv{0};
 		GLint argba{0};
@@ -17,7 +18,10 @@ namespace gleso{namespace gl{
 
 		inline virtual~shader(){
 			metric.shader_count--;
-	//		if(glid_program){glDeleteProgram(glid_program);glid_program=0;}
+			if(program){
+				glDeleteProgram(program);
+				program=0;
+			}
 		}
 
 		static void print_gl_string(const char *name,const GLenum s){
@@ -68,31 +72,31 @@ namespace gleso{namespace gl{
 			glViewport(0,0,wi,hi);
 		}
 		void use_program(){
-			if(active_program==glid_program)return;
+			if(active_program==program)return;
 	//		p(" activating program  %d\n",glid_program);
-			glUseProgram(glid_program);
+			glUseProgram(program);
 			prepare_gl_for_render();
-			active_program=glid_program;
+			active_program=program;
 		}
 
 	private:
 		void load_program(const char*vertex_shader_source,const char*fragment_shader_source){
-			glid_program=glCreateProgram();
-			if(!glid_program)throw"cannot create program";
+			program=glCreateProgram();
+			if(!program)throw"cannot create program";
 	//		p("    program glid=%d\n",glid_program);
-			glAttachShader(glid_program,load_shader(GL_VERTEX_SHADER,vertex_shader_source));
-			glAttachShader(glid_program,load_shader(GL_FRAGMENT_SHADER,fragment_shader_source));
-			glLinkProgram(glid_program);
+			glAttachShader(program,load_shader(GL_VERTEX_SHADER,vertex_shader_source));
+			glAttachShader(program,load_shader(GL_FRAGMENT_SHADER,fragment_shader_source));
+			glLinkProgram(program);
 			GLint linkStatus=GL_FALSE;
-			glGetProgramiv(glid_program,GL_LINK_STATUS,&linkStatus);
+			glGetProgramiv(program,GL_LINK_STATUS,&linkStatus);
 			if(linkStatus)return;
 			GLint info_len{0};
-			glGetProgramiv(glid_program,GL_INFO_LOG_LENGTH,&info_len);
+			glGetProgramiv(program,GL_INFO_LOG_LENGTH,&info_len);
 			unique_ptr<GLchar>info=make_unique<GLchar>(info_len);
-			glGetProgramInfoLog(glid_program,info_len,NULL,info.get());
+			glGetProgramInfoLog(program,info_len,NULL,info.get());
 			p("!!! could not link program:\n%s\n",info.get());
-			glDeleteProgram(glid_program);
-			glid_program=0;
+			glDeleteProgram(program);
+			program=0;
 			throw"error while linking";
 		}
 		static GLuint load_shader(const GLenum shader_type,const char*source){
@@ -140,11 +144,16 @@ namespace gleso{namespace gl{
 	}
 	)";
 
-		inline GLint get_attribute_location(const char*name){return glGetAttribLocation(glid_program,name);}
-		inline GLint get_uniform_location(const char*name){return glGetUniformLocation(glid_program,name);}
+		inline GLint get_attribute_location(const char*name){return glGetAttribLocation(program,name);}
+		inline GLint get_uniform_location(const char*name){return glGetUniformLocation(program,name);}
 		#define A(x,y)if((x=get_attribute_location(y))==-1){p("shader: cannot find attribute %s\n",y);throw"error";};
 		#define U(x,y)if((x=get_uniform_location(y))==-1){p("shader: cannot find uniform %s\n",y);throw"error";}
-		virtual void bind(){
+//
+//		inline int attribute(const char*name){
+//			if((x=get_attribute_location(y))==-1){p("shader: cannot find attribute %s\n",y);throw"error";
+//		}
+
+		inline virtual void bind(){
 			A(apos,"apos");
 			A(auv,"auv");
 			A(argba,"argba");
@@ -152,7 +161,8 @@ namespace gleso{namespace gl{
 			U(umtx_wvp,"umtx_wvp");
 			U(utex,"utex");
 		}
-		virtual void prepare_gl_for_render(){
+
+		inline virtual void prepare_gl_for_render(){
 			gl::umtx_mw=umtx_mw;
 			gl::umtx_wvp=umtx_wvp;
 			gl::utex=utex;
@@ -160,6 +170,7 @@ namespace gleso{namespace gl{
 			gl::auv=auv;
 			gl::argba=argba;
 		}
+
 	public:
 		static shader instance;
 	};

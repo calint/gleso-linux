@@ -7,7 +7,9 @@
 #include "../program96/a_ball.hpp"
 #include "../program96/init.hpp"
 
-static grid::grid grd;
+#include<signal.h>
+#include<thread>
+#include<unistd.h>
 
 
 /*-----------------------------
@@ -20,12 +22,15 @@ static grid::grid grd;
 
 ------------------------------
 "defglo" */
+
+static grid::grid grd;
+
+
 static void mainsig(const int i){
 	p(" ••• terminated with signal %d\n",i);
 	exit(i);
 }
-#include<signal.h>
-#include<thread>
+
 void gleso_init(){
 	p("* gleso\n");
 	for(int i=0;i<32;i++)signal(i,mainsig);//?
@@ -80,8 +85,6 @@ void gleso_viewport(int width,int height){
 	if(gl::active_shader)gl::active_shader->viewport(width,height);
 	gl::active_camera->viewport(width,height);
 }
-
-#include<unistd.h>
 
 void gleso_step(){
 	metric.on_frame_start();
