@@ -2,7 +2,8 @@
 #include"../../platform.hpp"
 using namespace gl;
 
-namespace grid{
+namespace gleso{namespace grid{
+
 	class glo_grid:public glo{
 		vector<GLfloat>make_vertices()const override{
 			return vector<GLfloat>{
@@ -27,4 +28,6 @@ namespace grid{
 		static glo_grid instance;
 	};
 	glo_grid glo_grid::instance=glo_grid{};
+}
+
 }

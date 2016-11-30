@@ -5,7 +5,8 @@
 #include<vector>
 using namespace gleso;
 
-namespace grid{
+namespace gleso{namespace grid{
+
 	class cell{
 	public:
 		vector<glob*>globs;
@@ -92,4 +93,4 @@ namespace grid{
 		}
 
 	};
-}
+}}

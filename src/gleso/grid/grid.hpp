@@ -1,7 +1,8 @@
 #pragma once
 #include"wque.hpp"
 
-namespace grid{
+namespace gleso{namespace grid{
+
 	class grid{
 		p3 po_;// location of center of square
 
@@ -142,4 +143,5 @@ namespace grid{
 			}
 		}
 	};
-}
+
+}}

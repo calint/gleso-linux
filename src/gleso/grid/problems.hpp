@@ -1,6 +1,6 @@
 #pragma once
 
-namespace grid{
+namespace gleso{namespace grid{
 	class problems{
 	public:
 		static bool are_spheres_in_collision(const glob&g1,const glob&g2){
@@ -20,4 +20,4 @@ namespace grid{
 		}
 	};
 
-}
+}}

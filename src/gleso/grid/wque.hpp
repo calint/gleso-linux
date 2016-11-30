@@ -3,7 +3,7 @@
 #include"cell.hpp"
 using namespace std;
 
-namespace grid{
+namespace gleso{namespace grid{
 
 	//- --- - - - - - -------- --     --- - -- -- - - - -- - -- ----- - -- - - -- - -- -
 	class wque_sync{
@@ -157,5 +157,5 @@ namespace grid{
 	};
 	atomic_int wque_thread::thread_count{0};
 
-}
+}}
 // lifted and modified from https://vichargrave.github.io/articles/2013-01/multithreaded-work-queue-in-cpp

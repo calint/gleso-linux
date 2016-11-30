@@ -7,9 +7,9 @@
 using namespace gl;
 using namespace physics;
 
-namespace grid{class grid;class cell;}
-
 namespace gleso{
+	namespace grid{class grid;class cell;}
+
 	class glob{
 		friend class grid::grid;
 		friend class grid::cell;
