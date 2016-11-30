@@ -96,7 +96,7 @@ static grid::grid grd;
 void gleso_step(){
 	gl::time_stamp++;
 
-	metrics::before_render();
+	metrics2.before_render();
 
 	grd.clear();
 
@@ -116,7 +116,7 @@ void gleso_step(){
 
 //	usleep(100000);
 
-	metrics::after_render();
+	metrics2.after_render();
 }
 
 void gleso_key(int key,int scancode,int action,int mods){

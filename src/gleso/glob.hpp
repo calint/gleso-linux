@@ -44,7 +44,6 @@ public:
 		if(time_stamp_render==time_stamp)
 			return;
 
-		metrics::rendered_globs++;
 		metrics2.globs_rendered++;
 		time_stamp_render=time_stamp;
 		if(!gl)return;
@@ -113,8 +112,6 @@ private:
 	inline void update(){
 		if(time_stamp_update==time_stamp)
 			return;
-
-		metrics::updated_globs++;
 
 		metrics2.globs_updated++;
 

@@ -15,7 +15,7 @@ namespace gl{
 
 		inline virtual~shader(){
 			metrics2.shader_count--;
-			metrics::print();//?
+//			metrics::print();//?
 	//		if(glid_program){glDeleteProgram(glid_program);glid_program=0;}
 		}
 

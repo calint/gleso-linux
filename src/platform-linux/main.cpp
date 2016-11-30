@@ -72,7 +72,7 @@ int main(int argc,char**argv){
 			timer tmr;
 			gleso_step();
 			const floato dt=min(tmr.dt(),.01);
-			metrics::dt=dt;
+			metrics2.dt=dt;
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 		}

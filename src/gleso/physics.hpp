@@ -11,10 +11,9 @@ public:
 	weight_kg w{0};
 
 	inline void update(){
-		using namespace metrics;
-		dp.add(ddp,dt);
-		p.add(dp,dt);
-		da.add(dda,dt);
-		a.add(da,dt);
+		dp.add(ddp,metrics2.dt);
+		p.add(dp,metrics2.dt);
+		da.add(dda,metrics2.dt);
+		a.add(da,metrics2.dt);
 	}
 };
