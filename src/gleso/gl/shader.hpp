@@ -1,7 +1,9 @@
 #pragma once
 #include"../../platform.hpp"
+#include"gl.hpp"
 
-namespace gl{
+namespace gleso{namespace gl{
+
 	class shader{
 		GLint glid_program{0};
 		GLint apos{0};
@@ -66,11 +68,11 @@ namespace gl{
 			glViewport(0,0,wi,hi);
 		}
 		void use_program(){
-			if(gl::active_program==glid_program)return;
+			if(active_program==glid_program)return;
 	//		p(" activating program  %d\n",glid_program);
 			glUseProgram(glid_program);
 			prepare_gl_for_render();
-			gl::active_program=glid_program;
+			active_program=glid_program;
 		}
 
 	private:
@@ -162,4 +164,4 @@ namespace gl{
 		static shader instance;
 	};
 	shader shader::instance=shader{};
-}
+}}

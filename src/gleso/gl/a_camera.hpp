@@ -1,9 +1,9 @@
 #pragma once
 #include"glo.hpp"
 #include"../glob.hpp"
-using namespace gleso;
 
-namespace gl{
+namespace gleso{namespace gl{
+
 	class a_camera:public glob{
 		int screen_width{320},screen_height{240};
 	public:
@@ -16,7 +16,7 @@ namespace gl{
 		inline void viewport(int w,int h){screen_width=w;screen_height=h;}
 
 		inline void pre_render(){
-			gl::active_shader->use_program();
+			active_shader->use_program();
 			glClearColor(floato{.3},0,floato{.2},1);
 			glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 
@@ -32,7 +32,8 @@ namespace gl{
 
 			m4 wvp=p*vw;
 
-			glUniformMatrix4fv(GLint(gl::umtx_wvp),1,false,wvp.c);
+			glUniformMatrix4fv(GLint(umtx_wvp),1,false,wvp.c);
 		}
 	};
-}
+
+}}

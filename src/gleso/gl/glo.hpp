@@ -4,7 +4,8 @@
 #include"gl.hpp"
 #include"texture.hpp"
 
-namespace gl{
+namespace gleso{namespace gl{
+
 	class glo{
 		class texture*tex{nullptr};
 	#ifdef GLESO_EMBEDDED
@@ -109,4 +110,5 @@ namespace gl{
 		virtual void gldraw()const{glDrawArrays(GL_TRIANGLES,0,3);}
 	};
 	glo glo::instance=glo{};
-}
+
+}}

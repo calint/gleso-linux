@@ -3,7 +3,8 @@
 #include"gl.hpp"
 #include"shader.hpp"
 
-namespace gl{
+namespace gleso{namespace gl{
+
 	class texture{
 	public:
 		inline texture(){metric.texture_count++;}
@@ -44,4 +45,5 @@ namespace gl{
 		static texture instance;
 	};
 	texture texture::instance=texture{};
-}
+
+}}
