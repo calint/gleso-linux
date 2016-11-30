@@ -8,13 +8,13 @@
 namespace grid{
 
 	class wque_thread{
-		wque<wque_work*>&q_;
+		wque&q_;
 		pthread_t id_;
 		static void*thread_run(void*arg){return((wque_thread*)arg)->run();}
 	public:
 		static atomic_int thread_count;
 
-		inline wque_thread(wque<wque_work*>&q):q_(q){
+		inline wque_thread(wque&q):q_(q){
 			if(pthread_create(&id_,NULL,thread_run,this))
 				throw"could not create work queue tread";
 			thread_count++;

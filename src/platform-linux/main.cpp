@@ -1,6 +1,7 @@
 #include"../app/main.hpp"
 #include"../gleso/timer.hpp"
-#include"../gleso/grid/update_render_sync.hpp"
+#include"../gleso/grid/wque.hpp"
+using namespace grid;
 
 #define WINDOW_WIDTH 512
 #define WINDOW_HEIGHT 512

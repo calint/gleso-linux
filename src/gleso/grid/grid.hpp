@@ -1,7 +1,5 @@
 #pragma once
-#include"update_render_sync.hpp"
-#include"wque_thread.hpp"
-#include"wque_work.hpp"
+#include"wque.hpp"
 
 namespace grid{
 	class grid{
@@ -10,7 +8,7 @@ namespace grid{
 		vector<cell>cells_;
 		int nrows_;
 		int ncols_;
-		wque<wque_work*>update_grid_queue_;
+		wque update_grid_queue_;
 		vector<wque_thread>threads_;
 		int nthreads_;
 
