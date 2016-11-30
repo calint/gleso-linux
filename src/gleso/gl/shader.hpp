@@ -11,11 +11,10 @@ namespace gl{
 		GLint umtx_wvp{0};
 		GLint utex{0};
 	public:
-		inline shader(){metrics2.shader_count++;}
+		inline shader(){metric.shader_count++;}
 
 		inline virtual~shader(){
-			metrics2.shader_count--;
-//			metrics::print();//?
+			metric.shader_count--;
 	//		if(glid_program){glDeleteProgram(glid_program);glid_program=0;}
 		}
 

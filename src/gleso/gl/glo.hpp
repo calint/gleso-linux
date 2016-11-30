@@ -18,10 +18,9 @@ namespace gl{
 	#endif
 	public:
 		static glo instance;
-		static atomic_int glo_count;
 
-		inline glo(){glo_count++;}
-		inline virtual~glo(){glo_count--;}
+		inline glo(){metric.glo_count++;}
+		inline virtual~glo(){metric.glo_count--;}
 		inline glo&set_texture(texture*t){tex=t;return*this;}
 		inline const texture&textureref()const{return*tex;}
 		inline texture&get_texture_for_update()const{return*tex;}
@@ -109,6 +108,5 @@ namespace gl{
 		virtual vector<GLfloat>make_colors()const{return vector<GLfloat>();}
 		virtual void gldraw()const{glDrawArrays(GL_TRIANGLES,0,3);}
 	};
-	glo glo::instance=glo();
-	atomic_int glo::glo_count;
+	glo glo::instance=glo{};
 }

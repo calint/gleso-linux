@@ -18,7 +18,7 @@ public:
 
 	inline glob(){
 //		p("new glob %p\n",(void*)this);
-		metrics2.glob_count++;
+		metric.glob_count++;
 		phy.r=.1;
 		phy.s={phy.r,phy.r,phy.r};
 		pthread_mutex_init(&handled_collisions_mutex,NULL);//? lazyinit
@@ -31,7 +31,7 @@ public:
 
 	inline virtual~glob(){
 //		p("delete glob %p\n",(void*)this);
-		metrics2.glob_count--;
+		metric.glob_count--;
 		pthread_mutex_destroy(&handled_collisions_mutex);
 	}
 
@@ -41,11 +41,11 @@ public:
 
 	inline void render(){
 		// check if already rendered this render frame, i.e. from a different grid
-		if(time_stamp_render==time_stamp)
+		if(time_stamp_render==metric.frame)
 			return;
 
-		metrics2.globs_rendered++;
-		time_stamp_render=time_stamp;
+		metric.globs_rendered++;
+		time_stamp_render=metric.frame;
 		if(!gl)return;
 //		ginfo=ginfo_nxt;
 		update_model_to_world_matrix();
@@ -94,11 +94,10 @@ private:
 	//---------------------------------------- grid_cell accessed
 	grid::cell*grid_cell_ref{nullptr};//managed by grid
 	bool overlaps_cells{false};
-	longo time_stamp_update{0};
 
 	inline void handle_overlapped_collision(glob*g){
 		pthread_mutex_lock(&handled_collisions_mutex);
-		metrics2.globs_mutex_locks++;
+		metric.globs_mutex_locks++;
 		for(auto gg:handled_collisions){
 			if(gg==g){// collision already handled
 				pthread_mutex_unlock(&handled_collisions_mutex);
@@ -110,12 +109,12 @@ private:
 		on_collision(g);
 	}
 	inline void update(){
-		if(time_stamp_update==time_stamp)
+		if(time_stamp_update==metric.frame)
 			return;
 
-		metrics2.globs_updated++;
+		metric.globs_updated++;
 
-		time_stamp_update=time_stamp;
+		time_stamp_update=metric.frame;
 
 
 		const position p=phy.p;
@@ -174,6 +173,8 @@ private:
 	pthread_mutex_t handled_collisions_mutex;
 
 	longo time_stamp_render{0};
+
+	longo time_stamp_update{0};
 
 	m4 model_to_world_matrix_;
 

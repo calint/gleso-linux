@@ -91,8 +91,8 @@ namespace grid{
 
 		inline void update_globs(){
 	//		p("  update_globs\n");
-			metrics2.globs_updated=0;
-			metrics2.globs_mutex_locks=0;
+			metric.globs_updated=0;
+			metric.globs_mutex_locks=0;
 			const int ncells=nrows_*ncols_;
 			update_render_sync_.set_work_to_do_count(ncells);
 			int number_of_globs_in_grid{0};
@@ -105,15 +105,15 @@ namespace grid{
 				}
 			}
 
-			metrics2.globs_per_cell=number_of_globs_in_grid/ncells;
+			metric.globs_per_cell=number_of_globs_in_grid/ncells;
 
 			update_render_sync_.wait_until_count_is_zero();
 		}
 
 		inline void update_globs_single_thread(){
 	//		p("  update_globs2\n");
-			metrics2.globs_updated=0;
-			metrics2.globs_mutex_locks=0;
+			metric.globs_updated=0;
+			metric.globs_mutex_locks=0;
 			for(auto r=0;r<nrows_;r++){
 				for(auto c=0;c<ncols_;c++){
 					auto&cc=cells_[r*ncols_+c];
@@ -124,7 +124,7 @@ namespace grid{
 		}
 
 		inline void render_globs(){
-			metrics2.globs_rendered=0;
+			metric.globs_rendered=0;
 			for(auto&c:cells_){
 				c.render_globs();
 			}

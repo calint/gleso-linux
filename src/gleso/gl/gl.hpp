@@ -25,5 +25,4 @@ namespace gl{
 	vector<glob*>globs;
 	vector<a_camera*>cameras;
 	a_camera*active_camera;
-	longo time_stamp;
 }

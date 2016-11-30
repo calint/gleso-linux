@@ -11,9 +11,9 @@ public:
 	weight_kg w{0};
 
 	inline void update(){
-		dp.add(ddp,metrics2.dt);
-		p.add(dp,metrics2.dt);
-		da.add(dda,metrics2.dt);
-		a.add(da,metrics2.dt);
+		dp.add(ddp,metric.dt);
+		p.add(dp,metric.dt);
+		da.add(dda,metric.dt);
+		a.add(da,metric.dt);
 	}
 };

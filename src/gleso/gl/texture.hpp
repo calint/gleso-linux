@@ -6,8 +6,8 @@
 namespace gl{
 	class texture{
 	public:
-		inline texture(){metrics2.texture_count++;}
-		~texture(){metrics2.texture_count--;}
+		inline texture(){metric.texture_count++;}
+		~texture(){metric.texture_count--;}
 		inline void load(){
 			glGenTextures(1,&glid_texture);
 	//		p("    texture  glid=%d\n",glid_texture);

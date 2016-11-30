@@ -9,10 +9,10 @@ namespace grid{
 	public:
 		vector<glob*>globs;
 
-		inline cell(){metrics2.grid_cell_count++;}
+		inline cell(){metric.grid_cell_count++;}
 
 		inline~cell(){
-			metrics2.grid_cell_count--;
+			metric.grid_cell_count--;
 			for(auto g:globs){
 				if(g->grid_cell_ref!=this)
 					continue;
@@ -57,6 +57,7 @@ namespace grid{
 						continue;
 
 //						p(" frame: %u    collision [%s %p] and [%s %p]\n",gl::time_stamp,typeid(g1).name(),g1,typeid(*g2).name(),g2);
+					metric.globs_collisions++;
 					if(g1->grid_cell_ref==g2->grid_cell_ref){// both handled by same cell, no racing
 						if(g1->grid_cell_ref!=this){// ... but buy a different cell
 							continue;
@@ -68,6 +69,7 @@ namespace grid{
 
 					}
 					// handled by different cells, may be multiple calls same collision
+					metric.globs_collisions_overlapping_cells++;
 					g1->handle_overlapped_collision(g2);
 					g2->handle_overlapped_collision(g1);
 				}

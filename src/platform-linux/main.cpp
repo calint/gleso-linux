@@ -68,11 +68,11 @@ int main(int argc,char**argv){
 		gleso_viewport(WINDOW_WIDTH,WINDOW_HEIGHT);
 		glfwSwapInterval(0);
 		p("* running\n");
+		timer tmr;
 		while(!glfwWindowShouldClose(window)){
-			timer tmr;
 			gleso_step();
-			const floato dt=min(tmr.dt(),.01);
-			metrics2.dt=dt;
+			const auto dt=tmr.dt();
+			metric.dt=dt>.1?.1:dt;
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 		}

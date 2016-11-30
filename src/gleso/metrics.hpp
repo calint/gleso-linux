@@ -2,73 +2,78 @@
 #include"../platform.hpp"
 #include<sys/time.h>
 #include<atomic>
+#include<iostream>
+using namespace std;
+using namespace chrono;
 
-class metrics_data{
+class metrics{
 public:
-	atomic_int glob_count;
-	atomic_int globs_updated;
-	atomic_int globs_mutex_locks;
-	int globs_rendered;
-	floato globs_per_cell;
-	int grid_cell_count;
-	int shader_count;
-	int texture_count;
+	atomic_int glob_count{0};
+	atomic_int globs_updated{0};
+	atomic_int globs_mutex_locks{0};
+	int globs_rendered{0};
+	floato globs_per_cell{0};
+	atomic_int globs_collisions{0};
+	atomic_int globs_collisions_overlapping_cells;
+	int grid_cell_count{0};
+	int shader_count{0};
+	int texture_count{0};
+	int glo_count{0};
 
-
-
-
-
-	longo frame;
-	floato fps;
+	longo frame{0};
 	floato dt{1./60};
 
 
+	inline~metrics(){print();}
 
-
-
-	void print_header_row(){
-		p("%5s %5s %6s %5s %5s %5s %5s\n","fps","dt","globs","upd","rend","lcks","g/c");
+	inline void print_header_row(){
+		p("%5s %5s %6s %5s %5s %5s %5s %4s\n","fps","dt","globs","upd","rend","lcks","g/c","glos");
 
 	}
-	void print(){
-		p("%5.0f %5d %6d %5d %5d %5d %5d\n",
-				fps,
+	inline void print(){
+		p("%5d %5d %6d %5d %5d %5d %.2f %5d\n",
+				int(fps),
 				int(dt*1000000),
 				int(glob_count),
 				int(globs_updated),
 				int(globs_rendered),
 				int(globs_mutex_locks),
-				globs_per_cell
+				globs_per_cell,
+//				int(globs_collisions),
+//				int(globs_collisions_overlapping_cells),
+				glo_count
 		);
 	}
 
-
-	void before_render(){
-		if(frame==0)
+	inline void on_frame_start(){
+		if(frame==0){
 			print_header_row();
-
+			fps_time=system_clock::now();
+		}
 		frame++;
-
 		globs_rendered=0;
+		globs_collisions=0;
 	}
 
-	void after_render(){
-		struct timeval tv;
-		gettimeofday(&tv,NULL);
-		const time_t diff_s=tv.tv_sec-fps_prev_time_.tv_sec;
-		const int diff_us=tv.tv_usec-fps_prev_time_.tv_usec;
-		const floato dt=(float)diff_s+diff_us/1000000.f;
-		if(dt<1)
+	inline void on_frame_end(){
+		const auto now=system_clock::now();
+		const auto dt_s=duration<floato,ratio<1>>(now-fps_time).count();
+		if(dt_s<print_intervall_in_seconds)
 			return;
-		const int dframe=frame-fps_prev_frame_count_;
-		fps_prev_frame_count_=frame;
-		fps=dframe/dt;
-		fps_prev_time_=tv;
+		const auto dframe=frame-fps_frame;
+		fps=dframe/dt_s;
+		fps_frame=frame;
+		fps_time=now;
 		print();
-	}
+}
 
 private:
-	struct timeval fps_prev_time_;
-	floato fps_prev_frame_count_;
-};
-metrics_data metrics2;
+	floato fps{0};
+
+	time_point<system_clock>fps_time;
+
+	int fps_frame{0};
+
+	floato print_intervall_in_seconds{.5};
+
+}metric;

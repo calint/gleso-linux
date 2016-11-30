@@ -15,8 +15,7 @@
 
 #include"../gleso/grid/grid.hpp"
 
-
-
+static grid::grid grd;
 
 
 /*-----------------------------
@@ -92,11 +91,8 @@ void gleso_viewport(int width,int height){
 
 #include<unistd.h>
 
-static grid::grid grd;
 void gleso_step(){
-	gl::time_stamp++;
-
-	metrics2.before_render();
+	metric.on_frame_start();
 
 	grd.clear();
 
@@ -116,7 +112,7 @@ void gleso_step(){
 
 //	usleep(100000);
 
-	metrics2.after_render();
+	metric.on_frame_end();
 }
 
 void gleso_key(int key,int scancode,int action,int mods){
