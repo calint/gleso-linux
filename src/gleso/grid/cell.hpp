@@ -2,8 +2,6 @@
 #include"../../platform.hpp"
 #include"glo_grid.hpp"
 #include"problems.hpp"
-#include<vector>
-using namespace gleso;
 
 namespace gleso{namespace grid{
 
@@ -88,7 +86,7 @@ namespace gleso{namespace grid{
 			m4 m;
 			m.load_translate(po);
 			m.append_scaling(p3{scale,scale,scale});
-			glUniformMatrix4fv(GLint(gl::umtx_mw),1,false,m.c);
+			glUniformMatrix4fv(GLint(umtx_mw),1,false,m.c);
 			glo_grid::instance.render();
 		}
 

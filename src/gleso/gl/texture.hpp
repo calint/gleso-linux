@@ -15,7 +15,7 @@ namespace gleso{namespace gl{
 			refresh_from_data();
 			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-			gl::shader::check_gl_error();
+			shader::check_gl_error();
 		}
 		inline void enable_for_gl_draw(){
 			glActiveTexture(GL_TEXTURE0);
