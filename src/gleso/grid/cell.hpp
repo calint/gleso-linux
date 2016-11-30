@@ -1,7 +1,8 @@
 #pragma once
 #include"../../platform.hpp"
-#include<vector>
+#include"glo_grid.hpp"
 #include"problems.hpp"
+#include<vector>
 
 namespace grid{
 	class cell{

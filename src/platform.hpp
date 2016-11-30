@@ -14,6 +14,8 @@ typedef long long longo;
 typedef floato weight_kg;
 typedef floato radius_m;
 
+typedef int count;
+
 class p3;
 typedef p3 scale;
 typedef p3 angle;

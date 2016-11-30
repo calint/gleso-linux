@@ -6,38 +6,48 @@ using namespace std;
 namespace grid{
 
 	//- --- - - - - - -------- --     --- - -- -- - - - -- - -- ----- - -- - - -- - -- -
-	class update_render_sync{
-		pthread_mutex_t mutex_;
-		//atomic<int>count;//? until 0
-		int count_;
-		pthread_cond_t cond_;
+	class wque_sync{
+		atomic_int count_;
+		pthread_mutex_t m_;
+//		int count_;
+		pthread_cond_t c_;
 	public:
-		update_render_sync():count_{0}{
-			pthread_mutex_init(&mutex_,NULL);
-			pthread_cond_init(&cond_,NULL);
+
+		inline wque_sync():count_{0}{
+			pthread_mutex_init(&m_,NULL);
+			pthread_cond_init(&c_,NULL);
 		}
-		~update_render_sync(){
-			pthread_mutex_destroy(&mutex_);
-			pthread_cond_destroy(&cond_);
+
+		inline~wque_sync(){
+			pthread_mutex_destroy(&m_);
+			pthread_cond_destroy(&c_);
 		}
-		void decrease_and_notify_if_zero(){
-			pthread_mutex_lock(&mutex_);
-			count_--;
-			if(count_==0)
-				pthread_cond_signal(&cond_);
-			pthread_mutex_unlock(&mutex_);
+//		void decrease_and_notify_if_zero(){
+//			pthread_mutex_lock(&m_);
+//			count_--;
+//			if(count_==0)
+//				pthread_cond_signal(&c_);
+//			pthread_mutex_unlock(&m_);
+//		}
+		inline void decrease_and_notify_if_zero(){
+			if(--count_)
+				return;
+			pthread_mutex_lock(&m_);
+				pthread_cond_signal(&c_);
+			pthread_mutex_unlock(&m_);
 		}
-		void wait_until_count_is_zero(){
-			pthread_mutex_lock(&mutex_);
-			while(count_!=0){
-				pthread_cond_wait(&cond_,&mutex_);
-			}
-			pthread_mutex_unlock(&mutex_);
+
+		inline void wait_until_count_is_zero(){
+			pthread_mutex_lock(&m_);
+				while(count_!=0)
+					pthread_cond_wait(&c_,&m_);
+			pthread_mutex_unlock(&m_);
 		}
-		void set(int work_to_do_count){
-			pthread_mutex_lock(&mutex_);
-			count_=work_to_do_count;
-			pthread_mutex_unlock(&mutex_);
+
+		inline void set_work_to_do_count(int n){
+			pthread_mutex_lock(&m_);
+				count_=n;
+			pthread_mutex_unlock(&m_);
 		}
 	};
 
@@ -46,11 +56,11 @@ namespace grid{
 
 		cell&c_;
 
-		update_render_sync&s_;
+		wque_sync&s_;
 
 	public:
 
-		inline wque_work(update_render_sync&urs,cell&c):c_{c},s_{urs}{}
+		inline wque_work(wque_sync&urs,cell&c):c_{c},s_{urs}{}
 
 		inline void exec(){
 

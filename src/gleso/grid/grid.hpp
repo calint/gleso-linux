@@ -4,32 +4,37 @@
 namespace grid{
 	class grid{
 		p3 po_;// location of center of square
-		floato cell_size_;// side of the square
+
+		floato cell_size_;// side of square
+
 		vector<cell>cells_;
+
 		int nrows_;
+
 		int ncols_;
-		wque update_grid_queue_;
-		vector<wque_thread>threads_;
-		int nthreads_;
+
+		wque q_;
+
+		vector<wque_thread>t_;
+
+		wque_sync update_render_sync_;
 
 	public:
-		update_render_sync update_render_sync_;
 
-	//	inline grid(const int nthreads=1,const int rows=1,const int cols=1,const floato cell_size=2,const p3&p=p3{})
-	//	inline grid(const int nthreads=2,const int rows=2,const int cols=2,const floato cell_size=1,const p3&p=p3{})
-	//	inline grid(const int nthreads=1,const int rows=4,const int cols=4,const floato cell_size=.5f,const p3&p=p3{})
-		inline grid(const int nthreads=4,const int rows=4,const int cols=4,const floato cell_size=.5f,const p3&p=p3{})
-	//		:po_(p),cell_size_(cell_size),cells_(rows*cols),nrows_{rows},ncols_{cols},nthreads_(nthreads)
-			:po_(p),cell_size_(cell_size),nrows_{rows},ncols_{cols},nthreads_{nthreads}
+		inline grid(const int nthreads=4,const int rows=4,const int cols=4,const floato cell_size=.5f,const p3&p=p3{}):
+			po_(p),cell_size_(cell_size),nrows_{rows},ncols_{cols}
 		{
-			const int n=rows*cols;
-			cells_.reserve(n);
-			for(int k=0;k<n;k++)
+			const int ncells=rows*cols;
+
+			cells_.reserve(ncells);
+
+			for(int i=0;i<ncells;i++)
 				cells_.emplace_back();
 
-			threads_.reserve(nthreads);
+			t_.reserve(nthreads);
+
 			for(int i=0;i<nthreads;i++)
-				threads_.emplace_back(update_grid_queue_);
+				t_.emplace_back(q_);
 		}
 
 		inline void clear(){
@@ -89,14 +94,14 @@ namespace grid{
 			globs_updated=0;
 			globs_mutex_locks=0;
 			const int ncells=nrows_*ncols_;
-			update_render_sync_.set(ncells);
+			update_render_sync_.set_work_to_do_count(ncells);
 			int number_of_globs_in_grid{0};
 			for(int r=0;r<nrows_;r++){
 				for(int c=0;c<ncols_;c++){
 					cell&cc=cells_[r*ncols_+c];
 					number_of_globs_in_grid+=cc.globs.size();
 					wque_work*wrk=new wque_work(update_render_sync_,cc);
-					update_grid_queue_.add(wrk);
+					q_.add(wrk);
 				}
 			}
 
