@@ -1,22 +1,27 @@
 #pragma once
-#include"thread.hpp"
 #include"wque_work.hpp"
 #include<atomic>
+#include<pthread.h>
+
 #include"wque.hpp"
 
-namespace grid{
-	class wque_thread:public thread{
-		wque<wque_work*>&queue_;
+static void*thread_run(void*arg);
 
+namespace grid{
+	class wque_thread{
+		wque<wque_work*>&queue_;
+		pthread_t id_;
 	public:
 
 		inline wque_thread(wque<wque_work*>&queue):
 			queue_(queue)
 		{
+			if(pthread_create(&id_,NULL,thread_run,this))throw"could not create work queue tread";
 			metrics::threads++;
 		}
 
 		inline virtual~wque_thread(){
+			pthread_cancel(id_);
 			metrics::threads--;
 		}
 
@@ -34,3 +39,5 @@ namespace grid{
 	};
 	atomic_int wque_thread::threads_running_count{0};
 }
+
+static void*thread_run(void*arg){return((grid::wque_thread*)arg)->run();}

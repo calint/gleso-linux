@@ -102,7 +102,7 @@ void gleso_step(){
 
 	grd.addall(gl::globs);
 
-	if(gleso::update_blobs_multithreaded){
+	if(gleso::update_grid_cells_in_parallell){
 		grd.update_globs();
 	}else{
 		grd.update_globs_single_thread();
@@ -159,7 +159,7 @@ void gleso_key(int key,int scancode,int action,int mods){
 	case 44://,
 		switch(action){
 			case 1:break;
-			case 0:gleso::update_blobs_multithreaded=!gleso::update_blobs_multithreaded;break;
+			case 0:gleso::update_grid_cells_in_parallell=!gleso::update_grid_cells_in_parallell;break;
 		}
 		break;
 	}

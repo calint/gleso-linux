@@ -32,9 +32,6 @@ namespace grid{
 			threads_.reserve(nthreads);
 			for(int i=0;i<nthreads;i++)
 				threads_.emplace_back(update_grid_queue_);
-
-			for(auto&t:threads_)
-				t.start();
 		}
 
 		inline void clear(){
