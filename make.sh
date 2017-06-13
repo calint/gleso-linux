@@ -12,7 +12,8 @@ WARNINGS='-Wall -Wextra -pedantic -Wfatal-errors -Wno-unused-function -Wno-unuse
 LIBS='-lGL -lglfw -lGLEW -lpthread'
 OPTIMIZATIONS=-O3
 VALGRIND='valgrind --leak-check=full --track-origins=yes'
+#PROFILE=-pg
 
-$CC $SRC -o $BIN $OPTIMIZATIONS $LIBS $WARNINGS &&
+$CC $PROFILE $SRC -o $BIN $OPTIMIZATIONS $LIBS $WARNINGS &&
 ls -la --color $BIN && # $VALGRIND ./$BIN
 ./$BIN
